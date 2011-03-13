@@ -1,8 +1,9 @@
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail
-from zoo.views import spec, snippet
+from zoo.views import spec, snippet, search
 
 urlpatterns = patterns('',
     (r'^spec/(?P<pk>\d+)/$', spec),
-    (r'^snippet/(?P<pk>\d+)/$', snippet),
+    (r'^(?P<pk>\d+)/$', snippet),
+    (r'^search/(?P<query>.*)/$', search),
 )

@@ -81,12 +81,15 @@ TEMPLATE_DIRS = (
     'templates',
 )
 
+DJAPIAN_DATABASE_PATH = 'djapian_spaces/'
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'djapian',
     'south',
     'zoo',
     # Uncomment the next line to enable the admin:
