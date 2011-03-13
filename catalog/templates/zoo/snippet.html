@@ -1,7 +1,24 @@
+<html>
+ <head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+$(function() {
+    $('#code').focus(function() {
+        $('#code').select();
+    });
+    // keep chrome from deselecting right after
+    $('#code').mouseup(function() { return false });
+})
+</script>
+</head>
+<body>
 <h1>{{snippet.spec.name}}</h1>
 <p>{{snippet.spec.summary}}</p>
 <p>{{snippet.spec.spec}}</p>
 <p>{{snippet.description}}</p>
-<textarea cols="80" rows="40" readonly="readonly">
+<textarea id="code" name="code" cols="80" rows="40">
 {{snippet.code}}
 </textarea>
+</body>
+</html>
