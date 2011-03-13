@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'south',
     'zoo',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
