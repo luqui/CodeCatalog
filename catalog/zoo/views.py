@@ -5,14 +5,13 @@ from zoo.models import Spec, Snippet
 from zoo.index import complete_indexer
 import pprint
 
-def object_view(model, template):
-    def view(request, pk):
-        obj = get_object_or_404(model, pk=pk)
-        return render_to_response(template, {str.lower(model.__name__): obj}, context_instance=RequestContext(request))
-    return view
+def spec(request, pk):
+    obj = get_object_or_404(Spec, pk=pk)
+    return render_to_response('zoo/spec.html', {'spec': obj}, context_instance=RequestContext(request))
 
-spec = object_view(Spec, 'zoo/spec.html')
-snippet = object_view(Snippet, 'zoo/snippet.html')
+def snippet(request, pk):
+    obj = get_object_or_404(Snippet, pk=pk)
+    return render_to_response('zoo/snippet.html', {'spec': obj.spec, 'snippet': obj}, context_instance=RequestContext(request))
 
 def search(request):
     if 'q' in request.GET:
@@ -21,14 +20,21 @@ def search(request):
     else:
         return render_to_response('zoo/search.html', context_instance=RequestContext(request))
 
-def editspec(request, pk):
-    print pprint.pprint(request.POST)
-    s = get_object_or_404(Spec, pk=pk)
-    fields = [ 'name', 'summary', 'spec' ]
+def update_fields(fields, obj, post):
+    edited = False
     for f in fields:
-        print "Checking " + f + " in request"
-        if f in request.POST:
-            print "Setting attr " + str(s.id) + "[" + f + "] = " + request.POST[f]
-            setattr(s, f, request.POST[f])
-    s.save()
+        if f in post:
+            edited = True
+            setattr(obj, f, post[f])
+    if edited: obj.save()
+
+def edit_spec(request, pk):
+    s = get_object_or_404(Spec, pk=pk)
+    update_fields(['name', 'summary', 'spec'], s, request.POST)
+    return HttpResponse()
+
+def edit_snippet(request, pk):
+    s = get_object_or_404(Snippet, pk=pk)
+    edit_spec(request, s.spec.id)
+    update_fields(['description', 'code'], s, request.POST)
     return HttpResponse()

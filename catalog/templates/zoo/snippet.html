@@ -1,24 +1,28 @@
-<html>
- <head>
-  {% include "jquery.html" %}
+{% extends "zoo/spec.html" %}
 
-<script type="text/javascript">
-$(function() {
-    $('#code').focus(function() {
-        $('#code').select();
+{% block scripting %}
+  <script type="text/javascript">
+   $(function() {
+       var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/{{snippet.id}}/edit/' });
+       e.installEditButtons();
+   });
+  </script>
+  
+  <script type="text/javascript">
+    $(function() {
+        $('#code').focus(function() {
+            $('#code').select();
+        });
+        // keep chrome from deselecting right after
+        $('#code').mouseup(function() { return false });
     });
-    // keep chrome from deselecting right after
-    $('#code').mouseup(function() { return false });
-})
-</script>
-</head>
-<body>
-<h1>{{snippet.spec.name}}</h1>
-<p>{{snippet.spec.summary}}</p>
-<p>{{snippet.spec.spec}}</p>
-<p>{{snippet.description}}</p>
-<textarea id="code" name="code" cols="80" rows="40">
+  </script>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+<p id="description" name="description" class="editable editarea">{{snippet.description}}</p>
+<textarea id="code" name="code" cols="72" rows="30" class="editable editarea">
 {{snippet.code}}
 </textarea>
-</body>
-</html>
+{% endblock %}
