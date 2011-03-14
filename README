@@ -24,7 +24,7 @@ the description page comes up, click the little blue edit buttons to expand the 
 
 After you have some snippets,
 
-% python manage.py index --rebuild
+% python manage.py rebuild_index
 
 to build the search index, then search by browsing to:
 
