@@ -1,3 +1,68 @@
-<h1>{{spec.name}}</h1>
-<p>{{spec.summary}}</p>
-<p>{{spec.spec}}</p>
+<html>
+ <head>
+  {% include "jquery.html" %}
+
+<style>
+.editlink { font-size: 8pt }
+</style>
+
+<script type="text/javascript">
+var makeEditWidget = function(proto) {
+    if (proto.hasClass('editarea')) {
+        return $('<textarea rows="30" cols="72"></textarea>').val(proto.text());
+    }
+    else {
+        return $('<input type="text" />').val(proto.text());
+    }
+};
+
+var makeEditBox = function(proto) {
+    var span = $('<span/>');
+    var editbox = makeEditWidget(proto);
+    editbox.val(proto.text());
+    var button  = $('<input type="button" value="OK" />');
+    span.append(editbox).append(button);
+
+    button.click(function() {
+        proto.text(editbox.val());
+        var newelt = makeLinkTag(proto);
+
+        var data = {};
+        data[proto.attr('name')] = editbox.val();
+        data.csrfmiddlewaretoken = '{{csrf_token}}';
+        $.post("/spec/{{spec.id}}/edit", data);
+
+        span.replaceWith(newelt);
+    });
+    return span;
+};
+var makeLinkTag = function(proto) {
+    var span = $('<span/>');
+    var elt = proto.clone();
+    var editlink = $('<a href="#" class="editlink">edit</a>');
+    span.append(elt).append(editlink);
+
+    editlink.click(function() {
+        span.replaceWith(makeEditBox(elt));
+    });
+    return span;
+};
+
+$(function() {
+  $('.editable').each(function(x,e) { 
+    var je = $(e);
+    var elt = makeLinkTag(je);
+    je.replaceWith(elt);
+  });
+})
+</script>
+
+ </head>
+<body>
+
+<h1 id="name" name="name" class="editable">{{spec.name}}</h1>
+<p id="summary" name="summary" class="editable">{{spec.summary}}</p>
+<p id="spec" name="spec" class="editable editarea">{{spec.spec}}</p>
+
+</body>
+</html>
