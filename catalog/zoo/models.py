@@ -6,7 +6,11 @@ class Spec(models.Model):
     spec = models.TextField()
 
     def shortdesc(self):
-        return self.name + " - " + self.summary
+        return "[spec] " + self.name + " - " + self.summary
+
+    # don't think this belongs here
+    def url(self):
+        return '/spec/' + str(self.id) + '/'
 
 class Snippet(models.Model):
     spec = models.ForeignKey(Spec)
@@ -14,7 +18,11 @@ class Snippet(models.Model):
     code = models.TextField()
 
     def shortdesc(self):
-        return self.spec.shortdesc()
+        return self.spec.name + " - " + self.spec.summary
+
+    # don't think this belongs here
+    def url(self):
+        return '/' + str(self.id) + '/'
 
 class Test(models.Model):
     spec = models.ForeignKey(Spec)
