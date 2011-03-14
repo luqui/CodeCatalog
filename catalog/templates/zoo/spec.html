@@ -3,6 +3,10 @@
   {% include "jquery.html" %}
   {% include "editable.html" %}
 
+  <style>
+   h1#name { font-family: monospace }
+  </style>
+
 {% block scripting %}
   <script type="text/javascript">
    $(function() {
@@ -16,8 +20,10 @@
 
 {% block content %}
 <h1 id="name" name="name" class="editable">{{spec.name}}</h1>
-<p id="summary" name="summary" class="editable">{{spec.summary}}</p>
-<p id="spec" name="spec" class="editable editarea">{{spec.spec}}</p>
+<h2>Summary</h2>
+<span id="summary" name="summary" class="editable">{{spec.summary}}</span>
+<h2>Spec</h2>
+<span id="spec" name="spec" class="editable editarea">{{spec.spec}}</span>
 {% endblock %}
 
 </body>

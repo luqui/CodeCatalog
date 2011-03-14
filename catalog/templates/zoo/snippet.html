@@ -21,8 +21,9 @@
 
 {% block content %}
 {{ block.super }}
-<p id="description" name="description" class="editable editarea">{{snippet.description}}</p>
-<textarea id="code" name="code" cols="72" rows="30" class="editable editarea">
+<h2>Impl. Notes</h2>
+<span id="description" name="description" class="editable editarea">{{snippet.description}}</span>
+<textarea id="code" name="code" cols="72" rows="15" class="editable editarea">
 {{snippet.code}}
 </textarea>
 {% endblock %}
