@@ -1,0 +1,6 @@
+<h1>Search Results</h1>
+<ol>
+{% for r in results %}
+    <li><a href="/{{r.instance.id}}">{{r.instance.shortdesc}}</a> - {{r.percent}}% match</li>
+{% endfor %}
+</ol>
