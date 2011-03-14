@@ -2,4 +2,4 @@ syntax: glob
 
 *.pyc
 .*.swp
-catalog/djapian_spaces/*
+catalog/catalog-index/*

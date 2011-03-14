@@ -81,7 +81,9 @@ TEMPLATE_DIRS = (
     'templates',
 )
 
-DJAPIAN_DATABASE_PATH = 'djapian_spaces/'
+HAYSTACK_SITECONF = 'catalog.search_sites'
+HAYSTACK_SEARCH_ENGINE = 'whoosh'
+HAYSTACK_WHOOSH_PATH = 'catalog-index'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -89,7 +91,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'djapian',
+    'haystack',
     'south',
     'zoo',
     # Uncomment the next line to enable the admin:

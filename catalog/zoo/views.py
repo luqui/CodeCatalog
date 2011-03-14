@@ -2,7 +2,6 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from zoo.models import Spec, Snippet
-from zoo.index import complete_indexer
 import re
 
 def spec(request, pk):
@@ -12,13 +11,6 @@ def spec(request, pk):
 def snippet(request, pk):
     obj = get_object_or_404(Snippet, pk=pk)
     return render_to_response('zoo/snippet.html', {'spec': obj.spec, 'snippet': obj}, context_instance=RequestContext(request))
-
-def search(request):
-    if 'q' in request.GET:
-        results = complete_indexer.search(request.GET['q']).prefetch()
-        return render_to_response('zoo/searchresult.html', { 'results': results }, context_instance=RequestContext(request))
-    else:
-        return render_to_response('zoo/search.html', context_instance=RequestContext(request))
 
 def update_fields(fields, obj, post):
     edited = False
