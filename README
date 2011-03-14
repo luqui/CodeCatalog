@@ -3,8 +3,10 @@ Repository for unnamed code catalog project.
 To get started:
 
 Install django, and the django packages south and djapian.  Debian packages 
-python-django, python-django-south and python-django-djapian.  Don't know about
-Mac.
+python-django, python-django-south.  Also get python-pip, the package manager.  Then
+
+% sudo pip install haystack
+% sudo pip install whoosh
 
 Then
 
