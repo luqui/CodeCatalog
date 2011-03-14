@@ -1,9 +1,9 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from zoo.models import Spec, Snippet
 from zoo.index import complete_indexer
-import pprint
+import re
 
 def spec(request, pk):
     obj = get_object_or_404(Spec, pk=pk)
@@ -38,3 +38,22 @@ def edit_snippet(request, pk):
     edit_spec(request, s.spec.id)
     update_fields(['description', 'code'], s, request.POST)
     return HttpResponse()
+
+def new(request):
+    if request.method != 'POST':
+        return render_to_response('zoo/new.html', context_instance=RequestContext(request))
+    code = request.POST['code']
+    name = detect_spec_name(code)
+    spec = Spec(name=name)
+    spec.save()
+    snippet = Snippet(spec=spec, code=code)
+    snippet.save()
+    return HttpResponseRedirect('/' + str(snippet.id) + '/')
+
+def_rx = re.compile(r'^def\s+(\w+).*:', re.MULTILINE)
+def detect_spec_name(code):
+    match = def_rx.search(code)
+    if match:
+        return match.group(1)
+    else:
+        return "unnamed"
