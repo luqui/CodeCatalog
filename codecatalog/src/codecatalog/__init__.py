@@ -1,5 +1,6 @@
 """
-CodeCatalog module.
+The CodeCatalog module provides access to the CodeCatalog's vast index of functions.
+Code is cached both on your local hard-drive and in memory for better performance.
 """
 import os
 import os.path
@@ -60,7 +61,7 @@ def _get_from_catalog(address):
     """
     Get the snippet from CodeCatalog.
     """
-    http_connection = httplib.HTTPConnection('127.0.0.1', 8000)
+    http_connection = httplib.HTTPConnection('coincatalog.net', 8000)
     http_connection.request("GET", "/" + address + "/raw/")
     contents = http_connection.getresponse()
     snippet_raw = contents.read(contents.length)
@@ -70,7 +71,6 @@ def get(address):
     """
     Get a snippet from the CodeCatalog by address.
     """
-    
     code = _check_cache(address)
     if code is not None:
         return code
