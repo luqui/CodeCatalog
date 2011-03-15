@@ -6,7 +6,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
 
-path = '/home/ubuntu/CodeCatalog/catalog'
+path = '/home/ubuntu/CodeCatalog/catalogserver'
 os.chdir(path)
 if path not in sys.path:
     sys.path.append(path)

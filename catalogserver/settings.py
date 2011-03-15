@@ -75,7 +75,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'catalog.urls'
+ROOT_URLCONF = 'catalogserver.urls'
 
 TEMPLATE_DIRS = (
     'templates',
