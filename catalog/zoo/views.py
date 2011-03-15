@@ -17,6 +17,10 @@ def snippet(request, pk):
     obj = get_object_or_404(Snippet, pk=pk)
     return render_to_response('zoo/snippet.html', {'spec': obj.spec, 'snippet': obj}, context_instance=RequestContext(request))
 
+def raw_snippet(request, pk):
+    obj = get_object_or_404(Snippet, pk=pk)
+    return render_to_response('zoo/rawcode.txt', {'snippet': obj}, mimetype="text/plain", context_instance=RequestContext(request))
+
 def update_fields(fields, obj, post):
     edited = False
     for f in fields:

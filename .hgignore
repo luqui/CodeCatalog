@@ -3,3 +3,4 @@ syntax: glob
 *.pyc
 .*.swp
 catalog/catalog-index/*
+catalog/database.sqlite
