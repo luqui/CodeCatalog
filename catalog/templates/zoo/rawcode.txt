@@ -1,1 +1,1 @@
-{{ snippet.code }}
+{{ snippet.code|safe }}
