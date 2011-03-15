@@ -23,7 +23,7 @@
 <body>
 
 {% block spec %}
-<h1><span id="name" name="name" class="editable">{{spec.name}}</span></h1>
+<h1><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
