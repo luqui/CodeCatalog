@@ -81,7 +81,7 @@ TEMPLATE_DIRS = (
     'templates',
 )
 
-HAYSTACK_SITECONF = 'catalog.search_sites'
+HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'whoosh'
 HAYSTACK_WHOOSH_PATH = 'catalog-index'
 
