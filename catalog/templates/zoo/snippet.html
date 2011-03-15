@@ -7,20 +7,17 @@
        e.installEditButtons();
    });
   </script>
-  
+
+{% include "select_on_click.html" %} 
+
   <script type="text/javascript">
     $(function() {
-        $('#code').focus(function() {
-            $('#code').select();
-        });
-        // keep chrome from deselecting right after
-        $('#code').mouseup(function() { return false });
+        select_on_click($('#code'));
     });
   </script>
 {% endblock %}
 
-{% block content %}
-{{ block.super }}
+{% block impls %}
 <h2>Impl. Notes</h2>
 <span id="description" name="description" class="editable editarea">{{snippet.description}}</span>
 <textarea id="code" name="code" cols="72" rows="15" class="editable editarea">

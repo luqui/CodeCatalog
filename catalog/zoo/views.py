@@ -4,9 +4,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from zoo.models import Spec, Snippet
 import re
 
+def linecount(s): return len(s.splitlines())
+
 def spec(request, pk):
     obj = get_object_or_404(Spec, pk=pk)
-    return render_to_response('zoo/spec.html', {'spec': obj}, context_instance=RequestContext(request))
+    snippets = [ 
+        { 'code': o.code, 'lines': min(10, linecount(o.code)), 'id': o.id } 
+            for o in obj.snippet_set.all() ]
+    return render_to_response('zoo/spec.html', {'spec': obj, 'snippets': snippets}, context_instance=RequestContext(request))
 
 def snippet(request, pk):
     obj = get_object_or_404(Snippet, pk=pk)

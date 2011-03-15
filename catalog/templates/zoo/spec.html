@@ -2,29 +2,42 @@
  <head>
   {% include "jquery.html" %}
   {% include "editable.html" %}
+  {% include "select_on_click.html" %}
 
   <style>
    #name { font-family: monospace }
   </style>
 
 {% block scripting %}
+
   <script type="text/javascript">
-   $(function() {
-       var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
-       e.installEditButtons();
-   });
+    $(function() {
+        var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
+        e.installEditButtons();
+
+        $('textarea').each(function (i,e) { select_on_click($(e)) });
+    });
   </script>
 {% endblock %}
  </head>
 <body>
 
-{% block content %}
+{% block spec %}
 <h1><span id="name" name="name" class="editable">{{spec.name}}</span></h1>
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
 <span id="spec" name="spec" class="editable editarea">{{spec.spec}}</span>
 {% endblock %}
+
+{% block impls %}
+<h2>Impls</h2>
+{% for snip in snippets %}
+ <textarea rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
+ <a href="/{{snip.id}}/">Details</a>
+{% endfor %}
+{% endblock %}
+
 
 </body>
 </html>
