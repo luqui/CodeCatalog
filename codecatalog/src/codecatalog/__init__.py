@@ -1,29 +1,80 @@
 """
 CodeCatalog module.
 """
+import os
+import os.path
 import httplib
 
+_cache_directory = os.path.expanduser("~/_codecatalog/")
 cache = {}
 
-def get(address):
+def _text_to_code(text):
     """
-    Get a snippet from the CodeCatalog by address.
+    Convert a block of text into the code it represents.
+    It is assumed that the code is a single python function.
+    """
+    snippet_compiled = compile(text, '<string>', 'exec')
+    exec(snippet_compiled)
+    return eval(snippet_compiled.co_names[0])
+
+def _filename(address):
+    """
+    Returns the expected local filename for a given CodeCatalog
+    address.
+    """
+    return os.path.normpath("{0}{1}.cog".format(_cache_directory, address))
+
+def _check_cache(address):
+    """
+    Check the cache for this snippet.
     """
     # Memory cache
     global cache
     code = cache.get(address)
     if code is not None:
         return code
-    
-    # TODO: Hard-drive cache
-    
-    # Get the data from CodeCatalog
+
+    f = None
+    try:
+        f = open(_filename(address))
+        return _text_to_code(f.read())
+    except IOError:
+        pass
+    finally:
+        if f is not None:
+            f.close()
+    return None
+
+def _cache(address, code, snippet_raw):
+    """
+    Add the code for this snippet to the cache.
+    """
+    cache[address] = code
+    if not os.path.exists(_cache_directory):
+        os.mkdir(_cache_directory)
+    f = open(_filename(address), 'w')
+    f.write(snippet_raw)
+    f.close()
+
+def _get_from_catalog(address):
+    """
+    Get the snippet from CodeCatalog.
+    """
     http_connection = httplib.HTTPConnection('127.0.0.1', 8000)
     http_connection.request("GET", "/" + address + "/raw/")
     contents = http_connection.getresponse()
     snippet_raw = contents.read(contents.length)
-    snippet_compiled = compile(snippet_raw, '<string>', 'exec')
-    exec(snippet_compiled)
-    code = eval(snippet_compiled.co_names[0])
-    cache[address] = code
+    return snippet_raw, _text_to_code(snippet_raw)
+
+def get(address):
+    """
+    Get a snippet from the CodeCatalog by address.
+    """
+    
+    code = _check_cache(address)
+    if code is not None:
+        return code
+    
+    snippet_raw, code = _get_from_catalog(address)
+    _cache(address, code, snippet_raw)
     return code
