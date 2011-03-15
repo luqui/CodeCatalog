@@ -61,7 +61,7 @@ def _get_from_catalog(address):
     """
     Get the snippet from CodeCatalog.
     """
-    http_connection = httplib.HTTPConnection('codecatalog.net', 8000)
+    http_connection = httplib.HTTPConnection('codecatalog.net', 80)
     http_connection.request("GET", "/" + address + "/raw/")
     contents = http_connection.getresponse()
     snippet_raw = contents.read(contents.length)
