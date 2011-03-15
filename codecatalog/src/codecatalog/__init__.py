@@ -64,7 +64,7 @@ def _get_from_catalog(address):
     Get the snippet from CodeCatalog.
     """
     http_connection = httplib.HTTPConnection('codecatalog.net', 80)
-    http_connection.request("GET", "/" + address + "/raw/")
+    http_connection.request("GET", "/{0}/raw/".format(address))
     contents = http_connection.getresponse()
     snippet_raw = contents.read(contents.length)
     return snippet_raw, _text_to_code(snippet_raw)
@@ -73,6 +73,10 @@ def get(address):
     """
     Get a snippet from the CodeCatalog by address.
     """
+    if isinstance(address, str):
+        short_address = address.split("codecatalog.net/")
+        if len(short_address) == 2:
+            address = short_address[1].strip("/")
     code = _check_cache(address)
     if code is not None:
         return code
