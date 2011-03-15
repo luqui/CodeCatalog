@@ -40,10 +40,19 @@ def edit_snippet(request, pk):
     update_fields(['description', 'code'], s, request.POST)
     return HttpResponse()
 
+def new_for_spec(request, pk):
+    spec = get_object_or_404(Spec, pk=pk)
+    if request.method != 'POST':
+        return render_to_response('zoo/new_for_spec.html', { 'spec': spec }, context_instance=RequestContext(request))
+    code = request.POST['code'].strip()
+    snippet = Snippet(spec=spec, code=code)
+    snippet.save()
+    return HttpResponseRedirect('/' + str(snippet.id) + '/')
+
 def new(request):
     if request.method != 'POST':
         return render_to_response('zoo/new.html', context_instance=RequestContext(request))
-    code = request.POST['code']
+    code = request.POST['code'].strip()
     name = detect_spec_name(code)
     spec = Spec(name=name)
     spec.save()
