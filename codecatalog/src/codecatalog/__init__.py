@@ -37,6 +37,7 @@ def _check_cache(address):
     if code is not None:
         return code
 
+    # File cache
     f = None
     try:
         f = open(_filename(address))
