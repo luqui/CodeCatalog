@@ -5,6 +5,7 @@ Code is cached both on your local hard-drive and in memory for better performanc
 import os
 import os.path
 import httplib
+import re
 
 _cache_directory = os.path.expanduser("~/_codecatalog/")
 cache = {}
@@ -14,6 +15,7 @@ def _text_to_code(text):
     Convert a block of text into the code it represents.
     It is assumed that the code is a single python function.
     """
+    text = re.sub('\r', '', text)
     snippet_compiled = compile(text, '<string>', 'exec')
     exec(snippet_compiled)
     return eval(snippet_compiled.co_names[0])
