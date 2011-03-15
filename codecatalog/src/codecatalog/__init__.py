@@ -14,6 +14,7 @@ def _text_to_code(text):
     """
     Convert a block of text into the code it represents.
     It is assumed that the code is a single python function.
+    Return the function.
     """
     text = re.sub('\r', '', text)
     snippet_compiled = compile(text, '<string>', 'exec')
@@ -22,7 +23,7 @@ def _text_to_code(text):
 
 def _filename(address):
     """
-    Returns the expected local filename for a given CodeCatalog
+    Return the expected local filename for a given CodeCatalog
     address.
     """
     return os.path.normpath("{0}{1}.cog".format(_cache_directory, address))
@@ -62,7 +63,7 @@ def _cache(address, code, snippet_raw):
 
 def _get_from_catalog(address):
     """
-    Get the snippet from CodeCatalog.
+    Find and return a snippet from the CodeCatalog server by address.
     """
     http_connection = httplib.HTTPConnection('codecatalog.net', 80)
     http_connection.request("GET", "/{0}/raw/".format(address))
@@ -72,7 +73,7 @@ def _get_from_catalog(address):
 
 def get(address):
     """
-    Get a snippet from the CodeCatalog by address.
+    Return a CodeCatalog snippet by address, which is a callable.
     """
     if isinstance(address, str):
         short_address = address.split("codecatalog.net/")
