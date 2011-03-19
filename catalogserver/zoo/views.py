@@ -10,8 +10,13 @@ def linecount(s): return len(s.splitlines())
 def spec(request, pk):
     obj = get_object_or_404(Spec, pk=pk)
     snippets = [ 
-        { 'code': o.code, 'lines': min(10, linecount(o.code)), 'id': o.id } 
+        { 'code': o.code, 
+          'lines': min(10, linecount(o.code)), 
+          'id': o.id, 
+          'canon': o.canon,
+          'sortkey': o.canon }
             for o in obj.snippet_set.all() ]
+    snippets.sort(key=lambda x: x['sortkey'], reverse=True)
     return render_to_response('zoo/spec.html', {'spec': obj, 'snippets': snippets}, context_instance=RequestContext(request))
 
 def snippet(request, pk):
@@ -37,7 +42,7 @@ def edit_spec(request, pk):
 
 def branch_snippet(request, pk):
     s = get_object_or_404(Snippet, pk=pk)
-    snippet = Snippet(spec=s.spec, code=request.POST['code'], date=datetime.now(), parent=s)
+    snippet = Snippet(spec=s.spec, code=request.POST['code'], date=datetime.now(), parent=s, canon=False)
     snippet.save()
     return HttpResponse()
 
@@ -54,7 +59,7 @@ def new_for_spec(request, pk):
     if request.method != 'POST':
         return render_to_response('zoo/new_for_spec.html', { 'spec': spec }, context_instance=RequestContext(request))
     code = request.POST['code'].strip()
-    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None)
+    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=False)
     snippet.save()
     return HttpResponseRedirect('/' + str(snippet.id) + '/')
 
@@ -65,9 +70,20 @@ def new(request):
     name = detect_spec_name(code)
     spec = Spec(name=name, parent=None)
     spec.save()
-    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None)
+    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=True)
     snippet.save()
     return HttpResponseRedirect('/' + str(snippet.id) + '/')
+
+def set_canon(request, pk):
+    s = get_object_or_404(Snippet, pk=pk)
+    current_canon = Snippet.objects.filter(spec__exact=s.spec, language__exact=s.language, canon__exact=True)
+    # TODO race condition
+    for i in current_canon:
+        i.canon = False
+        i.save()
+    s.canon = True
+    s.save()
+    return HttpResponse()
 
 def_rx = re.compile(r'^def\s+(\w+).*:', re.MULTILINE)
 def detect_spec_name(code):

@@ -19,6 +19,8 @@ class Snippet(models.Model):
     code = models.TextField()
     date = models.DateField()
     parent = models.ForeignKey('self', related_name='child', null=True)
+    canon = models.BooleanField()
+    language = models.TextField(default='python')
 
     def shortdesc(self):
         return self.spec.name + " - " + self.spec.summary

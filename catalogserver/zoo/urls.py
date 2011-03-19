@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     (r'^(?P<pk>\d+)/raw/$', views.raw_snippet),
     (r'^(?P<pk>\d+)/branch/$', views.branch_snippet),
     (r'^(?P<pk>\d+)/delete/$', views.delete_snippet),
+    (r'^(?P<pk>\d+)/setcanon/$', views.set_canon),
     (r'^search/$', include('haystack.urls')),
     (r'^new/$', views.new),
 )

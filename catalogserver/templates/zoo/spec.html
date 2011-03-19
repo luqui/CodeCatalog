@@ -8,6 +8,7 @@
    #name { font-family: monospace }
    .hidden { display: none }
    .snippet { background: #eec }
+   .canon { background: #aea }
   </style>
 
 {% block scripting %}
@@ -42,8 +43,11 @@
     };
 
     var delete_snip = function (snip_id) {
-        var dict = { csrfmiddlewaretoken: '{{csrf_token}}' }
-        post('/' + snip_id + '/delete/', dict, reload);
+        post('/' + snip_id + '/delete/', {}, reload);
+    };
+
+    var bless_snip = function (snip_id) {
+        post('/' + snip_id + '/setcanon/', {}, reload);
     };
 
     $(function() {
@@ -70,14 +74,25 @@
 <table border="0">
  <tr>
   <td>
-   <textarea class="snippet" name="code_{{snip.id}}" id="code_{{snip.id}}" rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
+   <textarea 
+   {% if snip.canon %}
+        class="canon" 
+   {% else %}
+        class="snippet"
+   {% endif %} 
+       name="code_{{snip.id}}" id="code_{{snip.id}}" rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
    <div class="hidden" id="edit_{{snip.id}}" name="edit_{{snip.id}}"></div>
   </td>
   <td>
    <table border="0">
     <tr><td><a href="/{{snip.id}}/">Details</a></td></tr>
     <tr><td><button onclick="edit_snip({{snip.id}})">Branch</button></td></tr>
-    <tr><td><button onclick="delete_snip({{snip.id}})">Delete</button></td></tr>
+    <tr><td><button 
+     {% if snip.canon %}
+        disabled="true"
+     {% endif %}
+        onclick="delete_snip({{snip.id}})">Delete</button></td></tr>
+    <tr><td><button onclick="bless_snip({{snip.id}})">Bless</button></td></tr>
    </table>
   </td>
  </tr>
