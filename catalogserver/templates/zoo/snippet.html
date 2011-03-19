@@ -20,7 +20,5 @@
 {% block title %}<a href="/spec/{{spec.id}}/">{{block.super}}</a>{% endblock %}
 
 {% block impls %}
-<h2>Impl. Notes</h2>
-<span id="description" name="description" class="editable editarea">{{snippet.description}}</span>
 <textarea id="code" name="code" cols="72" rows="15" class="editable editarea">{{snippet.code}}</textarea>
 {% endblock %}
