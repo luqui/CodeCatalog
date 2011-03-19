@@ -23,7 +23,7 @@
     var edit_snip = function (snip_id) {
         var textarea = $('<textarea></textarea>');
         var editblock = $('#edit_' + snip_id);
-        editblock.removeclass('hidden');
+        editblock.removeClass('hidden');
         var button = $('<button>Submit</button>');
         editblock.append(textarea);
         editblock.append(button);
