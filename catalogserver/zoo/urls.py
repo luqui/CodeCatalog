@@ -14,4 +14,5 @@ urlpatterns = patterns('',
     (r'^search/$', include('haystack.urls')),
     (r'^new/$', views.new),
     (r'^static/(?P<path>[\w+\./-]+)$', views.static),
+    (r'^openid/', include('django_openid_auth.urls')),
 )
