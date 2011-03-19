@@ -1,0 +1,22 @@
+<html>
+ <head>
+  <link rel="stylesheet" type="text/css" href="/static/site.css" />
+  
+  {% block header %}
+  {% endblock %}
+
+ </head>
+ <body>
+  <div class="userpanel">
+   {% if user.is_authenticated %}
+    <b>{{user.username}}</b>
+   {% else %}
+    <a href="/openid/login/">login</a>
+   {% endif %}
+  </div>
+
+  {% block content %}
+  {% endblock %}
+ </body>
+</html>
+

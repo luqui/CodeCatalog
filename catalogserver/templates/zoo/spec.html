@@ -1,9 +1,8 @@
-<html>
- <head>
+{% extends "zoo/frame.html" %}
+
+{% block header %}
   {% include "static/jquery.html" %}
 
-  <link rel="stylesheet" type="text/css" href="/static/site.css" />
-  
   <script type="text/javascript" src="/static/editable.js"></script>
   <script type="text/javascript" src="/static/select_on_click.js"></script>
 
@@ -59,9 +58,10 @@
         $('textarea').each(function (i,e) { select_on_click($(e)) });
     });
   </script>
-{% endblock %}
- </head>
-<body>
+{% endblock scripting %}
+{% endblock header %}
+
+{% block content %}
 
 {% block spec %}
 <h1><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
@@ -69,7 +69,7 @@
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
 <span id="spec" name="spec" class="editable editarea">{{spec.spec}}</span>
-{% endblock %}
+{% endblock spec %}
 
 {% block impls %}
 <h2>Impls</h2>
@@ -104,6 +104,5 @@
 {% endfor %}
 <br/>
 <a href="/spec/{{spec.id}}/new/">New</a>
-{% endblock %}
-</body>
-</html>
+{% endblock impls %}
+{% endblock content %}

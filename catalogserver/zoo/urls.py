@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     (r'^new/$', views.new),
     (r'^static/(?P<path>[\w+\./-]+)$', views.static),
     (r'^openid/', include('django_openid_auth.urls')),
+    (r'^logout/$', 'django.contrib.auth.views.logout'),
 )
