@@ -2,8 +2,9 @@ syntax: glob
 
 *.pyc
 .*.swp
-catalog/catalog-index/*
-catalog/database.sqlite
+catalogserver/catalog-index/*
+catalogserver/database.sqlite
+catalogserver/dev_settings.py
 
 *.project
 *.pydevproject
