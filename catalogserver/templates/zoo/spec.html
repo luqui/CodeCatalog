@@ -98,6 +98,7 @@
    <table border="0">
     <tr><td><a href="/{{snip.id}}/">Details</a></td></tr>
     <tr><td><button onclick="edit_snip({{snip.id}})">Branch</button></td></tr>
+    {% if user.is_authenticated %}
     {% if snip.canon %}
     <tr><td><button disabled="disabled">Delete</button></td></tr>
     <tr><td><button disabled="disabled">Bless</button></td></tr>
@@ -105,7 +106,6 @@
     <tr><td><button onclick="delete_snip({{snip.id}})">Delete</button></td></tr>
     <tr><td><button onclick="bless_snip({{snip.id}})">Bless</button></td></tr>
     {% endif %}
-    {% if user.is_authenticated %}
     <tr><td><button onclick="votedown_snip({{snip.id}})">-</button> {{snip.votes}} <button onclick="voteup_snip({{snip.id}})">+</button></td></tr>
     {% endif %}
    </table>
