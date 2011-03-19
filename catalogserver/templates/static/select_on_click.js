@@ -1,4 +1,3 @@
-<script type="text/javascript">
 var select_on_click = function(elt) {
     elt.focus(function() {
         elt.select();
@@ -6,4 +5,3 @@ var select_on_click = function(elt) {
     // keep chrome from immediately deselecting
     elt.mouseup(function() { return false });
 };
-</script>

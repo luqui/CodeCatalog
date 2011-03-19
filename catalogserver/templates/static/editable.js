@@ -1,9 +1,3 @@
-<style>
-.editlink { font-size: 8pt }
-</style>
-
-<script type="text/javascript">
-
 // settings: { editurl, csrf_token }
 // Adds a little blue "edit" link next to every element with class .editable.
 // If it also has class .editarea, the edit box will be a textarea instead of a
@@ -60,4 +54,3 @@ var editable = function(settings) {
         installEditButtons: installEditButtons,
     };
 };
-</script>
