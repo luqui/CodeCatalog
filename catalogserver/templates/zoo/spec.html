@@ -52,6 +52,14 @@
         post('/' + snip_id + '/setcanon/', {}, reload);
     };
 
+    var votedown_snip = function (snip_id) {
+        post('/' + snip_id + '/vote/-1/', {}, reload);
+    };
+
+    var voteup_snip = function (snip_id) {
+        post('/' + snip_id + '/vote/1/', {}, reload);
+    };
+
     $(function() {
         var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
         e.installEditButtons();
@@ -64,7 +72,7 @@
 {% block content %}
 
 {% block spec %}
-<h1><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
+<h1><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %} </span></h1>
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
@@ -96,6 +104,9 @@
     {% else %}
     <tr><td><button onclick="delete_snip({{snip.id}})">Delete</button></td></tr>
     <tr><td><button onclick="bless_snip({{snip.id}})">Bless</button></td></tr>
+    {% endif %}
+    {% if user.is_authenticated %}
+    <tr><td><button onclick="votedown_snip({{snip.id}})">-</button> {{snip.votes}} <button onclick="voteup_snip({{snip.id}})">+</button></td></tr>
     {% endif %}
    </table>
   </td>

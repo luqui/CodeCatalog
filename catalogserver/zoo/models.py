@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Spec(models.Model):
     name = models.CharField(max_length=128)
@@ -6,25 +7,30 @@ class Spec(models.Model):
     spec = models.TextField()
     parent = models.ForeignKey('self', related_name='child', null=True)
 
-    def shortdesc(self):
-        return "[spec] " + self.name + " - " + self.summary
-
     # don't think this belongs here
     def url(self):
         return '/spec/' + str(self.id) + '/'
 
 class Snippet(models.Model):
     spec = models.ForeignKey(Spec)
-    description = models.TextField()
     code = models.TextField()
     date = models.DateField()
     parent = models.ForeignKey('self', related_name='child', null=True)
     canon = models.BooleanField()
     language = models.TextField(default='python')
 
-    def shortdesc(self):
-        return self.spec.name + " - " + self.spec.summary
+    def votes(self):
+        r = 0
+        for vote in self.vote_set.all():
+            r += vote.value
+        return r
 
     # don't think this belongs here
     def url(self):
         return '/' + str(self.id) + '/'
+
+class Vote(models.Model):
+    user    = models.ForeignKey(User)
+    snippet = models.ForeignKey(Snippet)
+    value   = models.IntegerField()
+    date    = models.DateField()
