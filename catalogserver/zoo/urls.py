@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     (r'^(?P<pk>\d+)/setcanon/$', views.set_canon),
     (r'^search/$', include('haystack.urls')),
     (r'^new/$', views.new),
+    (r'^static/(?P<path>[\w+\./-]+)$', views.static),
 )

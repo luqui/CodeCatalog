@@ -87,12 +87,13 @@
    <table border="0">
     <tr><td><a href="/{{snip.id}}/">Details</a></td></tr>
     <tr><td><button onclick="edit_snip({{snip.id}})">Branch</button></td></tr>
-    <tr><td><button 
-     {% if snip.canon %}
-        disabled="true"
-     {% endif %}
-        onclick="delete_snip({{snip.id}})">Delete</button></td></tr>
+    {% if snip.canon %}
+    <tr><td><button disabled="disabled">Delete</button></td></tr>
+    <tr><td><button disabled="disabled">Bless</button></td></tr>
+    {% else %}
+    <tr><td><button onclick="delete_snip({{snip.id}})">Delete</button></td></tr>
     <tr><td><button onclick="bless_snip({{snip.id}})">Bless</button></td></tr>
+    {% endif %}
    </table>
   </td>
  </tr>

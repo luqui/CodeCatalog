@@ -19,6 +19,11 @@ def spec(request, pk):
     snippets.sort(key=lambda x: x['sortkey'], reverse=True)
     return render_to_response('zoo/spec.html', {'spec': obj, 'snippets': snippets}, context_instance=RequestContext(request))
 
+def static(request, path):
+    if re.match(r'\.\.', path):
+        return HttpResposne()  # TODO error
+    return render_to_response('static/' + path)
+
 def snippet(request, pk):
     obj = get_object_or_404(Snippet, pk=pk)
     return render_to_response('zoo/snippet.html', {'spec': obj.spec, 'snippet': obj}, context_instance=RequestContext(request))
