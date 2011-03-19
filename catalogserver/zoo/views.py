@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
+from datetime import datetime
 from zoo.models import Spec, Snippet
 import re
 
@@ -34,10 +35,18 @@ def edit_spec(request, pk):
     update_fields(['name', 'summary', 'spec'], s, request.POST)
     return HttpResponse()
 
-def edit_snippet(request, pk):
+def branch_snippet(request, pk):
     s = get_object_or_404(Snippet, pk=pk)
-    edit_spec(request, s.spec.id)
-    update_fields(['description', 'code'], s, request.POST)
+    snippet = Snippet(spec=s.spec, code=request.POST['code'], date=datetime.now(), parent=s)
+    snippet.save()
+    return HttpResponse()
+
+def delete_snippet(request, pk):
+    s = get_object_or_404(Snippet, pk=pk)
+    for c in s.child.all():
+        c.parent = s.parent
+        c.save()
+    s.delete()
     return HttpResponse()
 
 def new_for_spec(request, pk):
@@ -45,7 +54,7 @@ def new_for_spec(request, pk):
     if request.method != 'POST':
         return render_to_response('zoo/new_for_spec.html', { 'spec': spec }, context_instance=RequestContext(request))
     code = request.POST['code'].strip()
-    snippet = Snippet(spec=spec, code=code)
+    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None)
     snippet.save()
     return HttpResponseRedirect('/' + str(snippet.id) + '/')
 
@@ -54,9 +63,9 @@ def new(request):
         return render_to_response('zoo/new.html', context_instance=RequestContext(request))
     code = request.POST['code'].strip()
     name = detect_spec_name(code)
-    spec = Spec(name=name)
+    spec = Spec(name=name, parent=None)
     spec.save()
-    snippet = Snippet(spec=spec, code=code)
+    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None)
     snippet.save()
     return HttpResponseRedirect('/' + str(snippet.id) + '/')
 

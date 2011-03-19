@@ -6,15 +6,43 @@
 
   <style>
    #name { font-family: monospace }
+   .hidden { display: none }
   </style>
 
 {% block scripting %}
 
   <script type="text/javascript">
+
+    var reload = function() { document.location.reload(); }
+
+    var post = function(url, dict, callback) {
+        dict['csrf_token'] = '{{csrf_token}}';
+        $.post(url, dict, callback);
+    };
+
+    var edit_snip = function (snip_id) {
+        var textarea = $('<textarea></textarea>');
+        var editblock = $('#edit_' + snip_id);
+        editblock.removeclass('hidden');
+        var button = $('<button>Submit</button>');
+        editblock.append(textarea);
+        editblock.append(button);
+
+        button.click(function() {
+            button.attr('disabled', true);
+            var dict = { code: textarea.val() };
+            post('/' + snip_id + '/branch/', dict, reload);
+        });
+    };
+
+    var delete_snip = function (snip_id) {
+        var dict = { csrfmiddlewaretoken: '{{csrf_token}}' }
+        post('/' + snip_id + '/delete/', dict, reload);
+    };
+
     $(function() {
         var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
         e.installEditButtons();
-
         $('textarea').each(function (i,e) { select_on_click($(e)) });
     });
   </script>
@@ -35,11 +63,12 @@
 {% for snip in snippets %}
  <textarea rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
  <a href="/{{snip.id}}/">Details</a>
+ <a href="#" onclick="edit_snip({{snip.id}})">Branch</a>
+ <a href="#" onclick="delete_snip({{snip.id}})">Delete</a>
+ <div class="hidden" id="edit_{{snip.id}}" name="edit_{{snip.id}}"></div>
 {% endfor %}
 <br/>
 <a href="/spec/{{spec.id}}/new/">New</a>
 {% endblock %}
-
-
 </body>
 </html>

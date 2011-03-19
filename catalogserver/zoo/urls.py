@@ -1,14 +1,15 @@
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail
-from zoo.views import spec, edit_spec, snippet, raw_snippet, edit_snippet, new, new_for_spec
+from zoo import views
 
 urlpatterns = patterns('',
-    (r'^spec/(?P<pk>\d+)/$', spec),
-    (r'^spec/(?P<pk>\d+)/edit/$', edit_spec),
-    (r'^spec/(?P<pk>\d+)/new/$', new_for_spec),
-    (r'^(?P<pk>\d+)/$', snippet),
-    (r'^(?P<pk>\d+)/raw/$', raw_snippet),
-    (r'^(?P<pk>\d+)/edit/$', edit_snippet),
+    (r'^spec/(?P<pk>\d+)/$', views.spec),
+    (r'^spec/(?P<pk>\d+)/edit/$', views.edit_spec),
+    (r'^spec/(?P<pk>\d+)/new/$', views.new_for_spec),
+    (r'^(?P<pk>\d+)/$', views.snippet),
+    (r'^(?P<pk>\d+)/raw/$', views.raw_snippet),
+    (r'^(?P<pk>\d+)/branch/$', views.branch_snippet),
+    (r'^(?P<pk>\d+)/delete/$', views.delete_snippet),
     (r'^search/$', include('haystack.urls')),
-    (r'^new/$', new),
+    (r'^new/$', views.new),
 )
