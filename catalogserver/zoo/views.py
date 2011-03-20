@@ -92,7 +92,7 @@ def new(request):
     spec.save()
     snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=True)
     snippet.save()
-    return HttpResponseRedirect('/' + str(snippet.id) + '/')
+    return HttpResponseRedirect('/spec/' + str(spec.id) + '/')
 
 def set_canon(request, pk):
     s = get_object_or_404(Snippet, pk=pk)
