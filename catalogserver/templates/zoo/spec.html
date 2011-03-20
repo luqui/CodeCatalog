@@ -20,7 +20,9 @@
 
   <script type="text/javascript">
 
-    var reload = function() { document.location.reload(); }
+    // CodeCatalog Snippet http://codecatalog.net/21/
+    var reload = function() { document.location.reload(); };
+    // End CodeCatalog Snippet
 
     var post = function(url, dict, callback) {
         dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
@@ -39,7 +41,7 @@
         var textarea = $('<textarea cols="72"></textarea>');
         var codearea = $('#code_' + snip_id);
         var code = codearea.val();
-        textarea.attr('rows', max(10, count_lines(code)));
+        textarea.attr('rows', max(10, linecount(code)));
         textarea.val(code);
         var editblock = $('#edit_' + snip_id);
         editblock.removeClass('hidden');
@@ -90,13 +92,26 @@
         post('/' + snip_id + '/vote/1/', {}, reload);
     };
 
-    var min = function(x,y) {
-        return x <= y ? x : y;
+    // CodeCatalog Snippet http://codecatalog.net/19/
+    var max = function() {
+        var r = arguments[0];
+        for (var i = 1; i < arguments.length; ++i) {
+            if (arguments[i] > r) r = arguments[i];
+        }
+        return r;
     };
+    // End CodeCatalog Snippet
 
-    var max = function(x,y) {
-        return x >= y ? x : y;
+    // CodeCatalog Snippet http://codecatalog.net/20/
+    var min = function() {
+        var r = arguments[0];
+        for (var i = 1; i < arguments.length; ++i) {
+            if (arguments[i] < r) r = arguments[i];
+        }
+        return r;
     };
+    // End CodeCatalog Snippet
+
 
     $(function() {
         var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
@@ -108,7 +123,7 @@
         
         $('textarea').each(function (i,e) {
             e = $(e);
-            e.attr('rows', min(10, count_lines(e.val())));
+            e.attr('rows', min(10, linecount(e.val())));
             select_on_click(e, annotator(e.attr('snipid')));
         });
     });

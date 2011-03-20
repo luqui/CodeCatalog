@@ -1,6 +1,8 @@
-var count_lines = function(text) {
+// CodeCatalog Snippet http://codecatalog.net/22/
+var linecount = function(text) {
     return text.split(/\n/).length;
 };
+// End CodeCatalog Snippet
 
 var select_on_click = function(elt, modify) {
     elt.focus(function() {
@@ -8,7 +10,7 @@ var select_on_click = function(elt, modify) {
         elt.oldtext = text;
         elt.oldrows = elt.attr('rows');
         var newtext = modify(text);
-        elt.attr('rows', count_lines(newtext));
+        elt.attr('rows', linecount(newtext));
         elt.val(newtext);
         elt.select();
     });
