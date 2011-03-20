@@ -28,7 +28,7 @@
         var textarea = $('<textarea cols="72"></textarea>');
         var codearea = $('#code_' + snip_id);
         textarea.attr('rows', codearea.attr('rows')+2);
-        textarea.val(codearea.val() + '\n\n');
+        textarea.val(codearea.val());
         var editblock = $('#edit_' + snip_id);
         editblock.removeClass('hidden');
         var button = $('<button>Submit</button>');
@@ -42,6 +42,12 @@
         });
 
         textarea.focus();
+    };
+
+    var annotator = function (id) { 
+        return function (text) {
+            return "# CodeCatalog Snippet http://codecatalog.com/" + id + "/\n" + text + "\n# End CodeCatalog Snippet\n";
+        };
     };
 
     var delete_snip = function (snip_id) {
@@ -63,7 +69,7 @@
     $(function() {
         var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
         e.installEditButtons();
-        $('textarea').each(function (i,e) { select_on_click($(e)) });
+        $('textarea').each(function (i,e) { select_on_click($(e), annotator($(e).attr('snipid'))) });
     });
   </script>
 {% endblock scripting %}
@@ -91,7 +97,7 @@
    {% else %}
         class="snippet"
    {% endif %} 
-       name="code_{{snip.id}}" id="code_{{snip.id}}" rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
+       snipid="{{snip.id}}" name="code_{{snip.id}}" id="code_{{snip.id}}" rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
    <div class="hidden" id="edit_{{snip.id}}" name="edit_{{snip.id}}"></div>
   </td>
   <td>
