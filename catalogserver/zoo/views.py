@@ -1,31 +1,42 @@
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from zoo.models import Spec, Snippet, Vote
 from django.contrib.auth.decorators import login_required
-import re
 
-def linecount(s): return len(s.splitlines())
+# CodeCatalog Snippet http://codecatalog.net/14/
+def linecount(s):
+    return len(s.splitlines())
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/15/
+def render(request, template, dictionary={}, context_instance=None, mimetype="text/html"):
+    from django.shortcuts import render_to_response
+    from django.template import RequestContext
+    if context_instance == None:
+        context_instance = RequestContext(request)
+    return render_to_response(template, dictionary, context_instance=context_instance, mimetype=mimetype)
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/16/
+def schwartzian_sort(list, metric, reverse=False):
+    paired = [ (x, metric(x)) for x in list ]
+    paired.sort(key=lambda x: x[1], reverse=reverse)
+    return map(lambda x: x[0], paired)
+# End CodeCatalog Snippet
 
 def spec(request, pk):
+    def metric(obj): return (obj.canon, obj.votes())
+
     obj = get_object_or_404(Spec, pk=pk)
-    snippets = []
-    for o in obj.snippet_set.all():
-        votes = o.votes()
-        snippets.append({ 'code': o.code, 
-                          'lines': min(10, linecount(o.code)), 
-                          'id': o.id, 
-                          'canon': o.canon,
-                          'votes': votes,
-                          'sortkey': (o.canon, votes) })
-    snippets.sort(key=lambda x: x['sortkey'], reverse=True)
-    return render_to_response('zoo/spec.html', {'spec': obj, 'snippets': snippets}, context_instance=RequestContext(request))
+    snippets = schwartzian_sort(obj.snippet_set.all(), metric, reverse=True)
+    return render(request, 'zoo/spec.html', {'spec': obj, 'snippets': snippets})
 
 def static(request, path):
+    import re
     if re.match(r'\.\.', path):
         return HttpResponse()  # TODO error
-    return render_to_response('static/' + path)
+    return render(request, 'static/' + path)
 
 @login_required
 def vote_snippet(request, val, pk):
@@ -41,12 +52,13 @@ def vote_snippet(request, val, pk):
 
 def snippet(request, pk):
     obj = get_object_or_404(Snippet, pk=pk)
-    return render_to_response('zoo/snippet.html', {'spec': obj.spec, 'snippet': obj}, context_instance=RequestContext(request))
+    return render(request, 'zoo/snippet.html', {'spec': obj.spec, 'snippet': obj})
 
 def raw_snippet(request, pk):
     obj = get_object_or_404(Snippet, pk=pk)
-    return render_to_response('zoo/rawcode.txt', {'snippet': obj}, mimetype="text/plain", context_instance=RequestContext(request))
+    return render(request, 'zoo/rawcode.txt', {'snippet': obj}, mimetype="text/plain")
 
+# CodeCatalog Snippet http://codecatalog.net/17/
 def update_fields(fields, obj, post):
     edited = False
     for f in fields:
@@ -54,6 +66,7 @@ def update_fields(fields, obj, post):
             edited = True
             setattr(obj, f, post[f])
     if edited: obj.save()
+# End CodeCatalog Snippet
 
 def edit_spec(request, pk):
     s = get_object_or_404(Spec, pk=pk)
@@ -77,7 +90,7 @@ def delete_snippet(request, pk):
 def new_for_spec(request, pk):
     spec = get_object_or_404(Spec, pk=pk)
     if request.method != 'POST':
-        return render_to_response('zoo/new_for_spec.html', { 'spec': spec }, context_instance=RequestContext(request))
+        return render(request, 'zoo/new_for_spec.html', { 'spec': spec })
     code = request.POST['code'].strip()
     snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=False)
     snippet.save()
@@ -85,9 +98,9 @@ def new_for_spec(request, pk):
 
 def new(request):
     if request.method != 'POST':
-        return render_to_response('zoo/new.html', context_instance=RequestContext(request))
+        return render(request, 'zoo/new.html')
     code = request.POST['code'].strip()
-    name = detect_spec_name(code)
+    name = detect_defined_function_name(code) or "unnamed"
     spec = Spec(name=name, parent=None)
     spec.save()
     snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=True)
@@ -105,10 +118,15 @@ def set_canon(request, pk):
     s.save()
     return HttpResponse()
 
+# CodeCatalog Snippet http://codecatalog.net/18/
+import re
+
 def_rx = re.compile(r'^def\s+(\w+).*:', re.MULTILINE)
-def detect_spec_name(code):
+def detect_defined_function_name(code):
     match = def_rx.search(code)
     if match:
         return match.group(1)
     else:
-        return "unnamed"
+        return None
+# End CodeCatalog Snippet
+

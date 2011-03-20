@@ -27,7 +27,8 @@
     var edit_snip = function (snip_id) {
         var textarea = $('<textarea cols="72"></textarea>');
         var codearea = $('#code_' + snip_id);
-        textarea.attr('rows', codearea.attr('rows')+2);
+        var code = codearea.val();
+        textarea.attr('rows', max(10, count_lines(code)));
         textarea.val(codearea.val());
         var editblock = $('#edit_' + snip_id);
         editblock.removeClass('hidden');
@@ -66,10 +67,22 @@
         post('/' + snip_id + '/vote/1/', {}, reload);
     };
 
+    var min = function(x,y) {
+        return x <= y ? x : y;
+    };
+
+    var max = function(x,y) {
+        return x >= y ? x : y;
+    };
+
     $(function() {
         var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
         e.installEditButtons();
-        $('textarea').each(function (i,e) { select_on_click($(e), annotator($(e).attr('snipid'))) });
+        $('textarea').each(function (i,e) {
+            e = $(e);
+            e.attr('rows', min(10, count_lines(e.val())));
+            select_on_click(e, annotator(e.attr('snipid')));
+        });
     });
   </script>
 {% endblock scripting %}
@@ -97,7 +110,7 @@
    {% else %}
         class="snippet"
    {% endif %} 
-       snipid="{{snip.id}}" name="code_{{snip.id}}" id="code_{{snip.id}}" rows="{{snip.lines}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
+       snipid="{{snip.id}}" name="code_{{snip.id}}" id="code_{{snip.id}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
    <div class="hidden" id="edit_{{snip.id}}" name="edit_{{snip.id}}"></div>
   </td>
   <td>
