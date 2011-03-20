@@ -16,7 +16,7 @@ var makeMarkdownArea = function(textarea, divclass, editcallback){
         savebutton.click(function() {
             savebutton.remove();
             editcallback(newtextarea.val());
-            makeMarkdownArea(newtextarea);
+            makeMarkdownArea(newtextarea, divclass, editcallback);
         });
         newtextarea.after(savebutton);
     });
