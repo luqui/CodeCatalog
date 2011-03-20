@@ -1,2 +1,7 @@
 .editlink { font-size: 8pt }
 .userpanel { background: #aad }
+
+div.spec { background: #eee; margin-left: 1cm }
+div.spec h1 { font-size: 16pt; text-decoration: underline }
+div.spec h2 { font-size: 14pt }
+div.spec pre { padding-left: 1cm; background: #ccc }

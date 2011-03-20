@@ -5,6 +5,8 @@
 
   <script type="text/javascript" src="/static/editable.js"></script>
   <script type="text/javascript" src="/static/select_on_click.js"></script>
+  <script type="text/javascript" src="/static/showdown.js"></script>
+  <script type="text/javascript" src="/static/editable_markdown.js"></script>
 
   <style>
    #name { font-family: monospace }
@@ -78,6 +80,11 @@
     $(function() {
         var e = editable({ csrf_token: '{{csrf_token}}', editurl: '/spec/{{spec.id}}/edit/' });
         e.installEditButtons();
+        
+        makeMarkdownArea($('#spec'), 'spec', function(text) { 
+            post('/spec/{{spec.id}}/edit/', { spec: text });
+        });
+        
         $('textarea').each(function (i,e) {
             e = $(e);
             e.attr('rows', min(10, count_lines(e.val())));
@@ -95,7 +102,7 @@
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
-<span id="spec" name="spec" class="editable editarea">{{spec.spec}}</span>
+<textarea id="spec" name="spec">{{spec.spec}}</textarea>
 {% endblock spec %}
 
 {% block impls %}
