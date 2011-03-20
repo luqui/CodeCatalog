@@ -8,11 +8,20 @@
  </head>
  <body>
   <div class="userpanel">
-   {% if user.is_authenticated %}
-    <b>{{user.username}}</b>
-   {% else %}
-    <a href="/openid/login/">login</a>
-   {% endif %}
+   <table width="100%">
+    <tr>
+     <td>
+      {% if user.is_authenticated %}
+       <b>{{user.username}}</b>
+      {% else %}
+       <a href="/openid/login/">login</a>
+      {% endif %}
+     </td> 
+     <td style="text-align: right">
+      <a href="/new/">New</a>
+      <a href="/search/">Search</a>
+    </tr>
+   </table>
   </div>
 
   {% block content %}
