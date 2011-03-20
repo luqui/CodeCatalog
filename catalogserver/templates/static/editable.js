@@ -8,7 +8,7 @@ var editable = function(settings) {
             return $('<textarea rows="30" cols="72"></textarea>').val(proto.text());
         }
         else {
-            return $('<input type="text" />').val(proto.text());
+            return $('<input type="text" size="72" />').val(proto.text());
         }
     };
 

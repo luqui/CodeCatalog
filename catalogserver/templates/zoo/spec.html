@@ -60,9 +60,17 @@
         textarea.focus();
     };
 
+    var linecomment = {
+        python: '#',
+        javascript: '//',
+    };
+
     var annotator = function (id) { 
+        var lang = $('#code_' + id).attr('language');
         return function (text) {
-            return "# CodeCatalog Snippet http://codecatalog.net/" + id + "/\n" + text + "\n# End CodeCatalog Snippet\n";
+            return linecomment[lang] + " CodeCatalog Snippet http://codecatalog.net/" + id + "/\n" 
+                 + text + "\n"
+                 + linecomment[lang] + " End CodeCatalog Snippet\n";
         };
     };
 
