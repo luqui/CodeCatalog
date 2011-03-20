@@ -13,6 +13,7 @@
    .hidden { display: none }
    .snippet { background: #eec }
    .canon { background: #aea }
+   .languagemark { background: #db9; font-weight: bold; float: right }
   </style>
 
 {% block scripting %}
@@ -26,21 +27,33 @@
         $.post(url, dict, callback);
     };
 
+    var language_selector = function(val) {
+        var select = $('<select></select>');
+        select.append($('<option value="python">Python</option>'))
+              .append($('<option value="javascript">Javascript</option>'));
+        select.val(val);
+        return select;
+    };
+
     var edit_snip = function (snip_id) {
         var textarea = $('<textarea cols="72"></textarea>');
         var codearea = $('#code_' + snip_id);
         var code = codearea.val();
         textarea.attr('rows', max(10, count_lines(code)));
-        textarea.val(codearea.val());
+        textarea.val(code);
         var editblock = $('#edit_' + snip_id);
         editblock.removeClass('hidden');
         var button = $('<button>Submit</button>');
+        var language = language_selector(codearea.attr('language'));
+        language.addClass('languagemark');
         editblock.append(textarea);
+        editblock.append('<br/>');
+        editblock.append(language);
         editblock.append(button);
 
         button.click(function() {
             button.attr('disabled', true);
-            var dict = { code: textarea.val() };
+            var dict = { code: textarea.val(), language: language.val() };
             post('/' + snip_id + '/branch/', dict, reload);
         });
 
@@ -117,7 +130,8 @@
    {% else %}
         class="snippet"
    {% endif %} 
-       snipid="{{snip.id}}" name="code_{{snip.id}}" id="code_{{snip.id}}" cols="72" readonly="readonly">{{snip.code}}</textarea>
+       snipid="{{snip.id}}" language="{{snip.language}}" name="code_{{snip.id}}" id="code_{{snip.id}}" cols="72" readonly="readonly">{{snip.code}}</textarea><br/>
+   <div class="languagemark">{{snip.language}}</div>
    <div class="hidden" id="edit_{{snip.id}}" name="edit_{{snip.id}}"></div>
   </td>
   <td>
@@ -139,7 +153,5 @@
  </tr>
 </table>
 {% endfor %}
-<br/>
-<a href="/spec/{{spec.id}}/new/">New</a>
 {% endblock impls %}
 {% endblock content %}

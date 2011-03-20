@@ -75,7 +75,7 @@ def edit_spec(request, pk):
 
 def branch_snippet(request, pk):
     s = get_object_or_404(Snippet, pk=pk)
-    snippet = Snippet(spec=s.spec, code=request.POST['code'], date=datetime.now(), parent=s, canon=False)
+    snippet = Snippet(spec=s.spec, code=request.POST['code'], date=datetime.now(), parent=s, canon=False, language=request.POST['language'])
     snippet.save()
     return HttpResponse()
 
@@ -87,15 +87,6 @@ def delete_snippet(request, pk):
     s.delete()
     return HttpResponse()
 
-def new_for_spec(request, pk):
-    spec = get_object_or_404(Spec, pk=pk)
-    if request.method != 'POST':
-        return render(request, 'zoo/new_for_spec.html', { 'spec': spec })
-    code = request.POST['code'].strip()
-    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=False)
-    snippet.save()
-    return HttpResponseRedirect('/' + str(snippet.id) + '/')
-
 def new(request):
     if request.method != 'POST':
         return render(request, 'zoo/new.html')
@@ -103,7 +94,7 @@ def new(request):
     name = detect_defined_function_name(code) or "unnamed"
     spec = Spec(name=name, parent=None)
     spec.save()
-    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=True)
+    snippet = Snippet(spec=spec, code=code, date=datetime.now(), parent=None, canon=True, language=request.POST['language'])
     snippet.save()
     return HttpResponseRedirect('/spec/' + str(spec.id) + '/')
 

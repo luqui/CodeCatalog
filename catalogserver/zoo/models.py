@@ -17,7 +17,7 @@ class Snippet(models.Model):
     date = models.DateField()
     parent = models.ForeignKey('self', related_name='child', null=True)
     canon = models.BooleanField()
-    language = models.TextField(default='python')
+    language = models.TextField()
 
     def votes(self):
         r = 0
