@@ -1,3 +1,6 @@
+{% extends "zoo/frame.html" %}
+
+{% block content %}
 <h2>Search</h2>
 
 <form method="get" action=".">
@@ -33,3 +36,4 @@
         {# Show some example queries to run, maybe query syntax, something else? #}
     {% endif %}
 </form>
+{% endblock %}

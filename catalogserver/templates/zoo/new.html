@@ -1,10 +1,10 @@
-<html>
- <body>
+{% extends "zoo/frame.html" %}
+
+{% block content %}
   <h1>New Snippet</h1>
   <form action="/new/" method="post">
    {% csrf_token %}
    <textarea name="code" rows="30" cols="72"></textarea>
    <input type="submit" />
   </form>
- </body>
-</html>
+{% endblock %}
