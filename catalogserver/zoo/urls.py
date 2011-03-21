@@ -1,8 +1,26 @@
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail
 from zoo import views
+from zoo import api
+
+# CodeCatalog Snippet http://codecatalog.net/25/
+def jsonwrap(f):
+    from django.http import HttpResponse
+    import json
+    
+    def cb(*args, **kwargs):
+        return HttpResponse(content=json.dumps(f(*args, **kwargs)), mimetype='application/json')
+    return cb
+# End CodeCatalog Snippet
+
+apipatterns = patterns('',
+    (r'^snippet/(?P<pk>\d+)/get/$', jsonwrap(api.get_snippet)),
+    (r'^snippet/put/$', jsonwrap(api.put_snippet))
+)
+    
 
 urlpatterns = patterns('',
+    (r'^api/', include(apipatterns)),
     (r'^spec/(?P<pk>\d+)/$', views.spec),
     (r'^spec/(?P<pk>\d+)/edit/$', views.edit_spec),
     (r'^(?P<pk>\d+)/$', views.snippet),
