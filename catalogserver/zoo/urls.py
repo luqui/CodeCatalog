@@ -14,8 +14,9 @@ def jsonwrap(f):
 # End CodeCatalog Snippet
 
 apipatterns = patterns('',
-    (r'^snippet/(?P<pk>\d+)/get/$', jsonwrap(api.get_snippet)),
-    (r'^snippet/put/$', jsonwrap(api.put_snippet))
+    (r'^specs/(?P<version_id>\d+)/active/$', jsonwrap(api.specs_active)),
+    (r'^new/snippet/$', jsonwrap(api.new_snippet)),
+    (r'^new/spec/$', jsonwrap(api.new_spec)),
 )
     
 
