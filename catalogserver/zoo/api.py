@@ -1,7 +1,12 @@
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
 from zoo.models import *
 from datetime import datetime
+
+# Versions are organized into versionptrs, which essentially represents
+# a collection of versions of the same thing.  When we view a spec or a
+# snippet on the site, we refer to it using a versionptr, and we see
+# the latest active version.
+# Versions and versionptrs are separate, numeric namespaces. Versionptr 1
+# and version 1 are not related.
 
 def user_or_none(user):
     if user.is_anonymous():
@@ -25,6 +30,7 @@ def get_or_new_versionptr(versionptr_id):
         return VersionPtr.objects.get(id=int(versionptr_id))
 
 def dump_spec(spec):
+    """The representation of a spec.  This is what the methods that return a spec return."""
     return {
         'versionptr': spec.version.versionptr.id,
         'version': spec.version.id,
@@ -35,6 +41,7 @@ def dump_spec(spec):
     }
 
 def dump_snippet(snippet):
+    """The representation of a snippet.  This is what the methods that return a snippet return."""
     return {
         'versionptr': snippet.version.versionptr.id,
         'version': snippet.version.id,
@@ -51,49 +58,50 @@ def version_to_snippet(version):
     return version.snippet
 
 def active_version(versionptr):
-    return Version.objects.filter(versionptr__exact = versionptr, active = True).latest('timestamp')
+    return Version.objects.filter(versionptr = versionptr, active = True).latest('timestamp')
 
 def all_versions(versionptr):
-    return Version.objects.filter(versionptr__exact = versionptr).all()
+    return Version.objects.filter(versionptr = versionptr).all()
 
-# GET /api/specs/#/active    Gets the current active spec associated with this versionptr
 def specs_active(request, versionptr):
+    """GET /api/specs/<ptr>/active/ : Get the latest active spec with versionptr <ptr>."""
     return dump_spec(version_to_spec(active_version(versionptr)))
 
-# GET /api/specs/#/all       Gets all the versions associated with this versionptr
 def specs_all(request, versionptr):
+    """GET /api/specs/<ptr>/all/ : Get all spec versions associated with versionptr <ptr>."""
     return map(lambda x: dump_spec(version_to_spec(x)), all_versions(versionptr))
     
-# GET /api/specs/#/snippets  Gets the active snippets in all languages associated with a spec versionptr
-
 def specs_snippets(request, versionptr):
+    """GET /api/specs/<ptr>/snippets/ : Get all snippets associated with the spec versionptr <ptr>."""
     objs = Snippet.objects.filter(spec_versionptr = versionptr)
     return map(dump_snippet, objs)
 
-# GET /api/spec/#            Gets the info in a specific version of a spec
-
 def spec(request, version):
-    obj = Spec.objects.get(version__exact = version)
-    return dump_spec(obj)
-
-# GET /api/snippets/#/active Gets the current active snippet associated with this snippet versionptr
+    """GET /api/spec/<ver>/ : Get the spec at version <ver>."""
+    return dump_spec(Spec.objects.get(version__exact = version))
 
 def snippets_active(request, versionptr):
+    """GET /api/snippets/<ptr>/active/ : Gets the current active snippet associated with snippet versionptr <ptr>."""
     return dump_snippet(version_to_snippet(active_version(versionptr)))
 
-# GET /api/snippets/#/all    Gets all versions associated with this versionptr
-
 def snippets_all(request, versionptr):
+    """GET /api/snippets/<ptr>/all/ : Gets all versions of snippets associated with snippet versionptr <ptr>."""
     return map(lambda x: dump_snippet(version_to_snippet(x)), all_versions(versionptr))
 
-# GET /api/snippet/#         Get the info in snippet
-
 def snippet(request, version):
+    """GET /api/snippet/<ver>/ : Gets the snippet at version <ver>."""
     return dump_snippet(Snippet.objects.get(version__exact = version))
 
-# POST /api/new/snippet      Creates a new snippet associated with a spec versionptr (optional versionptr)
-    
 def new_snippet(request):
+    """POST /api/new/snippet/ : Creates a new snippet.
+
+        spec_versionptr : what spec versionptr to associate this code with
+        versionptr : (optional) what versionptr to make a new version of. 
+                     Allocates new versionptr if not given.
+        code : The code in the snippet
+        language : The language the snippet is wirtten in
+    """
+    
     spec_versionptr = VersionPtr.objects.get(id=int(request.POST['spec_versionptr']))
     versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
 
@@ -109,9 +117,15 @@ def new_snippet(request):
         'version': version.id,
     }
     
-
-# POST /api/new/spec         Creates a new spec (optional versionptr)
 def new_spec(request):
+    """POST /api/new/spec/ : Creates a new spec.
+
+        versionptr: (optional) what versionptr to add this version to.
+                    Allocates new if not given.
+        name: (optional) Name of this spec ("unnamed" if not given)
+        summary: (optional) Summary of this spec ("" if not given)
+        spec: (optinal) Description of this spec ("" if not given)
+    """
     versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
 
     # TODO leave inactive if user is untrusted
@@ -125,6 +139,5 @@ def new_spec(request):
         'versionptr': versionptr.id,
         'version': version.id,
     }
-
 
 # POST /api/vote             Vote on a versionptr
