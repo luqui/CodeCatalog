@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class VersionID(models.Model):
+class VersionPtr(models.Model):
     def votes(self):
         r = 0
         for vote in self.vote_set.all():
@@ -12,8 +12,7 @@ class Version(models.Model):
     timestamp = models.DateTimeField()
     user = models.ForeignKey(User, null=True)
     active = models.BooleanField()
-    versionid = models.ForeignKey(VersionID)
-    
+    versionptr = models.ForeignKey(VersionPtr)
 
 
 class Spec(models.Model):
@@ -27,10 +26,10 @@ class Spec(models.Model):
         return '/spec/' + str(self.id) + '/'
 
 class Snippet(models.Model):
-    version = models.ForeignKey(Version, primary_key=True)
+    version = models.OneToOneField(Version, primary_key=True)
     code = models.TextField()
     language = models.TextField()
-    versionid = models.ForeignKey(VersionID)
+    spec_versionptr = models.ForeignKey(VersionPtr)
 
 
     # don't think this belongs here
@@ -39,7 +38,7 @@ class Snippet(models.Model):
 
 class Vote(models.Model):
     user       = models.ForeignKey(User)
-    version_id = models.ForeignKey(VersionID)
+    versionptr = models.ForeignKey(VersionPtr)
     table_type = models.IntegerField(choices = [
                             (0, 'Spec'),
                             (1, 'Snippet'),

@@ -8,17 +8,17 @@ class Migration(SchemaMigration):
     
     def forwards(self, orm):
         
-        # Adding model 'VersionID'
-        db.create_table('zoo_versionid', (
+        # Adding model 'VersionPtr'
+        db.create_table('zoo_versionptr', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
-        db.send_create_signal('zoo', ['VersionID'])
+        db.send_create_signal('zoo', ['VersionPtr'])
 
         # Adding model 'Version'
         db.create_table('zoo_version', (
             ('active', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
             ('timestamp', self.gf('django.db.models.fields.DateTimeField')()),
-            ('versionid', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionID'])),
+            ('versionptr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionPtr'])),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True)),
         ))
@@ -36,28 +36,28 @@ class Migration(SchemaMigration):
         # Adding model 'Snippet'
         db.create_table('zoo_snippet', (
             ('code', self.gf('django.db.models.fields.TextField')()),
-            ('versionid', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionID'])),
-            ('version', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.Version'], primary_key=True)),
+            ('spec_versionptr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionPtr'])),
+            ('version', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['zoo.Version'], unique=True, primary_key=True)),
             ('language', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal('zoo', ['Snippet'])
 
         # Adding model 'Vote'
         db.create_table('zoo_vote', (
+            ('versionptr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionPtr'])),
             ('table_type', self.gf('django.db.models.fields.IntegerField')()),
             ('value', self.gf('django.db.models.fields.IntegerField')()),
-            ('version_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionID'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('date', self.gf('django.db.models.fields.DateTimeField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
         ))
         db.send_create_signal('zoo', ['Vote'])
     
     
     def backwards(self, orm):
         
-        # Deleting model 'VersionID'
-        db.delete_table('zoo_versionid')
+        # Deleting model 'VersionPtr'
+        db.delete_table('zoo_versionptr')
 
         # Deleting model 'Version'
         db.delete_table('zoo_version')
@@ -113,8 +113,8 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Snippet'},
             'code': ('django.db.models.fields.TextField', [], {}),
             'language': ('django.db.models.fields.TextField', [], {}),
-            'version': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.Version']", 'primary_key': 'True'}),
-            'versionid': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionID']"})
+            'spec_versionptr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionPtr']"}),
+            'version': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['zoo.Version']", 'unique': 'True', 'primary_key': 'True'})
         },
         'zoo.spec': {
             'Meta': {'object_name': 'Spec'},
@@ -129,10 +129,10 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'timestamp': ('django.db.models.fields.DateTimeField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True'}),
-            'versionid': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionID']"})
+            'versionptr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionPtr']"})
         },
-        'zoo.versionid': {
-            'Meta': {'object_name': 'VersionID'},
+        'zoo.versionptr': {
+            'Meta': {'object_name': 'VersionPtr'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'zoo.vote': {
@@ -142,7 +142,7 @@ class Migration(SchemaMigration):
             'table_type': ('django.db.models.fields.IntegerField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
             'value': ('django.db.models.fields.IntegerField', [], {}),
-            'version_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionID']"})
+            'versionptr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionPtr']"})
         }
     }
     
