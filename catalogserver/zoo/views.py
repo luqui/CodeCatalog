@@ -18,7 +18,7 @@ def spec(request, pk):
     spec = api.specs_active(request, pk)
     snippets = api.specs_snippets_active(request, pk)
 
-    return render(request, 'zoo/spec.html', {'spec': obj, 'snippets': snippets})
+    return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': snippets})
 
 def static(request, path):
     import re

@@ -3,24 +3,28 @@ var makeMarkdownArea = function(textarea, divclass, editcallback){
     div.addClass(divclass);
     var markup = textarea.val();
     var converter = new Showdown.converter();
-    var html = converter.makeHtml(markup);
-    div.append($(html));
-    
+
     var editlink = $('<a href="#">edit</a>');
+    var update = function() { div.html(converter.makeHtml(textarea.val())); div.append(editlink); };
+
+    // TODO keydown instead to make it more responsive.  Make sure it isn't lagging
+    // a character behind though!
+    textarea.keyup(update);
+    
     editlink.click(function() {
-        var newtextarea = $('<textarea rows="15" cols="72"></textarea>');
-        newtextarea.val(markup);
-        div.replaceWith(newtextarea);
+        textarea.show();
 
         var savebutton = $('<button>Save</button>');
         savebutton.click(function() {
             savebutton.remove();
-            editcallback(newtextarea.val());
-            makeMarkdownArea(newtextarea, divclass, editcallback);
+            textarea.hide();
+            editcallback(textarea.val());
         });
-        newtextarea.after(savebutton);
+        textarea.after(savebutton);
     });
+    update();
     div.append(editlink);
 
-    textarea.replaceWith(div);
+    textarea.before(div);
+    textarea.hide();
 };

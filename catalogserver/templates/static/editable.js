@@ -22,13 +22,8 @@ var editable = function(settings) {
         button.click(function() {
             proto.text(editbox.val());
             var newelt = makeLinkTag(proto);
-
-            var data = {};
-            data[proto.attr('name')] = editbox.val();
-            data.csrfmiddlewaretoken = settings.csrf_token;
-            $.post(settings.editurl, data);
-
             span.replaceWith(newelt);
+            settings.onedit(newelt)
         });
         return span;
     };
