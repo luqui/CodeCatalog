@@ -27,7 +27,6 @@ class Snippet(models.Model):
     language = models.TextField()
     spec_versionptr = models.ForeignKey(VersionPtr)
 
-
     # don't think this belongs here
     def url(self):
         return '/' + str(self.id) + '/'
