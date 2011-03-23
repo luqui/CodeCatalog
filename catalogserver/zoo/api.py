@@ -123,6 +123,7 @@ def new_snippet(request):
 
     version = new_version(user=request.user, versionptr=versionptr)
     version.save()
+    
     snippet = Snippet(version=version, 
                       code=request.POST['code'], 
                       language=request.POST['language'],
