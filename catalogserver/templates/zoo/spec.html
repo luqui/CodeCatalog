@@ -143,16 +143,11 @@
 
 {% block impls %}
 <h2>Impls</h2>
-{% for snip in snippets %}
+{% for lang in snippets.keys %}
 <table border="0">
  <tr>
   <td>
-   <textarea 
-   {% if snip.canon %}
-        class="canon" 
-   {% else %}
-        class="snippet"
-   {% endif %} 
+   <textarea class="snippet"
        snipid="{{snip.id}}" language="{{snip.language}}" name="code_{{snip.id}}" id="code_{{snip.id}}" cols="72" readonly="readonly">{{snip.code}}</textarea><br/>
    <div class="languagemark">{{snip.language}}</div>
    <div class="hidden" id="edit_{{snip.id}}" name="edit_{{snip.id}}"></div>

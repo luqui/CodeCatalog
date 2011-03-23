@@ -3,9 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from zoo.models import Spec, Snippet, Vote
 from django.contrib.auth.decorators import login_required
-
-def linecount(s):
-    return len(s.splitlines())
+from zoo import api
 
 def render(request, template, dictionary={}, context_instance=None, mimetype="text/html"):
     from django.shortcuts import render_to_response
@@ -14,16 +12,12 @@ def render(request, template, dictionary={}, context_instance=None, mimetype="te
         context_instance = RequestContext(request)
     return render_to_response(template, dictionary, context_instance=context_instance, mimetype=mimetype)
 
-def schwartzian_sort(list, metric, reverse=False):
-    paired = [ (x, metric(x)) for x in list ]
-    paired.sort(key=lambda x: x[1], reverse=reverse)
-    return map(lambda x: x[0], paired)
-
 def spec(request, pk):
     def metric(obj): return (obj.canon, obj.votes())
 
-    obj = get_object_or_404(Spec, pk=pk)
-    snippets = schwartzian_sort(obj.snippet_set.all(), metric, reverse=True)
+    spec = api.specs_active(request, pk)
+    snippets = api.specs_snippets_active(request, pk)
+
     return render(request, 'zoo/spec.html', {'spec': obj, 'snippets': snippets})
 
 def static(request, path):
