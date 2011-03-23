@@ -10,6 +10,7 @@ class Migration(SchemaMigration):
         
         # Adding model 'VersionPtr'
         db.create_table('zoo_versionptr', (
+            ('votes', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
         db.send_create_signal('zoo', ['VersionPtr'])
@@ -45,11 +46,10 @@ class Migration(SchemaMigration):
         # Adding model 'Vote'
         db.create_table('zoo_vote', (
             ('versionptr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionPtr'])),
-            ('table_type', self.gf('django.db.models.fields.IntegerField')()),
-            ('value', self.gf('django.db.models.fields.IntegerField')()),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('date', self.gf('django.db.models.fields.DateTimeField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('value', self.gf('django.db.models.fields.IntegerField')()),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
         ))
         db.send_create_signal('zoo', ['Vote'])
     
@@ -133,13 +133,13 @@ class Migration(SchemaMigration):
         },
         'zoo.versionptr': {
             'Meta': {'object_name': 'VersionPtr'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'votes': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         'zoo.vote': {
             'Meta': {'object_name': 'Vote'},
             'date': ('django.db.models.fields.DateTimeField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'table_type': ('django.db.models.fields.IntegerField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
             'value': ('django.db.models.fields.IntegerField', [], {}),
             'versionptr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['zoo.VersionPtr']"})

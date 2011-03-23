@@ -130,7 +130,7 @@ def new_spec(request):
 
     # TODO leave inactive if user is untrusted
     version = new_version(request.user, versionptr)
-    spec.save()
+    version.save()
 
     spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
     spec.save()
