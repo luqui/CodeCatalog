@@ -23,6 +23,7 @@ apipatterns = patterns('',
     (r'^snippet/(?P<version>\d+)/$', jsonwrap(api.snippet)),
     (r'^new/snippet/$', jsonwrap(api.new_snippet)),
     (r'^new/spec/$', jsonwrap(api.new_spec)),
+    (r'^vote/$', jsonwrap(api.vote)),
 )
     
 

@@ -147,14 +147,18 @@ def vote(request):
         value: -1, 0, or 1"""
 
     # TODO race condition
-    versionptr = VersionPtr.get(id=POST['versionptr'])
+    versionptr = VersionPtr.objects.get(id=request.POST['versionptr'])
     value = int(request.POST['value'])
     
     pvotes = Vote.objects.filter(user=request.user, versionptr=versionptr)
     for pvote in pvotes:
-        votes -= pvote.value
+        versionptr.votes -= pvote.value
     pvotes.delete()
     
-    vote = Vote(user=request.user, versionptr=versionptr, value=value, date=datetime.now())
-    versionptr.votes += value
+    if value != 0:
+        vote = Vote(user=request.user, versionptr=versionptr, value=value, date=datetime.now())
+        versionptr.votes += value
+        vote.save()
     versionptr.save()
+
+    return ""

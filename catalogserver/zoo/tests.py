@@ -9,6 +9,8 @@ from django.test import TestCase
 from django.test.client import Client
 import json
 from pprint import pprint
+from zoo import models
+from django.contrib.auth.models import User
 
 def dict_subset(a, b):
     for k in a.keys():
@@ -32,6 +34,10 @@ def exists(xs, p):
 
 class APITest(TestCase):
     client = Client()
+
+    def makeuser(self, username, password):
+        user = User.objects.create_user(username, 'yourmom@example.com', password=password)
+        user.save()
 
     def postjson(self, url, **kwargs):
         response = self.client.post(url, kwargs)
@@ -78,8 +84,40 @@ class APITest(TestCase):
         impls = [impl1, impl2, impl3]
 
         rets = self.getjson('/api/specs/' + str(spec_versionptr) + '/snippets/')
-        
-        pprint(dicts)
-        pprint(impls)
-        pprint(rets)
         self.assertTrue(forall(rets, lambda r: exists(dicts, lambda d: dict_subset(d,r))))
+
+    def test_votes(self):
+        self.makeuser('foo', 'bar')
+        self.makeuser('baz', 'quux')
+
+        quicksort = self.postjson('/api/new/spec/', name='quicksort', summary='sorts quickly', spec='quicksort spec')
+        versionptr = quicksort['versionptr']
+
+        def vote(val, expected):
+            self.postjson('/api/vote/', versionptr=versionptr, value=val)
+            self.assertEqual(self.getjson('/api/specs/' + str(versionptr) + '/active/')['votes'], expected)
+
+        self.client.login(username='foo', password='bar')
+        
+        vote(1, 1)
+        # can't vote more than once (new vote cancels out old)
+        vote(1,1)
+
+        self.client.login(username='baz', password='quux')
+
+        # votes from different users add
+        vote(1,2)
+
+        # and cancel
+        vote(-1,0)
+
+        # and can be cancelled
+        vote(0,1)
+
+        self.client.login(username='foo', password='bar')
+        
+        # by both users
+        vote(0,0)
+
+        # votes can be negative
+        vote(-1,-1)
