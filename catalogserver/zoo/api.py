@@ -37,7 +37,7 @@ def dump_spec(spec):
         'name': spec.name,
         'summary': spec.summary,
         'spec': spec.spec,
-        'votes': spec.version.versionptr.votes(),
+        'votes': spec.version.versionptr.votes,
     }
 
 def dump_snippet(snippet):
@@ -48,7 +48,7 @@ def dump_snippet(snippet):
         'spec_versionptr': snippet.spec_versionptr.id,
         'language': snippet.language,
         'code': snippet.code,
-        'votes': snippet.version.versionptr.votes(),
+        'votes': snippet.version.versionptr.votes,
     }
 
 def version_to_spec(version):
@@ -78,7 +78,7 @@ def specs_snippets(request, versionptr):
 
 def spec(request, version):
     """GET /api/spec/<ver>/ : Get the spec at version <ver>."""
-    return dump_spec(Spec.objects.get(version__exact = version))
+    return dump_spec(Spec.objects.get(version = version))
 
 def snippets_active(request, versionptr):
     """GET /api/snippets/<ptr>/active/ : Gets the current active snippet associated with snippet versionptr <ptr>."""
@@ -90,7 +90,7 @@ def snippets_all(request, versionptr):
 
 def snippet(request, version):
     """GET /api/snippet/<ver>/ : Gets the snippet at version <ver>."""
-    return dump_snippet(Snippet.objects.get(version__exact = version))
+    return dump_snippet(Snippet.objects.get(version = version))
 
 def new_snippet(request):
     """POST /api/new/snippet/ : Creates a new snippet.
@@ -140,4 +140,21 @@ def new_spec(request):
         'version': version.id,
     }
 
-# POST /api/vote             Vote on a versionptr
+def vote(request):
+    """POST /api/vote/ : Votes on a versionptr.  Cancels out any previous vote.
+
+        versionptr: the versionptr to vote on
+        value: -1, 0, or 1"""
+
+    # TODO race condition
+    versionptr = VersionPtr.get(id=POST['versionptr'])
+    value = int(request.POST['value'])
+    
+    pvotes = Vote.objects.filter(user=request.user, versionptr=versionptr)
+    for pvote in pvotes:
+        votes -= pvote.value
+    pvotes.delete()
+    
+    vote = Vote(user=request.user, versionptr=versionptr, value=value, date=datetime.now())
+    versionptr.votes += value
+    versionptr.save()

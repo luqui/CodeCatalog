@@ -2,11 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class VersionPtr(models.Model):
-    def votes(self):
-        r = 0
-        for vote in self.vote_set.all():
-            r += vote.value
-        return r
+    votes = models.IntegerField(default=0)
 
 class Version(models.Model):
     timestamp = models.DateTimeField()
@@ -39,9 +35,5 @@ class Snippet(models.Model):
 class Vote(models.Model):
     user       = models.ForeignKey(User)
     versionptr = models.ForeignKey(VersionPtr)
-    table_type = models.IntegerField(choices = [
-                            (0, 'Spec'),
-                            (1, 'Snippet'),
-                        ])
     value   = models.IntegerField()  # 1 or -1
     date    = models.DateTimeField()
