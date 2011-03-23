@@ -11,6 +11,7 @@ import json
 from pprint import pprint
 from zoo import models
 from django.contrib.auth.models import User
+import time
 
 def dict_subset(a, b):
     for k in a.keys():
@@ -73,18 +74,25 @@ class APITest(TestCase):
         spec_versionptr = quicksort['versionptr']
         
         impl1_dict = { 'spec_versionptr': spec_versionptr, 'code': 'quicksort=sqrt', 'language': 'haskell' }
-        impl2_dict = { 'spec_versionptr': spec_versionptr, 'code': 'qucksort=sort', 'language': 'haskell' }
+        impl2_dict = { 'spec_versionptr': spec_versionptr, 'code': 'quicksort=sort', 'language': 'haskell' }
         impl3_dict = { 'spec_versionptr': spec_versionptr, 'code': 'def quicksort(s): s.sort()', 'language': 'python' }
         dicts = [impl1_dict, impl2_dict, impl3_dict]
 
         impl1 = self.postjson('/api/new/snippet/', **impl1_dict)
         versionptr = impl1['versionptr']
-        impl2 = self.postjson('/api/new/snippet/', verisonptr=versionptr, **impl2_dict)
+        impl2 = self.postjson('/api/new/snippet/', versionptr=versionptr, **impl2_dict)
         impl3 = self.postjson('/api/new/snippet/', **impl3_dict)
         impls = [impl1, impl2, impl3]
 
         rets = self.getjson('/api/specs/' + str(spec_versionptr) + '/snippets/')
         self.assertTrue(forall(rets, lambda r: exists(dicts, lambda d: dict_subset(d,r))))
+
+        activesnip = self.getjson('/api/snippets/' + str(versionptr) + '/active/')
+        self.assertTrue(dict_subset(impl2_dict, activesnip))
+
+        rets = self.getjson('/api/specs/' + str(spec_versionptr) + '/snippets/active/')
+        self.assertTrue(dict_subset(impl2_dict, rets['haskell']))
+        self.assertTrue(dict_subset(impl3_dict, rets['python']))
 
     def test_votes(self):
         self.makeuser('foo', 'bar')

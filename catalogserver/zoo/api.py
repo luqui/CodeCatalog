@@ -8,6 +8,14 @@ from datetime import datetime
 # Versions and versionptrs are separate, numeric namespaces. Versionptr 1
 # and version 1 are not related.
 
+def distinct_by(f, xs):
+    cur = None
+    for x in xs:
+        fx = f(x)
+        if cur != fx:
+            cur = fx
+            yield x
+
 def user_or_none(user):
     if user.is_anonymous():
         return None
@@ -38,6 +46,7 @@ def dump_spec(spec):
         'summary': spec.summary,
         'spec': spec.spec,
         'votes': spec.version.versionptr.votes,
+        'timestamp': spec.version.timestamp.isoformat(),
     }
 
 def dump_snippet(snippet):
@@ -49,6 +58,7 @@ def dump_snippet(snippet):
         'language': snippet.language,
         'code': snippet.code,
         'votes': snippet.version.versionptr.votes,
+        'timestamp': snippet.version.timestamp.isoformat(),
     }
 
 def version_to_spec(version):
@@ -75,6 +85,12 @@ def specs_snippets(request, versionptr):
     """GET /api/specs/<ptr>/snippets/ : Get all snippets associated with the spec versionptr <ptr>."""
     objs = Snippet.objects.filter(spec_versionptr = versionptr)
     return map(dump_snippet, objs)
+
+def specs_snippets_active(request, versionptr):
+    """GET /api/specs/<ptr>/snippets/active/ : Gets the current active snippet in each language on the given spec versionptr"""
+    objs = Snippet.objects.filter(spec_versionptr=versionptr, version__active=True).order_by('language', '-version__timestamp')
+    return dict([ (snip.language, dump_snippet(snip)) 
+                        for snip in distinct_by(lambda x: x.language, objs) ])
 
 def spec(request, version):
     """GET /api/spec/<ver>/ : Get the spec at version <ver>."""
