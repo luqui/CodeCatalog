@@ -1,5 +1,6 @@
 from zoo.models import *
 from datetime import datetime
+from haystack.query import SearchQuerySet
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -179,3 +180,10 @@ def vote(request):
     versionptr.save()
 
     return ""
+
+def search(request):
+    """GET /api/search/?q=text : Search for specs matching the given text."""
+
+    results = SearchQuerySet().auto_query(request.GET['q'])[0:10]
+    return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
+                        for r in results ]
