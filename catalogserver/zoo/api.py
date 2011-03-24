@@ -1,6 +1,7 @@
 from zoo.models import *
 from datetime import datetime
 from haystack.query import SearchQuerySet
+from django.core.exceptions import ObjectDoesNotExist
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -27,7 +28,7 @@ def new_version(user, versionptr):
     return Version(
         timestamp = datetime.now(),
         user = user_or_none(user),
-        active = True,
+        approved = True,
         versionptr = versionptr)
 
 def get_or_new_versionptr(versionptr_id):
@@ -37,6 +38,15 @@ def get_or_new_versionptr(versionptr_id):
         return v
     else:
         return VersionPtr.objects.get(id=int(versionptr_id))
+
+def update_active(versionptr):
+    objs = Version.objects.filter(versionptr=versionptr)
+    objs.update(active=False)
+    activeobjs = objs.filter(approved=True).order_by('-timestamp')
+    if activeobjs.exists():
+        activeobj = activeobjs[0]
+        activeobj.active=True
+        activeobj.save()
 
 def dump_spec(spec):
     """The representation of a spec.  This is what the methods that return a spec return."""
@@ -62,25 +72,13 @@ def dump_snippet(snippet):
         'timestamp': snippet.version.timestamp.isoformat(),
     }
 
-def version_to_spec(version):
-    return version.spec
-
-def version_to_snippet(version):
-    return version.snippet
-
-def active_version(versionptr):
-    return Version.objects.filter(versionptr = versionptr, active = True).latest('timestamp')
-
-def all_versions(versionptr):
-    return Version.objects.filter(versionptr = versionptr).all()
-
 def specs_active(request, versionptr):
     """GET /api/specs/<ptr>/active/ : Get the latest active spec with versionptr <ptr>."""
-    return dump_spec(version_to_spec(active_version(versionptr)))
+    return dump_spec(Spec.objects.get(version__versionptr=versionptr, version__active=True))
 
 def specs_all(request, versionptr):
     """GET /api/specs/<ptr>/all/ : Get all spec versions associated with versionptr <ptr>."""
-    return map(lambda x: dump_spec(version_to_spec(x)), all_versions(versionptr))
+    return map(dump_spec, Spec.objects.filter(version__versionptr=versionptr))
     
 def specs_snippets(request, versionptr):
     """GET /api/specs/<ptr>/snippets/ : Get all snippets associated with the spec versionptr <ptr>."""
@@ -89,25 +87,24 @@ def specs_snippets(request, versionptr):
 
 def specs_snippets_active(request, versionptr):
     """GET /api/specs/<ptr>/snippets/active/ : Gets the current active snippet in each language on the given spec versionptr"""
-    objs = Snippet.objects.filter(spec_versionptr=versionptr, version__active=True).order_by('language', '-version__timestamp')
-    return dict([ (snip.language, dump_snippet(snip)) 
-                        for snip in distinct_by(lambda x: x.language, objs) ])
+    objs = Snippet.objects.filter(spec_versionptr=versionptr, version__active=True).order_by('language')
+    return dict([ (snip.language, dump_snippet(snip)) for snip in objs ])
 
 def spec(request, version):
     """GET /api/spec/<ver>/ : Get the spec at version <ver>."""
-    return dump_spec(Spec.objects.get(version = version))
+    return dump_spec(Spec.objects.get(version=version))
 
 def snippets_active(request, versionptr):
     """GET /api/snippets/<ptr>/active/ : Gets the current active snippet associated with snippet versionptr <ptr>."""
-    return dump_snippet(version_to_snippet(active_version(versionptr)))
+    return dump_snippet(Snippet.objects.get(version__versionptr=versionptr, version__active=True))
 
 def snippets_all(request, versionptr):
     """GET /api/snippets/<ptr>/all/ : Gets all versions of snippets associated with snippet versionptr <ptr>."""
-    return map(lambda x: dump_snippet(version_to_snippet(x)), all_versions(versionptr))
+    return map(dump_snippet, Snippet.objects.filter(version__versionptr=versionptr))
 
 def snippet(request, version):
     """GET /api/snippet/<ver>/ : Gets the snippet at version <ver>."""
-    return dump_snippet(Snippet.objects.get(version = version))
+    return dump_snippet(Snippet.objects.get(version=version))
 
 def new_snippet(request):
     """POST /api/new/snippet/ : Creates a new snippet.
@@ -130,6 +127,9 @@ def new_snippet(request):
                       language=request.POST['language'],
                       spec_versionptr=spec_versionptr)
     snippet.save()
+
+    update_active(versionptr)
+
     return {
         'versionptr': versionptr.id,
         'version': version.id,
@@ -152,6 +152,8 @@ def new_spec(request):
 
     spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
     spec.save()
+
+    update_active(versionptr)
 
     return {
         'versionptr': versionptr.id,
@@ -185,6 +187,6 @@ def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""
 
     # TODO filter out inactive/outdated entries (unless explicitly requested?)
-    results = SearchQuerySet().auto_query(request.GET['q'])[0:10]
+    results = SearchQuerySet().filter(version__active=True).auto_query(request.GET['q'])[0:10]
     return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
                         for r in results ]

@@ -17,11 +17,12 @@ class Migration(SchemaMigration):
 
         # Adding model 'Version'
         db.create_table('zoo_version', (
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
-            ('timestamp', self.gf('django.db.models.fields.DateTimeField')()),
             ('versionptr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['zoo.VersionPtr'])),
+            ('timestamp', self.gf('django.db.models.fields.DateTimeField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
+            ('approved', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
         ))
         db.send_create_signal('zoo', ['Version'])
 
@@ -126,6 +127,7 @@ class Migration(SchemaMigration):
         'zoo.version': {
             'Meta': {'object_name': 'Version'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'approved': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'timestamp': ('django.db.models.fields.DateTimeField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True'}),
