@@ -9,7 +9,8 @@ def jsonwrap(f):
     import json
     
     def cb(*args, **kwargs):
-        return HttpResponse(content=json.dumps(f(*args, **kwargs)), mimetype='application/json')
+        datastructure = f(*args, **kwargs)
+        return HttpResponse(content=json.dumps(datastructure), mimetype='application/json')
     return cb
 # End CodeCatalog Snippet
 
@@ -18,6 +19,7 @@ apipatterns = patterns('',
     (r'^specs/(?P<versionptr>\d+)/all/$', jsonwrap(api.specs_all)),
     (r'^specs/(?P<versionptr>\d+)/snippets/$', jsonwrap(api.specs_snippets)),
     (r'^specs/(?P<versionptr>\d+)/snippets/active/$', jsonwrap(api.specs_snippets_active)),
+    (r'^specs/(?P<versionptr>\d+)/assemble/$', jsonwrap(api.assemble)),
     (r'^spec/(?P<version>\d+)/$', jsonwrap(api.spec)),
     (r'^snippets/(?P<versionptr>\d+)/active/$', jsonwrap(api.snippets_active)),
     (r'^snippets/(?P<versionptr>\d+)/all/$', jsonwrap(api.snippets_all)),

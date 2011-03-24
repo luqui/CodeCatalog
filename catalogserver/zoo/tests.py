@@ -91,8 +91,9 @@ class APITest(TestCase):
         self.assertTrue(dict_subset(impl2_dict, activesnip))
 
         rets = self.getjson('/api/specs/' + str(spec_versionptr) + '/snippets/active/')
-        self.assertTrue(dict_subset(impl2_dict, rets['haskell']))
-        self.assertTrue(dict_subset(impl3_dict, rets['python']))
+        if rets[0]['language'] != 'haskell': (rets[0],rets[1]) = (rets[1],rets[0])
+        self.assertTrue(dict_subset(impl2_dict, rets[0]))
+        self.assertTrue(dict_subset(impl3_dict, rets[1]))
 
     def test_votes(self):
         self.makeuser('foo', 'bar')
