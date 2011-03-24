@@ -19,7 +19,7 @@
 
         {% for result in page.object_list %}
             <p>
-                <a href="{{ result.object.url }}">{{ result.object.name }} - {{ result.object.summary }}</a>
+                <a href="/spec/{{ result.object.version.versionptr.id }}/">{{ result.object.name }} - {{ result.object.summary }}</a>
             </p>
         {% empty %}
             <p>No results found.</p>

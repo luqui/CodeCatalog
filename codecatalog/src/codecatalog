@@ -37,7 +37,50 @@ def get_json(url, params={}):
 def tag_snippet(id, code):
     return "# Begin CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
            code + \
-           "\n# End CodeCatalog Snippet"
+           "# End CodeCatalog Snippet\n"
+
+def check_and_update(ver, newcode):
+    snip = get_json('/api/snippet/' + str(ver) + '/')
+    latest = get_json('/api/snippets/' + str(snip['versionptr']) + '/active/')
+    
+    up_to_date = latest['version'] <= snip['version']
+    changes = newcode != snip['code']
+
+    if up_to_date and changes:
+        sys.stderr.write("*** Uploading changes to " + str(ver) + "\n")
+        newsnip = post_json('/api/new/snippet/', {
+            'spec_versionptr': snip['spec_versionptr'],
+            'code': newcode,
+            'language': snip['language'],
+            'versionptr': snip['versionptr'],
+        })
+        return tag_snippet(newsnip['version'], newcode)
+    else:
+        if not changes or re.match(r'^\s*$', newcode):
+            sys.stderr.write("*** Downloading changes to " + str(ver) + "\n")
+            return tag_snippet(latest['version'], latest['code'])
+        else:
+            sys.stderr.write("*** Snippet " + str(ver) + " is not up-to-date but has changes.  Leaving be.\n")
+            return tag_snippet(ver, newcode)
+        
+
+def cmd_sync(*args, **opts):
+    snipid = None
+    code = ""
+    for line in sys.stdin:
+        m = re.search(r'Begin CodeCatalog Snippet http://codecatalog.net/(\d+)/', line)
+        if m:
+            code = ""
+            snipid = int(m.group(1))
+        elif snipid is None:
+            sys.stdout.write(line)
+        elif re.search(r'End CodeCatalog Snippet', line):
+            sys.stdout.write(check_and_update(snipid, code))
+            code = ""
+            snipid = None
+        else:
+            code += line
+        
 
 def cmd_post(*args, **opts):
     name = opts.get('name') or 'unnamed'
@@ -59,14 +102,14 @@ def cmd_post(*args, **opts):
     if not quiet:
         webbrowser.open_new_tab('http://' + host + '/spec/' + str(spec['versionptr']) + '/')
 
-    print tag_snippet(snip['version'], code)
+    sys.stdout.write(tag_snippet(snip['version'], code))
 
 def cmd_get(*args, **opts):
     ver = args[0]
     ver = re.sub(r'^http://codecatalog.net/', '', ver)
     ver = re.sub(r'/$', '', ver)
     snip = get_json('/api/snippet/' + ver + '/')
-    print tag_snippet(snip['version'], snip['code'])
+    sys.stdout.write(tag_snippet(snip['version'], snip['code']))
 
 def cmd_search(*args, **opts):
     text = ' '.join(args)
@@ -77,6 +120,7 @@ def cmd_search(*args, **opts):
 commands = {
     'post': cmd_post,
     'get': cmd_get,
+    'sync': cmd_sync,
     'search': cmd_search,
 }
 
