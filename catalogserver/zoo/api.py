@@ -67,14 +67,52 @@ def dump_snippet(snippet):
     return {
         'versionptr': snippet.version.versionptr.id,
         'version': snippet.version.id,
-        'approved': spec.version.approved,
-        'active': spec.version.active,
+        'approved': snippet.version.approved,
+        'active': snippet.version.active,
+        'dependencies': tuple(snippet.dependency_set.all().values_list('target', flat=True)),
         'spec_versionptr': snippet.spec_versionptr.id,
         'language': snippet.language,
         'code': snippet.code,
         'votes': snippet.version.versionptr.votes,
         'timestamp': snippet.version.timestamp.isoformat(),
     }
+
+def traverse_cons_list(conslist):
+    while conslist is not ():
+        (x,xs) = conslist
+        yield x
+        conslist = xs
+
+def shortest_path(children, success, init):
+    import heapq
+    seen = {}
+    q = [(0, init, ())]
+    if success(init):
+        return ()
+    while q:
+        (weight, elem, tail) = heapq.heappop(q)
+        print "visiting ", (weight,elem,tail)
+        if elem in seen: continue
+        seen[elem] = 1
+
+        for (cweight,child,edge) in children(elem):
+            if success(child): return tuple(traverse_cons_list((edge,tail)))
+            heapq.heappush(q, (weight+cweight,child, (edge,tail)))
+    return None
+
+
+def assemble(request, versionptr):
+    """GET /api/specs/<ptr>/assemble/ : Get a list of snippets which transitively assemble a spec"""
+    def children(elem):
+        (vptr, rest) = (elem[0], elem[1:])
+        snips = Snippet.objects.filter(spec_versionptr=vptr, version__active=True)
+        return (( -snip.version.versionptr.votes
+                , snip.dependency_set.values_list('target', flat=True)
+                , snip ) 
+                for snip in snips)
+    def success(elem):
+        return len(elem) == 0
+    return map(dump_snippet, shortest_path(children, success, (versionptr,)) or ()) or None
 
 def specs_active(request, versionptr):
     """GET /api/specs/<ptr>/active/ : Get the latest active spec with versionptr <ptr>."""
@@ -118,6 +156,7 @@ def new_snippet(request):
                      Allocates new versionptr if not given.
         code : The code in the snippet
         language : The language the snippet is wirtten in
+        dependencies : (optional) A comma-separated list of spec versionptrs the snippet depends on
     """
     
     spec_versionptr = VersionPtr.objects.get(id=int(request.POST['spec_versionptr']))
@@ -131,6 +170,13 @@ def new_snippet(request):
                       language=request.POST['language'],
                       spec_versionptr=spec_versionptr)
     snippet.save()
+
+    deps = request.POST.get('dependencies')
+    print "Deps = " + str(deps)
+    if deps is not None:
+        for dep in deps.split(','):
+            print "Adding dependency to snippet in spec " + str(spec_versionptr.id)
+            Dependency(snippet=snippet, target=VersionPtr.objects.get(id=int(dep))).save()
 
     update_active(versionptr)
 

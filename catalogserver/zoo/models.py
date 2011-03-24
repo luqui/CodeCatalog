@@ -13,7 +13,7 @@ class Version(models.Model):
 
 class Spec(models.Model):
     version = models.OneToOneField(Version, primary_key=True)
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=64)
     summary = models.TextField()
     spec = models.TextField()
 
@@ -22,6 +22,10 @@ class Snippet(models.Model):
     code = models.TextField()
     language = models.TextField()
     spec_versionptr = models.ForeignKey(VersionPtr)
+
+class Dependency(models.Model):
+    snippet = models.ForeignKey(Snippet)
+    target = models.ForeignKey(VersionPtr)  # points to a spec versionptr
 
 class Vote(models.Model):
     user       = models.ForeignKey(User)

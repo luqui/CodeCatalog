@@ -14,10 +14,8 @@ def render(request, template, dictionary={}, context_instance=None, mimetype="te
 
 def spec(request, pk):
     def metric(obj): return (obj.canon, obj.votes())
-
     spec = api.specs_active(request, pk)
     snippets = api.specs_snippets_active(request, pk)
-
     return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': snippets})
 
 def snippet(request, pk):
