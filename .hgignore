@@ -5,6 +5,6 @@ syntax: glob
 catalogserver/catalog-index/*
 catalogserver/database.sqlite
 catalogserver/dev_settings.py
-
+codecatalog/build/*
 *.project
 *.pydevproject
