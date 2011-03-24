@@ -7,7 +7,7 @@ import sys
 import re
 import webbrowser
 
-host = 'localhost:8000'
+host = 'codecatalog.net'
 
 def post_json(url, params):
     params_enc = urllib.urlencode(params)
@@ -46,15 +46,19 @@ def check_and_update(ver, newcode):
     up_to_date = latest['version'] <= snip['version']
     changes = newcode != snip['code']
 
-    if up_to_date and changes:
-        sys.stderr.write("*** Uploading changes to " + str(ver) + "\n")
-        newsnip = post_json('/api/new/snippet/', {
-            'spec_versionptr': snip['spec_versionptr'],
-            'code': newcode,
-            'language': snip['language'],
-            'versionptr': snip['versionptr'],
-        })
-        return tag_snippet(newsnip['version'], newcode)
+    if up_to_date:
+        if changes:
+            sys.stderr.write("*** Uploading changes to " + str(ver) + "\n")
+            newsnip = post_json('/api/new/snippet/', {
+                'spec_versionptr': snip['spec_versionptr'],
+                'code': newcode,
+                'language': snip['language'],
+                'versionptr': snip['versionptr'],
+            })
+            return tag_snippet(newsnip['version'], newcode)
+        else:
+            # Completely unchanged.  Don't even move your lips.
+            return tag_snippet(ver, newcode)
     else:
         if not changes or re.match(r'^\s*$', newcode):
             sys.stderr.write("*** Downloading changes to " + str(ver) + "\n")
@@ -87,7 +91,7 @@ def cmd_post(*args, **opts):
     summary = opts.get('summary') or ''
     language = opts.get('language') or 'python'
     quiet = opts.get('quiet')
-    code = sys.stdin.read().strip()
+    code = sys.stdin.read().strip() + "\n"
     
     spec = post_json('/api/new/spec/', { 
         'name': name, 

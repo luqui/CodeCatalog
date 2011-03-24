@@ -53,6 +53,8 @@ def dump_spec(spec):
     return {
         'versionptr': spec.version.versionptr.id,
         'version': spec.version.id,
+        'approved': spec.version.approved,
+        'active': spec.version.active,
         'name': spec.name,
         'summary': spec.summary,
         'spec': spec.spec,
@@ -65,6 +67,8 @@ def dump_snippet(snippet):
     return {
         'versionptr': snippet.version.versionptr.id,
         'version': snippet.version.id,
+        'approved': spec.version.approved,
+        'active': spec.version.active,
         'spec_versionptr': snippet.spec_versionptr.id,
         'language': snippet.language,
         'code': snippet.code,
@@ -187,6 +191,7 @@ def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""
 
     # TODO filter out inactive/outdated entries (unless explicitly requested?)
-    results = SearchQuerySet().filter(version__active=True).auto_query(request.GET['q'])[0:10]
+    print "Searching for " + request.GET['q']
+    results = SearchQuerySet().auto_query(request.GET['q']).filter(active='true')[0:10]
     return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
                         for r in results ]
