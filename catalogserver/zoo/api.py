@@ -91,7 +91,6 @@ def shortest_path(children, success, init):
         return ()
     while q:
         (weight, elem, tail) = heapq.heappop(q)
-        print "visiting ", (weight,elem,tail)
         if elem in seen: continue
         seen[elem] = 1
 
@@ -172,10 +171,8 @@ def new_snippet(request):
     snippet.save()
 
     deps = request.POST.get('dependencies')
-    print "Deps = " + str(deps)
     if deps is not None:
         for dep in deps.split(','):
-            print "Adding dependency to snippet in spec " + str(spec_versionptr.id)
             Dependency(snippet=snippet, target=VersionPtr.objects.get(id=int(dep))).save()
 
     update_active(versionptr)
