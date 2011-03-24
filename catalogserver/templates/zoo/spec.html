@@ -14,6 +14,7 @@
    .snippet { background: #eec }
    .canon { background: #aea }
    .languagemark { background: #db9; font-weight: bold; float: right }
+   .depmark { background: #db9; float: left }
   </style>
 
 {% block scripting %}
@@ -115,6 +116,11 @@
              language="{{snip.language}}" 
              name="code_{{snip.version}}" id="code_{{snip.version}}" 
              cols="72" readonly="readonly">{{snip.code}}</textarea><br/>
+   <div class="depmark">
+        {% for dep in snip.dependencies %}
+            <a href="/spec/{{dep}}/">{{dep}}</a>
+        {% endfor %}
+   </div>
    <div class="languagemark">{{snip.language}}</div>
   </td>
   <td>
