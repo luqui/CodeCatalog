@@ -1,2 +1,4 @@
 noremap <Leader>cp :!codecatalog post<CR>
-noremap <Leader>cs :!codecatalog sync<CR>
+vnoremap <Leader>cs :!codecatalog sync<CR>
+onoremap <Leader>cs :!codecatalog sync<CR>
+nnoremap <Leader>cs :%!codecatalog sync<CR>
