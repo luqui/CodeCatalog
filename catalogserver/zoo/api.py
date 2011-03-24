@@ -87,8 +87,8 @@ def specs_snippets(request, versionptr):
 
 def specs_snippets_active(request, versionptr):
     """GET /api/specs/<ptr>/snippets/active/ : Gets the current active snippet in each language on the given spec versionptr"""
-    objs = Snippet.objects.filter(spec_versionptr=versionptr, version__active=True).order_by('language')
-    return dict([ (snip.language, dump_snippet(snip)) for snip in objs ])
+    objs = Snippet.objects.filter(spec_versionptr=versionptr, version__active=True)
+    return map(dump_snippet, objs)
 
 def spec(request, version):
     """GET /api/spec/<ver>/ : Get the spec at version <ver>."""

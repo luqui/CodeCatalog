@@ -98,7 +98,7 @@
 {% block content %}
 
 {% block spec %}
-<h1><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %} </span></h1>
+<h1><span id="name" name="name" class="editable"><a href="/spec/{{spec.versionptr}}">{% block title %}{{spec.name}}{% endblock %}</a></span></h1>
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
@@ -106,17 +106,16 @@
 {% endblock spec %}
 
 {% block impls %}
-<h2>Impls</h2>
-{% for lang,snip in snippets.items %}
+{% for snip in snippets %}
 <table border="0">
  <tr>
   <td>
    <textarea class="snippet"
              snipid="{{snip.version}}" 
-             language="{{lang}}" 
+             language="{{snip.language}}" 
              name="code_{{snip.version}}" id="code_{{snip.version}}" 
              cols="72" readonly="readonly">{{snip.code}}</textarea><br/>
-   <div class="languagemark">{{lang}}</div>
+   <div class="languagemark">{{snip.language}}</div>
   </td>
   <td>
    <table border="0">
