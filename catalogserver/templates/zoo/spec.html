@@ -38,7 +38,7 @@
         var lang = $('#code_' + id).attr('language');
         return function (text) {
             return linecomment[lang] + " CodeCatalog Snippet http://codecatalog.net/" + id + "/\n" 
-                 + text + "\n"
+                 + text
                  + linecomment[lang] + " End CodeCatalog Snippet\n";
         };
     };
