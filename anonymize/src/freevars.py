@@ -47,6 +47,16 @@ def free_vars(astnode):
             params = arguments_to_set(node.args)
             self.free_vars |= freevars(params, node.body)
 
+        # list comprehensions are specifically *not* a scope:
+        # >>> def foo():
+        # ...     fs = [ x for x in range(10) ]
+        # ...     return x
+        # >>> foo()
+        # 9
+
+        def visit_GeneratorExp(self, node):
+            self.free_vars |= freevars((), node.elt, *node.generators)
+
         def get_free_vars(self):
             return self.free_vars - (self.local_vars - self.global_vars)
 
