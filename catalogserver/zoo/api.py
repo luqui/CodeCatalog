@@ -1,7 +1,6 @@
 from zoo.models import *
 from datetime import datetime
 from haystack.query import SearchQuerySet
-from django.core.exceptions import ObjectDoesNotExist
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
