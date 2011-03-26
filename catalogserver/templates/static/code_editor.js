@@ -78,13 +78,11 @@ var code_editor = function(proto, submit_callback) {
 
     var proto_opts = {};
     if (proto) {
-        console.log("proto", proto);
         proto_opts.spec_versionptr = proto.spec_versionptr;
         proto_opts.versionptr = proto.versionptr;
 
         var indeps = proto.dependencies;
         for (var i in indeps) {
-            console.log("adding dep", indeps[i]);
             add_dep().val(indeps[i]);
         }
 

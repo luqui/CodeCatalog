@@ -55,7 +55,7 @@ def check_and_update(ver, newcode):
     latest = get_json('/api/snippets/' + str(snip['versionptr']) + '/active/')
     
     up_to_date = latest['version'] <= snip['version']
-    changes = newcode != snip['code']
+    changes = newcode_norm != snip['code']
 
     if up_to_date:
         if changes:
@@ -77,7 +77,7 @@ def check_and_update(ver, newcode):
             return tag_snippet(latest['version'], indent_by(indent,latest['code']), indent=indent, language=latest['language'])
         else:
             sys.stderr.write("*** Snippet " + str(ver) + " is not up-to-date but has changes.  Leaving be.\n")
-            return tag_snippet(ver, newcode, indent=indent)
+            return tag_snippet(ver, newcode, indent=indent, language=snip['language'])
         
 
 def cmd_sync(*args, **opts):
@@ -118,8 +118,9 @@ def initial_whitespace(line):
 def strip_indent(text):
     lines = text.splitlines()
     lengths = map(lambda l: len(initial_whitespace(l)), lines)
-    initial = min(0, *lengths)
-    return ('\n'.join(map(lambda l: l[initial:], lines)), " " * initial)
+    initial = min(1000, *lengths)  # indenting by 1000 characters?  yow!
+    ret = ('\n'.join(map(lambda l: l[initial:], lines)), " " * initial)
+    return ret
 # End CodeCatalog Snippet
 
 
@@ -158,14 +159,14 @@ def cmd_post(*args, **opts):
     if not quiet:
         webbrowser.open_new_tab('http://' + host + '/spec/' + str(specid) + '/')
 
-    sys.stdout.write(tag_snippet(snip['version'], code, indent=indent))
+    sys.stdout.write(tag_snippet(snip['version'], code, indent=indent, language=language))
 
 def cmd_get(*args, **opts):
     ver = args[0]
     ver = re.sub(r'^http://codecatalog.net/', '', ver)
     ver = re.sub(r'/$', '', ver)
     snip = get_json('/api/snippet/' + ver + '/')
-    sys.stdout.write(tag_snippet(snip['version'], snip['code']))
+    sys.stdout.write(tag_snippet(snip['version'], snip['code'], language=snip['language']))
 
 def cmd_search(*args, **opts):
     text = ' '.join(args)

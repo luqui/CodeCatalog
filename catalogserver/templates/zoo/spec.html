@@ -22,7 +22,7 @@
 
   <script type="text/javascript">
 
-    // Begin CodeCatalog Snippet http://codecatalog.net/42/
+    // CodeCatalog Snippet http://codecatalog.net/45/
     var reload = function() { document.location.reload(); };
     // End CodeCatalog Snippet
 
@@ -31,7 +31,7 @@
         $.post(url, dict, callback);
     };
 
-    // Begin CodeCatalog Snippet http://codecatalog.net/76/
+    // CodeCatalog Snippet http://codecatalog.net/79/
     var linecomment = {
         python: '#',
         javascript: '//',
@@ -54,7 +54,7 @@
         post('/api/vote/', { versionptr: versionptr, value: 1 }, reload);
     };
 
-    // Begin CodeCatalog Snippet http://codecatalog.net/82/
+    // CodeCatalog Snippet http://codecatalog.net/85/
     var max = function() {
         var r = arguments[0];
         for (var i = 1; i < arguments.length; ++i) {
@@ -64,6 +64,7 @@
     };
     // End CodeCatalog Snippet
 
+    // CodeCatalog Snippet http://codecatalog.net/96/
     var min = function() {
         var r = arguments[0];
         for (var i = 1; i < arguments.length; ++i) {
@@ -71,6 +72,7 @@
         }
         return r;
     };
+    // End CodeCatalog Snippet
 
     var savespec = function() {
         post('/api/new/spec/', { 
@@ -81,7 +83,7 @@
         });
     };
 
-    // Begin CodeCatalog Snippet http://codecatalog.net/36/
+    // CodeCatalog Snippet http://codecatalog.net/37/
     var elt = function(name, attrs) {
         var r = $('<' + name + ' />');
         if (attrs) {
