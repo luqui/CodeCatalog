@@ -2,29 +2,30 @@
 
 {% block header %}
 {% include "static/jquery.html" %}
+<script type="text/javascript" src="/static/code_editor.js"></script>
 <script>
 $(function() {
-    $('#submit').click(function() {
-        $.post('/api/new/spec/', {}, function (spec) {
-            $.post('/api/new/snippet/', {
-                'language': $('#language').val(),
-                'code': $('#code').val(),
-                'spec_versionptr': spec.versionptr,
-            }, function (snippet) {
-                window.location.href = "/spec/" + spec.versionptr + "/";
+    $('#editor').append(code_editor(null, function(obj) { 
+        var regsnip = function (snip) {
+            $.post('/api/new/snippet/', snip, function (reply) {
+                window.location.href = '/' + reply.version + '/';
             });
-        });
-    });
+        };
+        if (obj.spec_versionptr) {
+            regsnip(obj);
+        }
+        else {
+            $.post('/api/new/spec/', {}, function (spec) {
+                obj.spec_versionptr = spec.versionptr;
+                regsnip(obj);
+            });
+        }
+    }));
 })
 </script>
 {% endblock %}
 
 {% block content %}
   <h1>New Snippet</h1>
-  <textarea name="code" id="code" rows="30" cols="72"></textarea><br/>
-  <select name="language" id="language">
-   <option value="python" selected>Python</option>
-   <option value="javascript">Javascript</option>
-  </select>
-  <button name="submit" id="submit">Submit</button>
+  <div name="editor" id="editor"></div>
 {% endblock %}
