@@ -32,6 +32,7 @@ apipatterns = patterns('',
     
 
 urlpatterns = patterns('',
+    (r'^/?$', views.home),
     (r'^api/', include(apipatterns)),
     (r'^spec/(?P<pk>\d+)/$', views.spec),
     (r'^(?P<pk>\d+)/$', views.snippet),

@@ -1,0 +1,32 @@
+{% extends "zoo/frame.html" %}
+
+{% block content %}
+
+<form action="/search/" method="get">
+ <b>Search</b>
+ <input type="text" name="q" />
+ <input type="submit" />
+</form>
+
+<h1>Recent Activity</h1>
+
+<table>
+ <thead>
+  <tr>
+   <td>Name</td>
+   <td>Summary</td>
+   <td>Date</td>
+  </tr>
+ </thead>
+ <tbody>
+{% for spec in specs %}
+  <tr>
+   <td><a href="/spec/{{spec.version.versionptr.id}}/">{{spec.name}}</a></td>
+   <td>{{spec.summary}}</td>
+   <td>{{spec.version.timestamp}}</td>
+  </tr>
+{% endfor %}
+ </tbody>
+</table>
+
+{% endblock content %}
