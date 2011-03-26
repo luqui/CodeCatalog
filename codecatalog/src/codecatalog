@@ -5,7 +5,7 @@ import urllib
 import json
 import sys
 import webbrowser
-# Begin CodeCatalog Snippet http://codecatalog.net/52/
+# CodeCatalog Snippet http://codecatalog.net/52/
 import re
 # End CodeCatalog Snippet
 
@@ -44,7 +44,7 @@ linecomment = {
 # End CodeCatalog Snippet
 
 def tag_snippet(id, code, indent="", language="python"):
-    return indent + linecomment[language] + " Begin CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
+    return indent + linecomment[language] + " CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
            code + \
            indent + linecomment[language] + " End CodeCatalog Snippet\n"
 
@@ -65,6 +65,7 @@ def check_and_update(ver, newcode):
                 'code': newcode_norm,
                 'language': snip['language'],
                 'versionptr': snip['versionptr'],
+                'dependencies': ','.join(map(str, snip['dependencies'])),
             })
             return tag_snippet(newsnip['version'], newcode, indent=indent, language=snip['language'])
         else:
@@ -83,7 +84,7 @@ def cmd_sync(*args, **opts):
     snipid = None
     code = ""
     for line in sys.stdin:
-        m = re.search(r'Begin CodeCatalog Snippet http://codecatalog.net/(\d+)/', line)
+        m = re.search(r'CodeCatalog Snippet http://codecatalog.net/(\d+)/', line)
         if m:
             code = ""
             snipid = int(m.group(1))
@@ -96,7 +97,7 @@ def cmd_sync(*args, **opts):
         else:
             code += line
 
-# Begin CodeCatalog Snippet http://codecatalog.net/47/
+# CodeCatalog Snippet http://codecatalog.net/47/
 def maximum_by(measure, xs):
     maxx = xs[0]
     maxm = measure(maxx)
@@ -108,20 +109,21 @@ def maximum_by(measure, xs):
     return maxx
 # End CodeCatalog Snippet
 
-# Begin CodeCatalog Snippet http://codecatalog.net/61/
+# CodeCatalog Snippet http://codecatalog.net/61/
 def initial_whitespace(line):
     return re.search(r'^\s*', line).group(0)
 # End CodeCatalog Snippet
 
-# Begin CodeCatalog Snippet http://codecatalog.net/69/
+# CodeCatalog Snippet http://codecatalog.net/90/
 def strip_indent(text):
-    indent = re.compile(r'^\s*')
     lines = text.splitlines()
-    initial = min(*map(lambda l: len(initial_whitespace(l)), lines))
+    lengths = map(lambda l: len(initial_whitespace(l)), lines)
+    initial = min(0, *lengths)
     return ('\n'.join(map(lambda l: l[initial:], lines)), " " * initial)
 # End CodeCatalog Snippet
 
-# Begin CodeCatalog Snippet http://codecatalog.net/71/
+
+# CodeCatalog Snippet http://codecatalog.net/71/
 def indent_by(indent, text):
     return '\n'.join(map(lambda s: indent + s, text.splitlines())) + '\n'
 # End CodeCatalog Snippet
