@@ -98,13 +98,16 @@
     };
     // End CodeCatalog Snippet
 
+    // CodeCatalog Snippet http://codecatalog.net/99/
     var button = function(text, click) {
         var r = elt('button');
         r.text(text);
         r.click(click);
         return r;
     };
+    // End CodeCatalog Snippet
 
+    // CodeCatalog Snippet http://codecatalog.net/104/
     var horizontal = function() {
         var r = elt('table');
         var row = elt('tr');
@@ -115,7 +118,9 @@
         }
         return r;
     };
+    // End CodeCatalog Snippet
 
+    // CodeCatalog Snippet http://codecatalog.net/109/
     var vertical = function() {
         var r = elt('table');
         for (var i in arguments) {
@@ -124,6 +129,7 @@
         }
         return r;
     };
+    // End CodeCatalog Snippet
 
     var dependencies_area = function(snip) {
         if (snip.dependencies.length == 0) {
