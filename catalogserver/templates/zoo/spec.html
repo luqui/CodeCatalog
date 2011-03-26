@@ -22,19 +22,21 @@
 
   <script type="text/javascript">
 
-// Begin CodeCatalog Snippet http://codecatalog.net/42/
+    // Begin CodeCatalog Snippet http://codecatalog.net/42/
     var reload = function() { document.location.reload(); };
-// End CodeCatalog Snippet
+    // End CodeCatalog Snippet
 
     var post = function(url, dict, callback) {
         dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
         $.post(url, dict, callback);
     };
 
+    // Begin CodeCatalog Snippet http://codecatalog.net/76/
     var linecomment = {
         python: '#',
         javascript: '//',
     };
+    // End CodeCatalog Snippet
 
     var annotator = function (snip) { 
         return function (text) {
@@ -52,6 +54,7 @@
         post('/api/vote/', { versionptr: versionptr, value: 1 }, reload);
     };
 
+    // Begin CodeCatalog Snippet http://codecatalog.net/82/
     var max = function() {
         var r = arguments[0];
         for (var i = 1; i < arguments.length; ++i) {
@@ -59,6 +62,7 @@
         }
         return r;
     };
+    // End CodeCatalog Snippet
 
     var min = function() {
         var r = arguments[0];
@@ -77,7 +81,7 @@
         });
     };
 
-// Begin CodeCatalog Snippet http://codecatalog.net/36/
+    // Begin CodeCatalog Snippet http://codecatalog.net/36/
     var elt = function(name, attrs) {
         var r = $('<' + name + ' />');
         if (attrs) {
@@ -90,7 +94,7 @@
         }
         return r;
     };
-// End CodeCatalog Snippet
+    // End CodeCatalog Snippet
 
     var button = function(text, click) {
         var r = elt('button');

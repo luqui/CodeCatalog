@@ -36,10 +36,17 @@ def get_json(url, params={}):
     response.close()
     return json.loads(jsonstr)
 
-def tag_snippet(id, code, indent=""):
-    return indent + "# Begin CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
+# CodeCatalog Snippet http://codecatalog.net/87/
+linecomment = {
+    'python': '#',
+    'javascript': '//',
+}
+# End CodeCatalog Snippet
+
+def tag_snippet(id, code, indent="", language="python"):
+    return indent + linecomment[language] + " Begin CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
            code + \
-           indent + "# End CodeCatalog Snippet\n"
+           indent + linecomment[language] + " End CodeCatalog Snippet\n"
 
 def check_and_update(ver, newcode):
     (newcode_norm, indent) = normalize_code(newcode)
@@ -59,14 +66,14 @@ def check_and_update(ver, newcode):
                 'language': snip['language'],
                 'versionptr': snip['versionptr'],
             })
-            return tag_snippet(newsnip['version'], newcode, indent=indent)
+            return tag_snippet(newsnip['version'], newcode, indent=indent, language=snip['language'])
         else:
             # Completely unchanged.  Don't even move your lips.
-            return tag_snippet(ver, newcode, indent=indent)
+            return tag_snippet(ver, newcode, indent=indent, language=snip['language'])
     else:
         if not changes or re.match(r'^\s*$', newcode):
             sys.stderr.write("*** Downloading changes to " + str(ver) + "\n")
-            return tag_snippet(latest['version'], indent_by(indent,latest['code']), indent=indent)
+            return tag_snippet(latest['version'], indent_by(indent,latest['code']), indent=indent, language=latest['language'])
         else:
             sys.stderr.write("*** Snippet " + str(ver) + " is not up-to-date but has changes.  Leaving be.\n")
             return tag_snippet(ver, newcode, indent=indent)
@@ -127,23 +134,27 @@ def cmd_post(*args, **opts):
     name = opts.get('name') or 'unnamed'
     summary = opts.get('summary') or ''
     language = opts.get('language') or 'python'
+    specid = opts.get('specid')
     quiet = opts.get('quiet')
     code = sys.stdin.read()
 
     (normalized, indent) = normalize_code(code)
     
-    spec = post_json('/api/new/spec/', {
-        'name': name, 
-        'summary': summary,
-    })
+    if specid is None:
+        spec = post_json('/api/new/spec/', {
+            'name': name, 
+            'summary': summary,
+        })
+        specid = spec['versionptr']
+
     snip = post_json('/api/new/snippet/', { 
-        'spec_versionptr': spec['versionptr'],
+        'spec_versionptr': specid,
         'code': normalized,
         'language': language,
     })
 
     if not quiet:
-        webbrowser.open_new_tab('http://' + host + '/spec/' + str(spec['versionptr']) + '/')
+        webbrowser.open_new_tab('http://' + host + '/spec/' + str(specid) + '/')
 
     sys.stdout.write(tag_snippet(snip['version'], code, indent=indent))
 
@@ -173,11 +184,11 @@ def main():
     args = []
     opts = {}
     for arg in argv[2:]:
-        m = re.match(r'--(\w+)', arg)
+        m = re.match(r'^--(\w+)$', arg)
         if m:
             opts[m.group(1)] = True
             continue
-        m = re.match(r'--(\w+)=(.*)', arg)
+        m = re.match(r'^--(\w+)=(.*)$', arg)
         if m:
             opts[m.group(1)] = m.group(2)
             continue
