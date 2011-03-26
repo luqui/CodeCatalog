@@ -73,9 +73,9 @@ class APITest(TestCase):
         quicksort = self.postjson('/api/new/spec/', name='quicksort', summary='sorts quickly', spec='quicksort spec')
         spec_versionptr = quicksort['versionptr']
         
-        impl1_dict = { 'spec_versionptr': spec_versionptr, 'code': 'quicksort=sqrt', 'language': 'haskell' }
-        impl2_dict = { 'spec_versionptr': spec_versionptr, 'code': 'quicksort=sort', 'language': 'haskell' }
-        impl3_dict = { 'spec_versionptr': spec_versionptr, 'code': 'def quicksort(s): s.sort()', 'language': 'python' }
+        impl1_dict = { 'spec_versionptr': spec_versionptr, 'code': 'quicksort=sqrt\n', 'language': 'haskell' }
+        impl2_dict = { 'spec_versionptr': spec_versionptr, 'code': 'quicksort=sort\n', 'language': 'haskell' }
+        impl3_dict = { 'spec_versionptr': spec_versionptr, 'code': 'def quicksort(s): s.sort()\n', 'language': 'python' }
         dicts = [impl1_dict, impl2_dict, impl3_dict]
 
         impl1 = self.postjson('/api/new/snippet/', **impl1_dict)
@@ -85,6 +85,8 @@ class APITest(TestCase):
         impls = [impl1, impl2, impl3]
 
         rets = self.getjson('/api/specs/' + str(spec_versionptr) + '/snippets/')
+        pprint(dicts)
+        pprint(rets)
         self.assertTrue(forall(rets, lambda r: exists(dicts, lambda d: dict_subset(d,r))))
 
         activesnip = self.getjson('/api/snippets/' + str(versionptr) + '/active/')

@@ -214,6 +214,9 @@ def vote(request):
         versionptr: the versionptr to vote on
         value: -1, 0, or 1"""
 
+    # TODO Proper error handling anyone?
+    if not request.user.is_authenticated: return ""
+    
     # TODO race condition
     versionptr = VersionPtr.objects.get(id=request.POST['versionptr'])
     value = int(request.POST['value'])
