@@ -14,7 +14,7 @@
    #name { font-family: monospace }
    .hidden { display: none }
    .snippet { background: #eec }
-   .languagemark { background: #db9; font-weight: bold; float: right }
+   .languagemark { background: #db9; font-weight: bold }
    .depmark { background: #db9; float: left }
   </style>
 
@@ -159,6 +159,7 @@
 
         var infoarea = 
             vertical(
+                $('<span class="languagemark"></span>').text(snip.language),
                 horizontal(
                     button('-', function() { votedown_snip(snip.versionptr) }),
                     votesbox,

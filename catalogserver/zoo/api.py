@@ -9,14 +9,6 @@ from haystack.query import SearchQuerySet
 # Versions and versionptrs are separate, numeric namespaces. Versionptr 1
 # and version 1 are not related.
 
-def distinct_by(f, xs):
-    cur = None
-    for x in xs:
-        fx = f(x)
-        if cur != fx:
-            cur = fx
-            yield x
-
 def user_or_none(user):
     if user.is_anonymous():
         return None
@@ -76,14 +68,20 @@ def dump_snippet(snippet):
         'timestamp': snippet.version.timestamp.isoformat(),
     }
 
+# Begin CodeCatalog Snippet http://codecatalog.net/20/
 def traverse_cons_list(conslist):
     while conslist is not ():
         (x,xs) = conslist
         yield x
         conslist = xs
+# End CodeCatalog Snippet
 
+# Begin CodeCatalog Snippet http://codecatalog.net/25/
+import heapq
+# End CodeCatalog Snippet
+
+# Begin CodeCatalog Snippet http://codecatalog.net/30/
 def shortest_path(children, success, init):
-    import heapq
     seen = {}
     q = [(0, init, ())]
     if success(init):
@@ -97,6 +95,7 @@ def shortest_path(children, success, init):
             if success(child): return tuple(traverse_cons_list((edge,tail)))
             heapq.heappush(q, (weight+cweight,child, (edge,tail)))
     return None
+# End CodeCatalog Snippet
 
 
 def assemble(request, versionptr):
