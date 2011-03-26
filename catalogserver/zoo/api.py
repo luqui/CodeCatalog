@@ -1,7 +1,6 @@
 from zoo.models import *
 from datetime import datetime
 from haystack.query import SearchQuerySet
-from django.core.exceptions import ObjectDoesNotExist
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -163,15 +162,17 @@ def new_snippet(request):
 
     version = new_version(user=request.user, versionptr=versionptr)
     version.save()
+
+    code = request.POST['code'].strip() + "\n"
     
     snippet = Snippet(version=version, 
-                      code=request.POST['code'], 
+                      code=code, 
                       language=request.POST['language'],
                       spec_versionptr=spec_versionptr)
     snippet.save()
 
     deps = request.POST.get('dependencies')
-    if deps is not None:
+    if deps:
         for dep in deps.split(','):
             Dependency(snippet=snippet, target=VersionPtr.objects.get(id=int(dep))).save()
 

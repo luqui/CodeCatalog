@@ -1,4 +1,5 @@
 {% extends "zoo/frame.html" %}
+{% load json_dump %}
 
 {% block header %}
   {% include "static/jquery.html" %}
@@ -7,13 +8,14 @@
   <script type="text/javascript" src="/static/select_on_click.js"></script>
   <script type="text/javascript" src="/static/showdown.js"></script>
   <script type="text/javascript" src="/static/editable_markdown.js"></script>
+  <script type="text/javascript" src="/static/code_editor.js"></script>
 
   <style>
    #name { font-family: monospace }
    .hidden { display: none }
    .snippet { background: #eec }
-   .canon { background: #aea }
    .languagemark { background: #db9; font-weight: bold; float: right }
+   .depmark { background: #db9; float: left }
   </style>
 
 {% block scripting %}
@@ -34,12 +36,11 @@
         javascript: '//',
     };
 
-    var annotator = function (id) { 
-        var lang = $('#code_' + id).attr('language');
+    var annotator = function (snip) { 
         return function (text) {
-            return linecomment[lang] + " CodeCatalog Snippet http://codecatalog.net/" + id + "/\n" 
+            return linecomment[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.version + "/\n" 
                  + text
-                 + linecomment[lang] + " End CodeCatalog Snippet\n";
+                 + linecomment[snip.language] + " End CodeCatalog Snippet\n";
         };
     };
 
@@ -76,6 +77,101 @@
         });
     };
 
+    var elt = function(name, attrs) {
+        var r = $('<' + name + ' />');
+        if (attrs) {
+            for (var i in attrs) {
+                r.attr(i, attrs[i]);
+            }
+        }
+        for (var i = 2; i < arguments.length; ++i) {
+            r.append(arguments[i]);
+        }
+        return r;
+    };
+
+    var button = function(text, click) {
+        var r = elt('button');
+        r.text(text);
+        r.click(click);
+        return r;
+    };
+
+    var horizontal = function() {
+        var r = elt('table');
+        var row = elt('tr');
+        r.append(row);
+        for (var i in arguments) {
+            var cell = elt('td', {}, arguments[i]);
+            row.append(cell);
+        }
+        return r;
+    };
+
+    var vertical = function() {
+        var r = elt('table');
+        for (var i in arguments) {
+            var row = elt('tr', {}, elt('td', {}, arguments[i]));
+            r.append(row);
+        }
+        return r;
+    };
+
+    var dependencies_area = function(snip) {
+        if (snip.dependencies.length == 0) {
+            return $('');
+        }
+        
+        var b = button('Depends...', function() {
+            var table = elt('table');
+            snip.dependencies.forEach(function (dep) {
+                $.get('/api/specs/' + dep + '/active/', function (result) {
+                    table.append(
+                        elt('tr', {}, 
+                            elt('td', {},
+                                elt('a', { href: '/spec/' + result.versionptr + '/' })
+                                    .text(result.name)),
+                            elt('td', {}).text(result.summary)));
+                });
+            });
+            b.replaceWith(table);
+        });
+        return b;
+    };
+
+    var displaysnip = function(snip) {
+        var div = elt('div');
+
+        var textarea = elt('textarea', { rows: 30, cols: 72, readonly: 'readonly' });
+        textarea.val(snip.code);
+        textarea.attr('rows', linecount(snip.code));
+
+        select_on_click(textarea, annotator(snip));
+
+        var votesbox = elt('span');
+        votesbox.text(snip.votes);
+
+        var edit = function() {
+            div.replaceWith(code_editor(snip, function(newsnip) {
+                $.post('/api/new/snippet/', newsnip, reload);
+            }));
+        };
+
+        var infoarea = 
+            vertical(
+                horizontal(
+                    button('-', function() { votedown_snip(snip.versionptr) }),
+                    votesbox,
+                    button('+', function() { voteup_snip(snip.versionptr) })),
+                button("edit", edit),
+                dependencies_area(snip));
+
+        var table = horizontal(textarea, infoarea);
+
+        div.append(table);
+        return div;
+    };
+
     $(function() {
         var e = editable({ onedit: function() { savespec(); } });
         e.installEditButtons();
@@ -83,12 +179,11 @@
         makeMarkdownArea($('#spec'), 'spec', function(text) { 
             savespec();
         });
-        
-        $('textarea').each(function (i,e) {
+
+        $('.snippet').each(function (i,e) {
             e = $(e);
-            if (e.attr('id') == 'spec') return;
-            e.attr('rows', min(10, linecount(e.val())));
-            select_on_click(e, annotator(e.attr('snipid')));
+            var data = JSON.parse(e.find('.data').val());
+            e.replaceWith(displaysnip(data));
         });
     });
   </script>
@@ -107,25 +202,11 @@
 
 {% block impls %}
 {% for snip in snippets %}
-<table border="0">
- <tr>
-  <td>
-   <textarea class="snippet"
-             snipid="{{snip.version}}" 
-             language="{{snip.language}}" 
-             name="code_{{snip.version}}" id="code_{{snip.version}}" 
-             cols="72" readonly="readonly">{{snip.code}}</textarea><br/>
-   <div class="languagemark">{{snip.language}}</div>
-  </td>
-  <td>
-   <table border="0">
-    {% if user.is_authenticated %}
-    <tr><td><button onclick="votedown_snip({{snip.versionptr}})">-</button> {{snip.votes}} <button onclick="voteup_snip({{snip.versionptr}})">+</button></td></tr>
-    {% endif %}
-   </table>
-  </td>
- </tr>
-</table>
+<div class="snippet">
+ <textarea class="code" readonly="readonly">{{snip.code}}</textarea>
+ <textarea class="data hidden" readonly="readonly">{{snip|json}}</textarea>
+</div>
+
 {% endfor %}
 {% endblock impls %}
 {% endblock content %}
