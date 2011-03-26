@@ -22,9 +22,9 @@
 
   <script type="text/javascript">
 
-    // CodeCatalog Snippet http://codecatalog.net/21/
+// Begin CodeCatalog Snippet http://codecatalog.net/42/
     var reload = function() { document.location.reload(); };
-    // End CodeCatalog Snippet
+// End CodeCatalog Snippet
 
     var post = function(url, dict, callback) {
         dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
@@ -77,6 +77,7 @@
         });
     };
 
+// Begin CodeCatalog Snippet http://codecatalog.net/36/
     var elt = function(name, attrs) {
         var r = $('<' + name + ' />');
         if (attrs) {
@@ -89,6 +90,7 @@
         }
         return r;
     };
+// End CodeCatalog Snippet
 
     var button = function(text, click) {
         var r = elt('button');

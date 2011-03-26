@@ -4,8 +4,10 @@ import httplib
 import urllib
 import json
 import sys
-import re
 import webbrowser
+# Begin CodeCatalog Snippet http://codecatalog.net/52/
+import re
+# End CodeCatalog Snippet
 
 host = 'codecatalog.net'
 
@@ -34,12 +36,14 @@ def get_json(url, params={}):
     response.close()
     return json.loads(jsonstr)
 
-def tag_snippet(id, code):
-    return "# Begin CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
+def tag_snippet(id, code, indent=""):
+    return indent + "# Begin CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
            code + \
-           "# End CodeCatalog Snippet\n"
+           indent + "# End CodeCatalog Snippet\n"
 
 def check_and_update(ver, newcode):
+    (newcode_norm, indent) = normalize_code(newcode)
+
     snip = get_json('/api/snippet/' + str(ver) + '/')
     latest = get_json('/api/snippets/' + str(snip['versionptr']) + '/active/')
     
@@ -51,21 +55,21 @@ def check_and_update(ver, newcode):
             sys.stderr.write("*** Uploading changes to " + str(ver) + "\n")
             newsnip = post_json('/api/new/snippet/', {
                 'spec_versionptr': snip['spec_versionptr'],
-                'code': newcode,
+                'code': newcode_norm,
                 'language': snip['language'],
                 'versionptr': snip['versionptr'],
             })
-            return tag_snippet(newsnip['version'], newcode)
+            return tag_snippet(newsnip['version'], newcode, indent=indent)
         else:
             # Completely unchanged.  Don't even move your lips.
-            return tag_snippet(ver, newcode)
+            return tag_snippet(ver, newcode, indent=indent)
     else:
         if not changes or re.match(r'^\s*$', newcode):
             sys.stderr.write("*** Downloading changes to " + str(ver) + "\n")
-            return tag_snippet(latest['version'], latest['code'])
+            return tag_snippet(latest['version'], indent_by(indent,latest['code']), indent=indent)
         else:
             sys.stderr.write("*** Snippet " + str(ver) + " is not up-to-date but has changes.  Leaving be.\n")
-            return tag_snippet(ver, newcode)
+            return tag_snippet(ver, newcode, indent=indent)
         
 
 def cmd_sync(*args, **opts):
@@ -84,29 +88,64 @@ def cmd_sync(*args, **opts):
             snipid = None
         else:
             code += line
-        
+
+# Begin CodeCatalog Snippet http://codecatalog.net/47/
+def maximum_by(measure, xs):
+    maxx = xs[0]
+    maxm = measure(maxx)
+    for x in xs[1:]:
+        xm = measure(x)
+        if xm > maxm:
+            maxx = x
+            maxm = xm
+    return maxx
+# End CodeCatalog Snippet
+
+# Begin CodeCatalog Snippet http://codecatalog.net/61/
+def initial_whitespace(line):
+    return re.search(r'^\s*', line).group(0)
+# End CodeCatalog Snippet
+
+# Begin CodeCatalog Snippet http://codecatalog.net/69/
+def strip_indent(text):
+    indent = re.compile(r'^\s*')
+    lines = text.splitlines()
+    initial = min(*map(lambda l: len(initial_whitespace(l)), lines))
+    return ('\n'.join(map(lambda l: l[initial:], lines)), " " * initial)
+# End CodeCatalog Snippet
+
+# Begin CodeCatalog Snippet http://codecatalog.net/71/
+def indent_by(indent, text):
+    return '\n'.join(map(lambda s: indent + s, text.splitlines())) + '\n'
+# End CodeCatalog Snippet
+
+def normalize_code(code):
+    (s,indent) = strip_indent(code)
+    return (s.strip() + "\n", indent)
 
 def cmd_post(*args, **opts):
     name = opts.get('name') or 'unnamed'
     summary = opts.get('summary') or ''
     language = opts.get('language') or 'python'
     quiet = opts.get('quiet')
-    code = sys.stdin.read().strip() + "\n"
+    code = sys.stdin.read()
+
+    (normalized, indent) = normalize_code(code)
     
-    spec = post_json('/api/new/spec/', { 
+    spec = post_json('/api/new/spec/', {
         'name': name, 
         'summary': summary,
     })
     snip = post_json('/api/new/snippet/', { 
         'spec_versionptr': spec['versionptr'],
-        'code': code,
+        'code': normalized,
         'language': language,
     })
 
     if not quiet:
         webbrowser.open_new_tab('http://' + host + '/spec/' + str(spec['versionptr']) + '/')
 
-    sys.stdout.write(tag_snippet(snip['version'], code))
+    sys.stdout.write(tag_snippet(snip['version'], code, indent=indent))
 
 def cmd_get(*args, **opts):
     ver = args[0]
