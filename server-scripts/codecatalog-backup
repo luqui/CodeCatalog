@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /home/ubuntu/backups/
+DATE=`date +"%Y-%m-%d"`
+sudo -u postgres pg_dump codecatalog | gzip > $DATE.sql.gz
+sudo -u ubuntu -i s3cmd put backups/$DATE.sql.gz s3://codecatalog-backup/

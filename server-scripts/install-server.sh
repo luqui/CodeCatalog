@@ -36,5 +36,13 @@ cd catalogserver
 cp settings/dev_settings.py.livedb dev_settings.py
 ./manage.py syncdb
 ./manage.py migrate
-
+sudo chown :www-data .
+sudo chmod g+w .
+sudo -u www-data ./manage.py rebuild_index
 sudo /etc/init.d/apache2 reload
+
+cd ..
+sudo cp server-scripts/codecatalog-backup /etc/cron.daily/
+sudo cp server-scripts/codecatalog-reindex /etc/cron.hourly/
+
+echo "CodeCatalog Configured"
