@@ -1,32 +1,45 @@
-{% extends "zoo/frame.html" %}
+{% extends "zoo/search.html" %}
+
+{% block header %}
+{{block.super}}
+<style>
+div.activity {
+    padding-top: 3cm;
+}
+.activity table {
+    border: 1px solid black;
+    width: 100%;
+}
+.activity thead {
+    font-weight: bold; 
+}
+</style>
+{% endblock %}
 
 {% block content %}
 
-<form action="/search/" method="get">
- <b>Search</b>
- <input type="text" name="q" />
- <input type="submit" />
-</form>
+{{block.super}}
 
+<div class="activity">
 <h1>Recent Activity</h1>
-
-<table>
+<table class="activity">
  <thead>
   <tr>
    <td>Name</td>
    <td>Summary</td>
-   <td>Date</td>
+   <td>User</td>
   </tr>
  </thead>
  <tbody>
 {% for spec in specs %}
   <tr>
-   <td><a href="/spec/{{spec.version.versionptr.id}}/">{{spec.name}}</a></td>
+   <td><tt><a href="/spec/{{spec.version.versionptr.id}}/">{{spec.name}}</a></tt></td>
    <td>{{spec.summary}}</td>
-   <td>{{spec.version.timestamp}}</td>
+   <td>{{spec.version.user|default_if_none:"Anonymous"}}</td>
   </tr>
 {% endfor %}
  </tbody>
 </table>
+</div>
 
 {% endblock content %}

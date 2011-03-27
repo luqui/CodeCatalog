@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail
+import django.views.static
 from zoo import views
 from zoo import api
 
@@ -38,7 +39,8 @@ urlpatterns = patterns('',
     (r'^(?P<pk>\d+)/$', views.snippet),
     (r'^search/$', include('haystack.urls')),
     (r'^new/$', views.new),
-    (r'^static/(?P<path>[\w+\./-]+)$', views.static),
+    (r'^static/(?P<path>[\w+\./-]+)$', django.views.static.serve, 
+            { 'document_root': 'static'} ),
     (r'^openid/', include('django_openid_auth.urls')),
     (r'^logout/$', 'django.contrib.auth.views.logout'),
 )

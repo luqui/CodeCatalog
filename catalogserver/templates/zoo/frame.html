@@ -5,27 +5,38 @@
   {% block header %}
   {% endblock %}
 
+  <style>
+   .site { width: 900px; margin: auto }
+   .centered { width: 480px; margin: auto }
+  </style>
+
  </head>
  <body>
-  <div class="userpanel">
-   <table width="100%">
-    <tr>
-     <td>
-      {% if user.is_authenticated %}
-       <b>{{user.username}}</b>
-      {% else %}
-       <a href="/openid/login/">login</a>
-      {% endif %}
-     </td> 
-     <td style="text-align: right">
-      <a href="/new/">New</a>
-      <a href="/search/">Search</a>
-    </tr>
-   </table>
+  <div class="site">
+   <div class="userpanel">
+    <table width="100%">
+     <tr>
+      <td>
+       {% if user.is_authenticated %}
+        <b>{{user.username}}</b>
+       {% else %}
+        <a href="/openid/login/">login</a>
+       {% endif %}
+      </td> 
+      <td style="text-align: right">
+       <a href="/new/">New</a>
+       <a href="/search/">Search</a>
+     </tr>
+    </table>
+   </div>
+   <div class="centered">
+    <img src="/static/banner.png" />
+   </div>
+   {% block content %}
+   {% endblock %}
   </div>
 
-  {% block content %}
-  {% endblock %}
+
  </body>
 </html>
 

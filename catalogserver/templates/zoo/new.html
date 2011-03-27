@@ -1,7 +1,8 @@
 {% extends "zoo/frame.html" %}
 
 {% block header %}
-{% include "static/jquery.html" %}
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="/static/code_editor.js"></script>
 <script>
 $(function() {
@@ -26,6 +27,8 @@ $(function() {
 {% endblock %}
 
 {% block content %}
+ <div class="newsnippet">
   <h1>New Snippet</h1>
   <div name="editor" id="editor"></div>
+ </div>
 {% endblock %}
