@@ -42,5 +42,5 @@ urlpatterns = patterns('',
     (r'^static/(?P<path>[\w+\./-]+)$', django.views.static.serve, 
             { 'document_root': 'static'} ),
     (r'^openid/', include('django_openid_auth.urls')),
-    (r'^logout/$', 'django.contrib.auth.views.logout'),
+    (r'^logout/$', 'django.contrib.auth.views.logout', { 'next_page': '/' }),
 )

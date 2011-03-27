@@ -18,7 +18,7 @@
      <tr>
       <td>
        {% if user.is_authenticated %}
-        <b>{{user.username}}</b>
+        <b>{{user.username}}</b> (<a href="/logout/">logout</a>)
        {% else %}
         <a href="/openid/login/">login</a>
        {% endif %}
@@ -30,7 +30,7 @@
     </table>
    </div>
    <div class="centered">
-    <img src="/static/banner.png" />
+    <a href="/"><img src="/static/banner.png" /></a>
    </div>
    {% block content %}
    {% endblock %}
