@@ -38,7 +38,7 @@ cp settings/dev_settings.py.livedb dev_settings.py
 ./manage.py migrate
 sudo chown :www-data .
 sudo chmod g+w .
-sudo -u www-data ./manage.py rebuild_index
+sudo -u www-data ./manage.py rebuild_index --noinput
 sudo /etc/init.d/apache2 reload
 
 cd ..
