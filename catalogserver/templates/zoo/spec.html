@@ -14,7 +14,9 @@
   <style>
    #name { font-family: monospace }
    .hidden { display: none }
-   .snippet { background: #eec }
+   .snippet { background: #ddb; margin-top: 5mm }
+   .snippet > table { width: 100% }
+   .snippet textarea { background: #eee; width: 100% }
    .languagemark { background: #db9; font-weight: bold }
    .depmark { background: #db9; float: left }
   </style>
@@ -155,7 +157,7 @@
     };
 
     var displaysnip = function(snip) {
-        var div = elt('div');
+        var div = elt('div', { class: 'snippet' });
 
         var textarea = elt('textarea', { rows: 30, cols: 72, readonly: 'readonly' });
         textarea.val(snip.code);
