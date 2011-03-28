@@ -68,6 +68,16 @@ def dump_snippet(snippet):
         'timestamp': snippet.version.timestamp.isoformat(),
     }
 
+def dump_comment(comment):
+    return {
+        'id': comment.id,
+        'user': comment.user.username,
+        'versionptr': comment.versionptr.id,
+        'text': comment.text,
+        'timestamp': comment.timestamp.isoformat(),
+    }
+        
+
 # Begin CodeCatalog Snippet http://codecatalog.net/20/
 def traverse_cons_list(conslist):
     while conslist is not ():
@@ -226,7 +236,7 @@ def vote(request):
     pvotes.delete()
     
     if value != 0:
-        vote = Vote(user=request.user, versionptr=versionptr, value=value, date=datetime.now())
+        vote = Vote(user=request.user, versionptr=versionptr, value=value, timestamp=datetime.now())
         versionptr.votes += value
         vote.save()
     versionptr.save()
@@ -240,3 +250,34 @@ def search(request):
     results = SearchQuerySet().auto_query(request.GET['q']).filter(active='true')[0:10]
     return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
                         for r in results ]
+
+def comments(request, versionptr):
+    """GET /api/specs/<ptr>/comments/
+       GET /api/snippets/<ptr>/comments/
+
+    Gets the comments associated with a spec or snippet.
+    """
+
+    comments = Comment.objects.filter(versionptr=versionptr).order_by('-timestamp')
+    return map(dump_comment, comments)
+
+def new_comment(request):
+    """POST /api/new/comment/
+
+        versionptr: the (spec or snippet) versionptr to comment on
+        text: the content of the comment
+    """
+    
+    # TODO better error handling
+    if not request.user.is_authenticated: return ""
+
+    versionptr = VersionPtr.objects.get(id=request.POST['versionptr'])
+    text = request.POST['text']
+    
+    comment = Comment(
+                user=request.user, 
+                versionptr=VersionPtr.objects.get(id=request.POST['versionptr']),
+                text=request.POST['text'],
+                timestamp=datetime.now())
+    comment.save();
+    return { 'id': comment.id }

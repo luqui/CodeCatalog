@@ -19,6 +19,9 @@
    .snippet textarea { background: #eee; width: 100% }
    .languagemark { background: #db9; font-weight: bold }
    .depmark { background: #db9; float: left }
+   #spec_comments { margin-left: 1in }
+   #spec_comments p { color: #666 }
+   #spec_comments textarea { width: 100% }
   </style>
 
 {% block scripting %}
@@ -190,6 +193,39 @@
         return div;
     };
 
+    var render_comment = function(comment) {
+        return elt('div', {},
+            elt('p').text(comment.text).append(
+                elt('b', {}, elt('span').text(" -- " + comment.user))));
+    };
+
+    var comments_box = function(versionptr) {
+        var div = elt('div');
+        var newcomment = elt('a', { href: '#' }).text("Comment");
+        newcomment.click(function() {
+            var newdiv = elt('div');
+            var textarea = elt('textarea');
+            var btn = button('OK', function() {
+                var comment = { versionptr: versionptr, text: textarea.val(), user: '{{user.username}}' };
+                post('/api/new/comment/', comment);
+                
+                newcomment.before(render_comment(comment));
+                newdiv.remove();
+            });
+            newdiv.append(textarea, btn);
+            newcomment.before(newdiv);
+        });
+        div.append(newcomment);
+        
+        $.get('/api/specs/' + versionptr + '/comments/', function(comments) {
+            for (var i in comments) {
+                console.log(comments[i])
+                div.prepend(render_comment(comments[i]));
+            }
+        });
+        return div;
+    };
+
     $(function() {
         var e = editable({ onedit: function() { savespec(); } });
         e.installEditButtons();
@@ -197,6 +233,8 @@
         makeMarkdownArea($('#spec'), 'spec', function(text) { 
             savespec();
         });
+
+        $('#spec_comments').append(comments_box('{{spec.versionptr}}'));
 
         $('.snippet').each(function (i,e) {
             e = $(e);
@@ -216,6 +254,7 @@
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
 <textarea id="spec" name="spec" rows="15" cols="72">{{spec.spec}}</textarea>
+<div id="spec_comments"></div>
 {% endblock spec %}
 
 {% block impls %}
