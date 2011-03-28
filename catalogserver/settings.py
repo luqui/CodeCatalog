@@ -52,7 +52,7 @@ ADMIN_MEDIA_PREFIX = '/media/'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'z4w^+s)6v!e62sp49=q$#g7bq7)ncgk@%-93#k*4+l@!t9^%fx'
 
-# List of callables that know how to import templates from various sources.
+
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
@@ -72,6 +72,8 @@ ROOT_URLCONF = 'catalogserver.urls'
 TEMPLATE_DIRS = (
     'templates',
 )
+
+SOUTH_AUTO_FREEZE_APP = True
 
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'whoosh'
