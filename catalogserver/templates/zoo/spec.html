@@ -19,14 +19,16 @@
    .snippet textarea { background: #eee; width: 100% }
    .languagemark { background: #db9; font-weight: bold }
    .depmark { background: #db9; float: left }
-   #spec_comments { margin-left: 1in }
-   #spec_comments p { color: #666 }
-   #spec_comments textarea { width: 100% }
+   .comments_box { margin-left: 1in }
+   .comments_box p { color: #666 }
+   .comments_box textarea { width: 100% }
   </style>
 
 {% block scripting %}
 
   <script type="text/javascript">
+
+    var logged_in = '{{user.is_authenticated}}' == 'True';
 
     // CodeCatalog Snippet http://codecatalog.net/45/
     var reload = function() { document.location.reload(); };
@@ -200,22 +202,26 @@
     };
 
     var comments_box = function(versionptr) {
-        var div = elt('div');
-        var newcomment = elt('a', { href: '#' }).text("Comment");
-        newcomment.click(function() {
-            var newdiv = elt('div');
-            var textarea = elt('textarea');
-            var btn = button('OK', function() {
-                var comment = { versionptr: versionptr, text: textarea.val(), user: '{{user.username}}' };
-                post('/api/new/comment/', comment);
-                
-                newcomment.before(render_comment(comment));
-                newdiv.remove();
+        var div = elt('div', { 'class': 'comments_box' });
+
+        if (logged_in) {
+            var newcomment = elt('a', { href: '#' }).text("Comment");
+            newcomment.click(function() {
+                var newdiv = elt('div');
+                var textarea = elt('textarea');
+                var btn = button('OK', function() {
+                    var comment = { versionptr: versionptr, text: textarea.val(), user: '{{user.username}}' };
+                    post('/api/new/comment/', comment);
+                    
+                    newcomment.before(render_comment(comment));
+                    newdiv.remove();
+                });
+                newdiv.append(textarea, btn);
+                newcomment.before(newdiv);
+                return false;
             });
-            newdiv.append(textarea, btn);
-            newcomment.before(newdiv);
-        });
-        div.append(newcomment);
+            div.append(newcomment);
+        }
         
         $.get('/api/specs/' + versionptr + '/comments/', function(comments) {
             for (var i in comments) {
@@ -234,12 +240,14 @@
             savespec();
         });
 
-        $('#spec_comments').append(comments_box('{{spec.versionptr}}'));
+        $('#spec_comments').append(comments_box({{spec.versionptr}}));
 
         $('.snippet').each(function (i,e) {
             e = $(e);
             var data = JSON.parse(e.find('.data').val());
-            e.replaceWith(displaysnip(data));
+            var snip = displaysnip(data);
+            e.replaceWith(snip);
+            snip.after(comments_box(data.versionptr));
         });
     });
   </script>
