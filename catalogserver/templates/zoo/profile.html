@@ -1,0 +1,30 @@
+{% extends "zoo/frame.html" %}
+
+{% block content %}
+<h1>User: {{user.username}}</h1>
+
+<form action="/profile/" method="POST">
+ <input name="id" type="hidden" value="{{user.id}}" />
+ <table>
+  <tr>
+   <td>Username</td>
+   <td><input name="username" type="text" value="{{user.username}}" /></td>
+  </tr>
+  <tr>
+   <td>First Name</td>
+   <td><input name="first_name" type="text" value="{{user.first_name}}" /></td>
+  </tr>
+  <tr>
+   <td>Last Name</td>
+   <td><input name="last_name" type="text" value="{{user.last_name}}" /></td>
+  </tr>
+  <tr>
+   <td>Email</td>
+   <td><input name="email" type="text" value="{{user.email}}" /></td>
+  </tr>
+  <tr>
+   <td colspan="2"><input type="submit" /></td>
+  </tr>
+ </table>
+</form>
+{% endblock %}

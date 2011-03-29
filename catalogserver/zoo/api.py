@@ -305,3 +305,12 @@ def search(request):
     results = SearchQuerySet().auto_query(request.GET['q']).filter(active='true')[0:10]
     return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
                         for r in results ]
+
+def user_update(request):
+    user = User.objects.get(id=request.POST['id'])
+    user.username = request.POST['username']
+    user.first_name = request.POST['first_name']
+    user.last_name = request.POST['last_name']
+    user.email = request.POST['email']
+    user.save()
+    return ""

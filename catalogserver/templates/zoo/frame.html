@@ -18,7 +18,7 @@
      <tr>
       <td>
        {% if user.is_authenticated %}
-        <b>{{user.username}}</b> (<a href="/logout/">logout</a>)
+        <b><a href="/profile/">{{user.username}}</a></b> (<a href="/logout/">logout</a>)
        {% else %}
         <a href="/openid/login/">login</a>
        {% endif %}
