@@ -227,7 +227,7 @@ def new_spec(request):
     versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
 
     # TODO leave inactive if user is untrusted
-    version = new_version(request.user, versionptr, REQUEST.post.get('comment') or "")
+    version = new_version(request.user, versionptr, request.POST.get('comment') or "")
     version.save()
 
     spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
