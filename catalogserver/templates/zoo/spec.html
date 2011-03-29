@@ -215,11 +215,13 @@
             for (var i in bugs) {
                 div.append(render_bug_version(bugs[i]));
             }
-            var link = button('Update', function() {
-                var last = bugs[bugs.length-1];
-                link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
-            });
-            div.append(link);
+            if (logged_in) {
+                var link = button('Update', function() {
+                    var last = bugs[bugs.length-1];
+                    link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
+                });
+                div.append(link);
+            }
             div.append(button('Hide', function() { div.replaceWith(render_bug(bug)) }));
         });
         return div;
