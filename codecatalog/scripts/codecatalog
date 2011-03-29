@@ -9,7 +9,7 @@ import webbrowser
 import re
 # End CodeCatalog Snippet
 
-host = 'codecatalog.net'
+host = 'www.codecatalog.net'
 
 def post_json(url, params):
     params_enc = urllib.urlencode(params)
