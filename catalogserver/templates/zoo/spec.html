@@ -21,10 +21,10 @@
     .languagemark { background: #db9; font-weight: bold }
     .depmark { background: #db9; float: left }
     .bugs_box { margin-left: 1in }
-    .bugs_box p { color: #666 }
+    .bug_summary { color: #666 }
     .bugs_box table,input,textarea { width: 100% }
     .bugs_box textarea { height: 1in }
-  
+    .bug_details { border: 1px solid black; background: #fd9 }
   </style>
 
 {% block scripting %}
@@ -197,9 +197,86 @@
     };
 
     var render_bug = function(bug) {
-        return elt('div', {},
+        var details = elt('a', {href:'#'}).text("Details...");
+        var ret = elt('div', {},
             elt('p').text(bug.title).append(
-                elt('b', {}, elt('span').text(" -- " + bug.status))));
+                elt('b').text(" -- " + bug.status + ". "),
+                details)).addClass("bug_summary");
+        details.click(function() {
+            ret.replaceWith(render_bug_details(bug));
+            return false;
+        });
+        return ret; 
+    };
+
+    var render_bug_details = function(bug) {
+        var div = elt('div').addClass("bug_details");
+        $.get('/api/bugs/' + bug.versionptr + '/all/', function(bugs) {
+            for (var i in bugs) {
+                div.append(render_bug_version(bugs[i]));
+            }
+            if (logged_in) {
+                var link = button('Update', function() {
+                    var last = bugs[bugs.length-1];
+                    link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
+                });
+                div.append(link);
+            }
+            div.append(button('Hide', function() { div.replaceWith(render_bug(bug)) }));
+        });
+        return div;
+    };
+
+    var render_bug_version = function(bug) {
+        return elt('div', {}, 
+            horizontal(elt('b').text(bug.title), elt('span').text(bug.user), elt('span').text(bug.status)),
+            elt('p').text(bug.comment));
+    };
+
+    // CodeCatalog Snippet http://codecatalog.net/149/
+    var label_table = function(dict) {
+        var ret = elt('table');
+        for (var i in dict) {
+            ret.append(elt('tr', {}, 
+                           elt('td', {}).text(i),
+                           elt('td', {}, dict[i])));
+        }
+        return ret;
+    };
+    // End CodeCatalog Snippet
+
+    var simple_select = function(options) {
+        var ret = elt('select', {});
+        for (var i in options) {
+            ret.append(elt('option', {}).text(options[i]).val(options[i]));
+        }
+        return ret;
+    };
+
+    var bug_edit_box = function(target, bug, cont) {
+        var newdiv = elt('div');
+        var input = elt('input', { type: 'text' }).val(bug.title);
+        var textarea = elt('textarea');
+        var select = simple_select([ 'Open', 'Resolved', 'Closed' ]);
+        select.val(bug.status || 'Open');
+        
+        var btn = button('OK', function() {
+            var newbug = { target_versionptr: target, title: input.val(), comment: textarea.val(), status: select.val(), user: '{{user.username}}' };
+            if (bug.versionptr) { newbug['versionptr'] = bug.versionptr; }
+            
+            post('/api/new/bug/', newbug, function(r) {
+                newbug.version = r.version;
+                newbug.versionptr = r.versionptr;
+            });
+            
+            newdiv.replaceWith(cont(newbug));
+        });
+        newdiv.append(label_table({
+                Title: input,
+                Status: select,
+                Details: textarea}),
+            btn);
+        return newdiv;
     };
 
     var bugs_box = function(versionptr) {
@@ -208,25 +285,7 @@
         if (logged_in) {
             var newbug = elt('a', { href: '#' }).text("Report Bug");
             newbug.click(function() {
-                var newdiv = elt('div');
-                var input = elt('input', { type:'text' });
-                var textarea = elt('textarea');
-                var btn = button('OK', function() {
-                    var bug = { target_versionptr: versionptr, title: input.val(), comment: textarea.val(), status: 'Open', user: '{{user.username}}' };
-                    post('/api/new/bug/', bug);
-                    
-                    newbug.before(render_bug(bug));
-                    newdiv.remove();
-                });
-                newdiv.append(elt('table', {},
-                        elt('tr', {},
-                            elt('td', {}, elt('b', {}).text("Title")),
-                            elt('td', {}, input)),
-                        elt('tr', {},
-                            elt('td', {}, elt('b', {}).text("Details")),
-                            elt('td', {}, textarea))),
-                    btn);
-                newbug.before(newdiv);
+                newbug.before(bug_edit_box(versionptr, {}, render_bug));
                 return false;
             });
             div.append(newbug);
