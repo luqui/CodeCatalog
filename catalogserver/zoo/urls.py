@@ -4,7 +4,6 @@ import django.views.static
 from zoo import views
 from zoo import api
 
-# CodeCatalog Snippet http://codecatalog.net/25/
 def jsonwrap(f):
     from django.http import HttpResponse
     import json
@@ -13,7 +12,6 @@ def jsonwrap(f):
         datastructure = f(*args, **kwargs)
         return HttpResponse(content=json.dumps(datastructure), mimetype='application/json')
     return cb
-# End CodeCatalog Snippet
 
 apipatterns = patterns('',
     (r'^specs/(?P<versionptr>\d+)/active/$', jsonwrap(api.specs_active)),
