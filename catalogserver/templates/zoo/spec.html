@@ -215,7 +215,7 @@
             for (var i in bugs) {
                 div.append(render_bug_version(bugs[i]));
             }
-            var link = button('Edit', function() {
+            var link = button('Update', function() {
                 var last = bugs[bugs.length-1];
                 link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
             });
@@ -254,7 +254,7 @@
     var bug_edit_box = function(target, bug, cont) {
         var newdiv = elt('div');
         var input = elt('input', { type: 'text' }).val(bug.title);
-        var textarea = elt('textarea').val(bug.comment);
+        var textarea = elt('textarea');
         var select = simple_select([ 'Open', 'Resolved', 'Closed' ]);
         select.val(bug.status || 'Open');
         
