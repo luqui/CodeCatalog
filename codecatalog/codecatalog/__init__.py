@@ -258,5 +258,3 @@ def update_project(code_directory, language="python"):
     import os.path
     cc = CodeCatalogClient()
     os.path.walk(code_directory, _scan_directory, (cc, language))
-    
-update_project("C:\Max\Development\Wizards")
