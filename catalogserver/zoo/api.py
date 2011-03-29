@@ -174,7 +174,7 @@ def bugs(request, versionptr):
 
 def bugs_all(request, versionptr):
     """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
-    return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr))
+    return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr).order_by('version__timestamp'))
 
 def new_snippet(request):
     """POST /api/new/snippet/ : Creates a new snippet.
