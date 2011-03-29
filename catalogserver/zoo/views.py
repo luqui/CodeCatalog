@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
-from zoo.models import Spec, Snippet, Vote
+from zoo.models import *
 from django.contrib.auth.decorators import login_required
 from zoo import api
 
@@ -36,3 +36,10 @@ def new(request):
 def home(request):
     latest = Spec.objects.filter(version__active=True).order_by('-version__timestamp')
     return render(request, 'zoo/home.html', {'specs': latest[0:10]})
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        api.user_update(request)
+    request.user = User.objects.get(id=request.user.id)
+    return render(request, 'zoo/profile.html')
