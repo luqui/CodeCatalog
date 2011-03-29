@@ -15,12 +15,13 @@ def user_or_none(user):
     else:
         return user
 
-def new_version(user, versionptr):
+def new_version(user, versionptr, comment=""):
     return Version(
         timestamp = datetime.now(),
         user = user_or_none(user),
         approved = True,
-        versionptr = versionptr)
+        versionptr = versionptr,
+        comment = comment)
 
 def get_or_new_versionptr(versionptr_id):
     if versionptr_id is None:
@@ -51,6 +52,7 @@ def dump_spec(spec):
         'spec': spec.spec,
         'votes': spec.version.versionptr.votes,
         'timestamp': spec.version.timestamp.isoformat(),
+        'comment': spec.version.comment,
     }
 
 def dump_snippet(snippet):
@@ -66,15 +68,20 @@ def dump_snippet(snippet):
         'code': snippet.code,
         'votes': snippet.version.versionptr.votes,
         'timestamp': snippet.version.timestamp.isoformat(),
+        'comment': snippet.version.comment,
     }
 
-def dump_comment(comment):
+def dump_bug(bug):
     return {
-        'id': comment.id,
-        'user': comment.user.username,
-        'versionptr': comment.versionptr.id,
-        'text': comment.text,
-        'timestamp': comment.timestamp.isoformat(),
+        'versionptr': bug.version.versionptr.id,
+        'version': bug.version.id,
+        'active': bug.version.active,
+        'target_versionptr': bug.target_versionptr.id,
+        'title': bug.title,
+        'status': BugReport.ID_TO_STATUS[bug.status],
+        'timestamp': bug.version.timestamp.isoformat(),
+        'comment': bug.version.comment,
+        'user': bug.version.user.username,
     }
         
 
@@ -155,6 +162,20 @@ def snippet(request, version):
     """GET /api/snippet/<ver>/ : Gets the snippet at version <ver>."""
     return dump_snippet(Snippet.objects.get(version=version))
 
+def bugs(request, versionptr):
+    """GET /api/specs/<ptr>/bugs/active/
+       GET /api/snippets/<ptr>/bugs/active/
+
+    Gets all the active bugs on a snippet or spec.
+    """
+
+    bugs = BugReport.objects.filter(target_versionptr=versionptr, version__active=True)
+    return map(dump_bug, bugs)
+
+def bugs_all(request, versionptr):
+    """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
+    return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr))
+
 def new_snippet(request):
     """POST /api/new/snippet/ : Creates a new snippet.
 
@@ -164,12 +185,13 @@ def new_snippet(request):
         code : The code in the snippet
         language : The language the snippet is wirtten in
         dependencies : (optional) A comma-separated list of spec versionptrs the snippet depends on
+        comment: (optional) Description of this change
     """
     
     spec_versionptr = VersionPtr.objects.get(id=int(request.POST['spec_versionptr']))
     versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
 
-    version = new_version(user=request.user, versionptr=versionptr)
+    version = new_version(request.user, versionptr, request.POST.get('comment') or "")
     version.save()
 
     code = request.POST['code'].strip() + "\n"
@@ -200,15 +222,48 @@ def new_spec(request):
         name: (optional) Name of this spec ("unnamed" if not given)
         summary: (optional) Summary of this spec ("" if not given)
         spec: (optinal) Description of this spec ("" if not given)
+        comment: (optional) Description of this change
     """
     versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
 
     # TODO leave inactive if user is untrusted
-    version = new_version(request.user, versionptr)
+    version = new_version(request.user, versionptr, REQUEST.post.get('comment') or "")
     version.save()
 
     spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
     spec.save()
+
+    update_active(versionptr)
+
+    return {
+        'versionptr': versionptr.id,
+        'version': version.id,
+    }
+
+def new_bug(request):
+    """POST /api/new/bug/ : Creates a new bug report (or modifies an exisitng one)
+
+        target_versionptr : what spec/snippet versionptr to associate this report with
+        versionptr : (optional) what bug versionptr to put this bug in sequence with.
+                     Allocates new versionptr if not given.
+        title : The title of the bug
+        status : "Open", "Resolved" or "Closed"
+        comment: (optional) Description of this change or comments on the bug
+    """
+    
+    target_versionptr = VersionPtr.objects.get(id=int(request.POST['target_versionptr']))
+    versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
+
+    status = BugReport.STATUS_TO_ID[request.POST['status']]
+
+    version = new_version(request.user, versionptr, request.POST.get('comment') or "")
+    version.save()
+
+    bug = BugReport(version=version, 
+                    title=request.POST['title'], 
+                    target_versionptr=target_versionptr,
+                    status=status)
+    bug.save()
 
     update_active(versionptr)
 
@@ -250,34 +305,3 @@ def search(request):
     results = SearchQuerySet().auto_query(request.GET['q']).filter(active='true')[0:10]
     return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
                         for r in results ]
-
-def comments(request, versionptr):
-    """GET /api/specs/<ptr>/comments/
-       GET /api/snippets/<ptr>/comments/
-
-    Gets the comments associated with a spec or snippet.
-    """
-
-    comments = Comment.objects.filter(versionptr=versionptr).order_by('-timestamp')
-    return map(dump_comment, comments)
-
-def new_comment(request):
-    """POST /api/new/comment/
-
-        versionptr: the (spec or snippet) versionptr to comment on
-        text: the content of the comment
-    """
-    
-    # TODO better error handling
-    if not request.user.is_authenticated: return ""
-
-    versionptr = VersionPtr.objects.get(id=request.POST['versionptr'])
-    text = request.POST['text']
-    
-    comment = Comment(
-                user=request.user, 
-                versionptr=VersionPtr.objects.get(id=request.POST['versionptr']),
-                text=request.POST['text'],
-                timestamp=datetime.now())
-    comment.save();
-    return { 'id': comment.id }

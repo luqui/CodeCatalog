@@ -10,6 +10,7 @@ class Version(models.Model):
     approved   = models.BooleanField()
     active     = models.BooleanField()    # cache field that always marks the latest approved version
     versionptr = models.ForeignKey(VersionPtr)
+    comment    = models.TextField()
 
 class Spec(models.Model):
     version = models.OneToOneField(Version, primary_key=True)
@@ -33,8 +34,28 @@ class Vote(models.Model):
     value      = models.IntegerField()  # 1 or -1
     timestamp  = models.DateTimeField()
 
-class Comment(models.Model):
-    user       = models.ForeignKey(User)
-    versionptr = models.ForeignKey(VersionPtr)
-    text       = models.TextField()
-    timestamp  = models.DateTimeField()
+# CodeCatalog Snippet http://codecatalog.net/134/
+def dict_inverse(dictionary):
+    r = {}
+    for k,v in dictionary.items():
+        if v in r:
+            raise ValueError(
+                """Dictionary given to dict_inverse is not one-to-one.  
+                   Duplicate value: {value}
+                   Mapped to by: {key1} and {key2}""".format(value=v, key1=r[v], key2=k))
+        r[v] = k
+    return r
+# End CodeCatalog Snippet
+
+class BugReport(models.Model):
+    ID_TO_STATUS = { 
+        0: 'Open',
+        1: 'Resolved',
+        2: 'Closed',
+    }
+    STATUS_TO_ID = dict_inverse(ID_TO_STATUS)
+
+    version = models.OneToOneField(Version, primary_key=True)
+    target_versionptr = models.ForeignKey(VersionPtr)
+    title = models.TextField()
+    status = models.IntegerField(choices=ID_TO_STATUS.items())

@@ -12,17 +12,19 @@
   <script type="text/javascript" src="/static/code_editor.js"></script>
 
   <style>
-   #name { font-family: monospace }
-   .hidden { display: none; visibility: hidden; width: 10px }
-   #hack { display: none; visibility: hidden; width: 10px }
-   .snippet { background: #ddb; margin-top: 5mm }
-   .snippet > table { width: 100% }
-   .snippet textarea { background: #eee; width: 100% }
-   .languagemark { background: #db9; font-weight: bold }
-   .depmark { background: #db9; float: left }
-   .comments_box { margin-left: 1in }
-   .comments_box p { color: #666 }
-   .comments_box textarea { width: 100% }
+    #name { font-family: monospace }
+    .hidden { display: none; visibility: hidden; width: 10px }
+    #hack { display: none; visibility: hidden; width: 10px }
+    .snippet { background: #ddb; margin-top: 5mm }
+    .snippet > table { width: 100% }
+    .snippet textarea { background: #eee; width: 100% }
+    .languagemark { background: #db9; font-weight: bold }
+    .depmark { background: #db9; float: left }
+    .bugs_box { margin-left: 1in }
+    .bugs_box p { color: #666 }
+    .bugs_box table,input,textarea { width: 100% }
+    .bugs_box textarea { height: 1in }
+  
   </style>
 
 {% block scripting %}
@@ -194,37 +196,45 @@
         return div;
     };
 
-    var render_comment = function(comment) {
+    var render_bug = function(bug) {
         return elt('div', {},
-            elt('p').text(comment.text).append(
-                elt('b', {}, elt('span').text(" -- " + comment.user))));
+            elt('p').text(bug.title).append(
+                elt('b', {}, elt('span').text(" -- " + bug.status))));
     };
 
-    var comments_box = function(versionptr) {
-        var div = elt('div', { 'class': 'comments_box' });
+    var bugs_box = function(versionptr) {
+        var div = elt('div', { 'class': 'bugs_box' });
 
         if (logged_in) {
-            var newcomment = elt('a', { href: '#' }).text("Comment");
-            newcomment.click(function() {
+            var newbug = elt('a', { href: '#' }).text("Report Bug");
+            newbug.click(function() {
                 var newdiv = elt('div');
+                var input = elt('input', { type:'text' });
                 var textarea = elt('textarea');
                 var btn = button('OK', function() {
-                    var comment = { versionptr: versionptr, text: textarea.val(), user: '{{user.username}}' };
-                    post('/api/new/comment/', comment);
+                    var bug = { target_versionptr: versionptr, title: input.val(), comment: textarea.val(), status: 'Open', user: '{{user.username}}' };
+                    post('/api/new/bug/', bug);
                     
-                    newcomment.before(render_comment(comment));
+                    newbug.before(render_bug(bug));
                     newdiv.remove();
                 });
-                newdiv.append(textarea, btn);
-                newcomment.before(newdiv);
+                newdiv.append(elt('table', {},
+                        elt('tr', {},
+                            elt('td', {}, elt('b', {}).text("Title")),
+                            elt('td', {}, input)),
+                        elt('tr', {},
+                            elt('td', {}, elt('b', {}).text("Details")),
+                            elt('td', {}, textarea))),
+                    btn);
+                newbug.before(newdiv);
                 return false;
             });
-            div.append(newcomment);
+            div.append(newbug);
         }
         
-        $.get('/api/specs/' + versionptr + '/comments/', function(comments) {
-            for (var i in comments) {
-                div.prepend(render_comment(comments[i]));
+        $.get('/api/specs/' + versionptr + '/bugs/active/', function(bugs) {
+            for (var i in bugs) {
+                div.prepend(render_bug(bugs[i]));
             }
         });
         return div;
@@ -238,14 +248,14 @@
             savespec();
         });
 
-        $('#spec_comments').append(comments_box({{spec.versionptr}}));
+        $('#spec_bugs').append(bugs_box({{spec.versionptr}}));
 
         $('.snippet').each(function (i,e) {
             e = $(e);
             var data = JSON.parse(e.find('.data').val());
             var snip = displaysnip(data);
             e.replaceWith(snip);
-            snip.after(comments_box(data.versionptr));
+            snip.after(bugs_box(data.versionptr));
         });
     });
   </script>
@@ -260,7 +270,7 @@
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
 <textarea id="spec" name="spec" rows="15" cols="72">{{spec.spec}}</textarea>
-<div id="spec_comments"></div>
+<div id="spec_bugs"></div>
 {% endblock spec %}
 
 {% block impls %}
