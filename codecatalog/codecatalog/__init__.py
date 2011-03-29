@@ -245,16 +245,34 @@ def _update_file(catalog_client, language, fqn):
     return new_code
 
 def _scan_directory(data, directory, _):
+    """
+    Scan a directory for files and use CodeCatalog to update any source 
+    files of the given language type.
+    data: a tuple of (CatalogClient, language), where language is a str.
+    directory: the directory to search.
+    """
     import glob
     (catalog_client, language) = data
     for file_name in glob.glob1(directory, "*." + file_extension_map[language]):
         _update_file(catalog_client, language, os.path.join(directory, file_name))
 
 def update_directory(code_directory, language="python"):
+    """
+    Scan a directory for changes to CodeCatalog snippets in source files of
+    the type specified by the language str. Updates will be pulled from the server if there
+    are new versions of any code you haven't changed.  Your changes will also
+    be posted to the Code Catalog if you are still at tip. 
+    """
     cc = CodeCatalogClient()
     _scan_directory_file((cc, language), code_directory, None)
 
 def update_project(code_directory, language="python"):
+    """
+    Scan all the directories under a root "project" directory for updates to
+    CodeCatalog snippets.  Updates will be pulled from the server if there
+    are new versions of any code you haven't changed.  Your changes will also
+    be posted to the Code Catalog if you are still at tip.
+    """
     import os.path
     cc = CodeCatalogClient()
     os.path.walk(code_directory, _scan_directory, (cc, language))
