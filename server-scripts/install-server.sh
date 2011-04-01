@@ -32,9 +32,10 @@ sudo apt-get -y install python-psycopg2
 
 sudo apt-get -y install libapache2-mod-wsgi
 sudo cp server-scripts/httpd.conf /etc/apache2/httpd.conf
+sudo cp server-scripts/pg_hba.conf /etc/postgresql/*/main/
 
 cd catalogserver
-cp settings/dev_settings.py.livedb dev_settings.py
+cp settings/dev_settings.py.postgres dev_settings.py
 ./manage.py syncdb
 ./manage.py migrate
 sudo chown :www-data .
