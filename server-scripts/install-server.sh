@@ -26,7 +26,6 @@ sudo pip install django-haystack
 sudo pip install python-openid
 sudo pip install django-openid-auth
 sudo pip install whoosh
-sudo pip install django-profile
 
 sudo apt-get -y install libpq-dev
 sudo apt-get -y install python-psycopg2
