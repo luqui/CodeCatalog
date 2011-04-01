@@ -14,7 +14,7 @@ s3cmd get `s3cmd ls s3://codecatalog-backup | sort -r | head -n 1 | awk '{print 
 sudo -u postgres dropdb codecatalog || echo "No Database to Drop"
 sudo -u postgres dropuser codecatalog || echo "No User to Drop"
 
-sudo -u postgres createuser --no-superuser --no-createdb --no-createrole --login codecatalog
+echo "CREATE ROLE codecatalog ENCRYPTED PASSWORD 'md57440cf204de9772bdbf067bf97f8fb63' NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;" | sudo -u postgres psql
 sudo -u postgres createdb -O codecatalog codecatalog
 zcat *.sql.gz | sudo -u postgres psql -f - codecatalog > /dev/null
 
