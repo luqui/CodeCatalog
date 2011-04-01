@@ -23,6 +23,7 @@ sudo pip install setuptools
 sudo pip install django
 sudo pip install south
 sudo pip install django-haystack
+sudo pip install python-openid
 sudo pip install django-openid-auth
 sudo pip install whoosh
 sudo pip install django-profile
