@@ -34,6 +34,8 @@ sudo apt-get -y install libapache2-mod-wsgi
 sudo cp server-scripts/httpd.conf /etc/apache2/httpd.conf
 sudo cp server-scripts/pg_hba.conf /etc/postgresql/*/main/
 
+sudo /etc/init.d/postgresql restart
+
 sudo apt-get -y install solr-tomcat
 sudo cp server-scripts/server.xml /etc/tomcat6/server.xml
 
