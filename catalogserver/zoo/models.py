@@ -1,8 +1,28 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# CodeCatalog Snippet http://codecatalog.net/134/
+def dict_inverse(dictionary):
+    r = {}
+    for k,v in dictionary.items():
+        if v in r:
+            raise ValueError(
+                """Dictionary given to dict_inverse is not one-to-one.  
+                   Duplicate value: {value}
+                   Mapped to by: {key1} and {key2}""".format(value=v, key1=r[v], key2=k))
+        r[v] = k
+    return r
+# End CodeCatalog Snippet
+
 class VersionPtr(models.Model):
+    ID_TO_PTRTYPE = {
+        0: 'Spec',
+        1: 'Snippet',
+        2: 'BugReport',
+    }
+    PTRTYPE_TO_ID = dict_inverse(ID_TO_PTRTYPE)
     votes = models.IntegerField(default=0)
+    type = models.IntegerField(choices=ID_TO_PTRTYPE.items())
 
 class Version(models.Model):
     timestamp  = models.DateTimeField()
@@ -34,18 +54,6 @@ class Vote(models.Model):
     value      = models.IntegerField()  # 1 or -1
     timestamp  = models.DateTimeField()
 
-# CodeCatalog Snippet http://codecatalog.net/134/
-def dict_inverse(dictionary):
-    r = {}
-    for k,v in dictionary.items():
-        if v in r:
-            raise ValueError(
-                """Dictionary given to dict_inverse is not one-to-one.  
-                   Duplicate value: {value}
-                   Mapped to by: {key1} and {key2}""".format(value=v, key1=r[v], key2=k))
-        r[v] = k
-    return r
-# End CodeCatalog Snippet
 
 class BugReport(models.Model):
     ID_TO_STATUS = { 

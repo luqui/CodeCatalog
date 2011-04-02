@@ -23,9 +23,9 @@ def new_version(user, versionptr, comment=""):
         versionptr = versionptr,
         comment = comment)
 
-def get_or_new_versionptr(versionptr_id):
+def get_or_new_versionptr(typ, versionptr_id):
     if versionptr_id is None:
-        v = VersionPtr()
+        v = VersionPtr(type=VersionPtr.ID_TO_PTRTYPE[typ])
         v.save()
         return v
     else:
@@ -189,7 +189,7 @@ def new_snippet(request):
     """
     
     spec_versionptr = VersionPtr.objects.get(id=int(request.POST['spec_versionptr']))
-    versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
+    versionptr = get_or_new_versionptr('Snippet', request.POST.get('versionptr'))
 
     version = new_version(request.user, versionptr, request.POST.get('comment') or "")
     version.save()
@@ -224,7 +224,7 @@ def new_spec(request):
         spec: (optinal) Description of this spec ("" if not given)
         comment: (optional) Description of this change
     """
-    versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
+    versionptr = get_or_new_versionptr('Spec', request.POST.get('versionptr'))
 
     # TODO leave inactive if user is untrusted
     version = new_version(request.user, versionptr, request.POST.get('comment') or "")
@@ -252,7 +252,7 @@ def new_bug(request):
     """
     
     target_versionptr = VersionPtr.objects.get(id=int(request.POST['target_versionptr']))
-    versionptr = get_or_new_versionptr(request.POST.get('versionptr'))
+    versionptr = get_or_new_versionptr('BugReport', request.POST.get('versionptr'))
 
     status = BugReport.STATUS_TO_ID[request.POST['status']]
 
@@ -307,6 +307,11 @@ def search(request):
                         for r in results ]
 
 def user_update(request):
+    """POST /api/user/update/ : Update the details of a user
+
+        id: the user id of the user to update
+        username, first_name, last_name, email are all required
+    """
     user = User.objects.get(id=request.POST['id'])
     user.username = request.POST['username']
     user.first_name = request.POST['first_name']
