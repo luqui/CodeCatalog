@@ -1,5 +1,7 @@
 <html>
  <head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+
   <link rel="stylesheet" type="text/css" href="/static/site.css" />
   
   {% block header %}
@@ -8,7 +10,79 @@
   <style>
    .site { width: 900px; margin: auto }
    .centered { width: 480px; margin: auto }
+   #events > a { background: #c00; color: white }
+   .events_table { background: silver }
+   .events_table td { border: 1px solid black }
   </style>
+
+  <script>
+    // CodeCatalog Snippet http://codecatalog.net/119/
+    var elt = function(name, attrs) {
+        var r = $(document.createElement(name));
+        if (attrs) {
+            for (var i in attrs) {
+                r.attr(i, attrs[i]);
+            }
+        }
+        for (var i = 2; i < arguments.length; ++i) {
+            r.append(arguments[i]);
+        }
+        return r;
+    };
+    // End CodeCatalog Snippet
+
+    $(function() {
+        $.get('/api/user/events/check/', function (hasEvents) {
+            if (!hasEvents) return;
+            var link = $('<a href="#">New Events</a>');
+            $('#events').append(link);
+
+            var onclick = function() {
+                var event_list = $('<table></table>').addClass('events_table');
+                $('#events').append(event_list);
+                link.unbind('click');
+                link.click(function() {
+                    link.unbind('click');
+                    event_list.remove();
+                    link.click(onclick);
+                    return false;
+                });
+                
+                $.get('/api/user/events/new/', function (events) {
+                    for (var i in events) { (function() {
+                        var cell = elt('td');
+                        var target = '/' + events[i].versionptr + '/' ;
+                        var link = elt('a', { href: '#' }).text(events[i].name);
+                        link.click(function() {
+                            $.post('/api/user/events/mark_viewed/', 
+                                   { versionptr: events[i].versionptr },
+                                   function() {
+                                       window.location.href = target;
+                                   });
+                            return false;
+                        });
+                        
+                        if (events[i].type == 'new_version') {
+                            cell.append(elt('p', {}).text('New version of ').append(link));
+                        }
+                        else if (events[i].type == 'bug') {
+                            cell.append(elt('p', {}).text('Bug report: "' + events[i].bug_title + '" on ').append(link));
+                        }
+                        else if (events[i].type == 'vote' && events[i].value > 0) {
+                            cell.append(elt('p', {}).text('Upvote on ').append(link));
+                        }
+                        else if (events[i].type == 'vote' && events[i].value < 0) {
+                            cell.append(elt('p', {}).text('Downvote on ').append(link));
+                        }
+                        event_list.append(elt('tr', {}, cell));
+                    })() }
+                });
+                return false;
+            };
+            link.click(onclick);
+        });
+    });
+  </script>
 
  </head>
  <body>
@@ -23,6 +97,11 @@
         <a href="/openid/login/">login</a>
        {% endif %}
       </td> 
+      <td>
+       {% if user.is_authenticated %}
+        <div id="events"></div>
+       {% endif %}
+      </td>
       <td style="text-align: right">
        <a href="/new/">New</a>
        <a href="/search/">Search</a>

@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from datetime import datetime
 from zoo.models import *
 from django.contrib.auth.decorators import login_required
@@ -12,15 +12,35 @@ def render(request, template, dictionary={}, context_instance=None, mimetype="te
         context_instance = RequestContext(request)
     return render_to_response(template, dictionary, context_instance=context_instance, mimetype=mimetype)
 
-def spec(request, pk):
-    def metric(obj): return (obj.canon, obj.votes())
-    spec = api.specs_active(request, pk)
+def latest(request, versionptr):
+    vptr = get_object_or_404(VersionPtr, pk=versionptr)
+    typ = VersionPtr.ID_TO_PTRTYPE[vptr.type]
+    if typ == 'Snippet':
+        return render_snippet(request, api.snippets_active(request, versionptr))
+    elif typ == 'Spec':
+        return render_spec(request, api.specs_active(request, versionptr))
+    elif typ == 'BugReport':
+        raise Http404()  # TODO bug page
+
+def version(request, versionptr, version):
+    vptr = get_object_or_404(VersionPtr, pk=versionptr)
+    typ = VersionPtr.ID_TO_PTRTYPE[vptr.type]
+    if typ == 'Snippet':
+        snip = api.snippet(request, version)
+        if snip.versionptr.id != versionptr: raise Http404()
+        return render_snippet(request, snip)
+    elif typ == 'Spec':
+        spec = api.spec(request, version)
+        if spec.versionptr.id != versionptr: raise Http404()
+        return render_spec(request, spec)
+    elif typ == 'BugReport':
+        raise Http404()  # TODO bug page
+
+def render_spec(request, spec):
     snippets = api.specs_snippets_active(request, pk)
     return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': snippets})
 
-def snippet(request, pk):
-    obj = get_object_or_404(Snippet, pk=pk)
-    snippet = api.snippet(request, pk)
+def render_snippet(request, snippet):
     spec = api.specs_active(request, snippet['spec_versionptr'])
     return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': [snippet] })
 

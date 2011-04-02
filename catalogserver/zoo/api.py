@@ -40,6 +40,60 @@ def update_active(versionptr):
         activeobj.active=True
         activeobj.save()
 
+def notify_followers(versionptr):
+    Following.objects.filter(followed=versionptr).update(new_events=True)
+
+def latest_version(cls, versionptr):
+    return cls.objects.filter(version__versionptr=versionptr).order_by('-version__timestamp')[0]
+
+def get_versionptr_name(versionptr):
+    typ = VersionPtr.ID_TO_PTRTYPE[versionptr.type]
+    if typ == 'Spec':
+        return latest_version(Spec, versionptr).name
+    elif typ == 'Snippet':
+        snip = latest_version(Snippet, versionptr)
+        return get_versionptr_name(snip.spec_versionptr)
+    elif typ == 'BugReport':
+        return latest_version(BugReport, versionptr).title
+    return "???"
+
+def get_events_date_range(versionptr, startdate, enddate):
+    versionptr_type = VersionPtr.ID_TO_PTRTYPE[versionptr.type]
+    
+    events = []
+    name = get_versionptr_name(versionptr)
+    print "Name = " + name
+    for v in Version.objects.filter(versionptr=versionptr, timestamp__gt=startdate, timestamp__lt=enddate):
+        events.append({
+            'type': 'new_version',
+            'versionptr': versionptr.id,
+            'versionptr_type': versionptr_type,
+            'version': v.id,
+            'timestamp': v.timestamp.isoformat(),
+            'name': name,
+        })
+    for v in Vote.objects.filter(versionptr=versionptr, timestamp__gt=startdate, timestamp__lt=enddate):
+        events.append({
+            'type': 'vote',
+            'versionptr': versionptr.id,
+            'versionptr_type': versionptr_type,
+            'timestamp': v.timestamp.isoformat(),
+            'value': v.value,
+            'name': name,
+        })
+    for bug in BugReport.objects.filter(target_versionptr=versionptr, version__timestamp__gt=startdate, version__timestamp__lt=enddate):
+        events.append({
+            'type': 'bug',
+            'versionptr': versionptr.id,
+            'versionptr_type': versionptr_type,
+            'timestamp': bug.version.timestamp.isoformat(),
+            'bug_version': bug.version.id,
+            'bug_versionptr': bug.version.versionptr.id,
+            'name': name,
+            'bug_title': bug.title,
+        })
+    return events
+
 def dump_spec(spec):
     """The representation of a spec.  This is what the methods that return a spec return."""
     return {
@@ -175,6 +229,34 @@ def bugs(request, versionptr):
 def bugs_all(request, versionptr):
     """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
     return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr).order_by('version__timestamp'))
+    
+def new_spec(request):
+    """POST /api/new/spec/ : Creates a new spec.
+
+        versionptr: (optional) what versionptr to add this version to.
+                    Allocates new if not given.
+        name: (optional) Name of this spec ("unnamed" if not given)
+        summary: (optional) Summary of this spec ("" if not given)
+        spec: (optinal) Description of this spec ("" if not given)
+        comment: (optional) Description of this change
+    """
+    versionptr = get_or_new_versionptr('Spec', request.POST.get('versionptr'))
+
+    # TODO leave inactive if user is untrusted
+    version = new_version(request.user, versionptr, request.POST.get('comment') or "")
+    version.save()
+
+    spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
+    spec.save()
+
+    update_active(versionptr)
+    notify_followers(versionptr)
+    follow(request.user, versionptr, True)
+
+    return {
+        'versionptr': versionptr.id,
+        'version': version.id,
+    }
 
 def new_snippet(request):
     """POST /api/new/snippet/ : Creates a new snippet.
@@ -208,32 +290,8 @@ def new_snippet(request):
             Dependency(snippet=snippet, target=VersionPtr.objects.get(id=int(dep))).save()
 
     update_active(versionptr)
-
-    return {
-        'versionptr': versionptr.id,
-        'version': version.id,
-    }
-    
-def new_spec(request):
-    """POST /api/new/spec/ : Creates a new spec.
-
-        versionptr: (optional) what versionptr to add this version to.
-                    Allocates new if not given.
-        name: (optional) Name of this spec ("unnamed" if not given)
-        summary: (optional) Summary of this spec ("" if not given)
-        spec: (optinal) Description of this spec ("" if not given)
-        comment: (optional) Description of this change
-    """
-    versionptr = get_or_new_versionptr('Spec', request.POST.get('versionptr'))
-
-    # TODO leave inactive if user is untrusted
-    version = new_version(request.user, versionptr, request.POST.get('comment') or "")
-    version.save()
-
-    spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
-    spec.save()
-
-    update_active(versionptr)
+    notify_followers(versionptr)
+    follow(request.user, versionptr, True)
 
     return {
         'versionptr': versionptr.id,
@@ -266,6 +324,9 @@ def new_bug(request):
     bug.save()
 
     update_active(versionptr)
+    notify_followers(target_versionptr)
+    notify_followers(versionptr)
+    follow(request.user, versionptr, True)
 
     return {
         'versionptr': versionptr.id,
@@ -296,6 +357,8 @@ def vote(request):
         vote.save()
     versionptr.save()
 
+    notify_followers(versionptr)
+
     return ""
 
 def search(request):
@@ -318,4 +381,53 @@ def user_update(request):
     user.last_name = request.POST['last_name']
     user.email = request.POST['email']
     user.save()
+    return ""
+
+def follow(user, versionptr, enabled):
+    if user.is_anonymous(): return
+    fset = Following.objects.filter(follower=user, followed=versionptr)
+    if not enabled:
+        fset.delete()
+    elif not fset.exists():
+        Following.objects.create(
+            follower=user, 
+            followed=versionptr,
+            new_events=False, 
+            last_check=datetime.now())
+    
+
+def user_follow(request):
+    """POST /api/user/follow/ : Have the authenticated user subscribe to any changes of a versionptr
+
+        versionptr: the versionptr to follow
+        enabled: (optional) If False, remove instead of add the follow relation.
+    """
+    enabled = request.POST.get('enabled')
+    if enabled is None: enabled = True
+    follow(request.user, request.POST['versionptr'], enabled)
+    return ""
+
+def user_events_check(request):
+    """GET /api/user/events/check/ : Returns a boolean indicating whether there are new events for the logged in user"""
+    
+    return Following.objects.filter(follower=request.user, new_events=True).exists()
+
+def user_events_new(request):
+    """GET /api/user/events/new/ : Get all unseen events that the user is subscribed to"""
+    
+    fset = Following.objects.filter(follower=request.user, new_events=True)
+    ret = []
+    now = datetime.now()
+    for fol in fset:
+        ret.extend(get_events_date_range(fol.followed, fol.last_check, now))
+    return ret
+
+def user_events_mark_viewed(request):
+    """POST /api/user/events/mark_viewed/ : Mark a versionptr as viewed.
+
+        versionptr: the versionptr to mark as viewed
+    """
+
+    Following.objects.filter(follower=request.user, new_events=True, followed=request.POST['versionptr']).update(new_events=False, last_check=datetime.now())
+    
     return ""

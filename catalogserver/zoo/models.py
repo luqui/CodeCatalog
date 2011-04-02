@@ -67,3 +67,9 @@ class BugReport(models.Model):
     target_versionptr = models.ForeignKey(VersionPtr)
     title = models.TextField()
     status = models.IntegerField(choices=ID_TO_STATUS.items())
+
+class Following(models.Model):
+    follower = models.ForeignKey(User)
+    followed = models.ForeignKey(VersionPtr)
+    new_events = models.BooleanField()
+    last_check = models.DateTimeField()
