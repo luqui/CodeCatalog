@@ -1,6 +1,7 @@
 from zoo.models import *
 from datetime import datetime
 from haystack.query import SearchQuerySet
+from django.db.models import Q
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -40,8 +41,11 @@ def update_active(versionptr):
         activeobj.active=True
         activeobj.save()
 
-def notify_followers(versionptr):
-    Following.objects.filter(followed=versionptr).update(new_events=True)
+def notify_followers(user, versionptr):
+    q = Q(followed=versionptr)
+    if not user.is_anonymous(): 
+        q = q & ~Q(follower=user)
+    Following.objects.filter(q).update(new_events=True)
 
 def latest_version(cls, versionptr):
     return cls.objects.filter(version__versionptr=versionptr).order_by('-version__timestamp')[0]
@@ -250,7 +254,7 @@ def new_spec(request):
     spec.save()
 
     update_active(versionptr)
-    notify_followers(versionptr)
+    notify_followers(request.user, versionptr)
     follow(request.user, versionptr, True)
 
     return {
@@ -290,7 +294,7 @@ def new_snippet(request):
             Dependency(snippet=snippet, target=VersionPtr.objects.get(id=int(dep))).save()
 
     update_active(versionptr)
-    notify_followers(versionptr)
+    notify_followers(request.user, versionptr)
     follow(request.user, versionptr, True)
 
     return {
@@ -324,8 +328,8 @@ def new_bug(request):
     bug.save()
 
     update_active(versionptr)
-    notify_followers(target_versionptr)
-    notify_followers(versionptr)
+    notify_followers(request.user, target_versionptr)
+    notify_followers(request.user, versionptr)
     follow(request.user, versionptr, True)
 
     return {
@@ -357,7 +361,7 @@ def vote(request):
         vote.save()
     versionptr.save()
 
-    notify_followers(versionptr)
+    notify_followers(request.user, versionptr)
 
     return ""
 

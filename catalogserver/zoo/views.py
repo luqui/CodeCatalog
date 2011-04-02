@@ -37,7 +37,7 @@ def version(request, versionptr, version):
         raise Http404()  # TODO bug page
 
 def render_spec(request, spec):
-    snippets = api.specs_snippets_active(request, pk)
+    snippets = api.specs_snippets_active(request, spec['versionptr'])
     return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': snippets})
 
 def render_snippet(request, snippet):
