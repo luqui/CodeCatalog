@@ -49,7 +49,7 @@
 
     var annotator = function (snip) { 
         return function (text) {
-            return linecomment[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.version + "/\n" 
+            return linecomment[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
                  + text
                  + linecomment[snip.language] + " End CodeCatalog Snippet\n";
         };
@@ -150,7 +150,7 @@
                     table.append(
                         elt('tr', {}, 
                             elt('td', {},
-                                elt('a', { href: '/spec/' + result.versionptr + '/' })
+                                elt('a', { href: '/' + result.versionptr + '/' })
                                     .text(result.name)),
                             elt('td', {}).text(result.summary)));
                 });

@@ -27,11 +27,11 @@ def version(request, versionptr, version):
     typ = VersionPtr.ID_TO_PTRTYPE[vptr.type]
     if typ == 'Snippet':
         snip = api.snippet(request, version)
-        if snip.versionptr.id != versionptr: raise Http404()
+        if snip['versionptr'] != int(versionptr): raise Http404()
         return render_snippet(request, snip)
     elif typ == 'Spec':
         spec = api.spec(request, version)
-        if spec.versionptr.id != versionptr: raise Http404()
+        if spec['versionptr'] != int(versionptr): raise Http404()
         return render_spec(request, spec)
     elif typ == 'BugReport':
         raise Http404()  # TODO bug page

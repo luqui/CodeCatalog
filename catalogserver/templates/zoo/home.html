@@ -33,7 +33,7 @@ div.activity {
  <tbody>
 {% for spec in specs %}
   <tr>
-   <td><tt><a href="/spec/{{spec.version.versionptr.id}}/">{{spec.name}}</a></tt></td>
+   <td><tt><a href="/{{spec.version.versionptr.id}}/">{{spec.name}}</a></tt></td>
    <td>{{spec.summary}}</td>
    <td>{{spec.version.user|default_if_none:"Anonymous"}}</td>
   </tr>
