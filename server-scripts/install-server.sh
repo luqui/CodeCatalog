@@ -53,6 +53,6 @@ sudo /etc/init.d/tomcat6 restart
 cd ..
 sudo cp server-scripts/codecatalog-backup /etc/cron.daily/
 
-sudo /etc/init.d/apache2 reload
+sudo /etc/init.d/apache2 restart
 
 echo "CodeCatalog Configured"
