@@ -9,7 +9,9 @@ class Migration(DataMigration):
     
     def forwards(self, orm):
         for vptr in orm.VersionPtr.objects.all():
-            version = orm.Version.objects.filter(versionptr=vptr)[0]
+            versions = orm.Version.objects.filter(versionptr=vptr)
+            if not versions.exists(): continue
+            version = versions[0]
             vptr.type = -1
             if orm.Spec.objects.filter(version=version).exists():
                 vptr.type = VersionPtr.PTRTYPE_TO_ID['Spec']
