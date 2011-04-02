@@ -35,7 +35,7 @@ sudo cp server-scripts/httpd.conf /etc/apache2/httpd.conf
 sudo cp server-scripts/pg_hba.conf /etc/postgresql/*/main/
 
 sudo apt-get -y install solr-tomcat
-sudo cp server-scipts/server.xml /etc/tomcat6/server.xml
+sudo cp server-scripts/server.xml /etc/tomcat6/server.xml
 
 
 cd catalogserver
