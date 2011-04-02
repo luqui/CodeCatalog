@@ -25,7 +25,7 @@ def new_version(user, versionptr, comment=""):
 
 def get_or_new_versionptr(typ, versionptr_id):
     if versionptr_id is None:
-        v = VersionPtr(type=VersionPtr.ID_TO_PTRTYPE[typ])
+        v = VersionPtr(type=VersionPtr.PTRTYPE_TO_ID[typ])
         v.save()
         return v
     else:
