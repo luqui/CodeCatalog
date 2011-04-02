@@ -34,17 +34,23 @@ sudo apt-get -y install libapache2-mod-wsgi
 sudo cp server-scripts/httpd.conf /etc/apache2/httpd.conf
 sudo cp server-scripts/pg_hba.conf /etc/postgresql/*/main/
 
+sudo apt-get -y install solr-tomcat
+sudo cp server-scipts/server.xml /etc/tomcat6/server.xml
+
+
 cd catalogserver
 cp settings/dev_settings.py.postgres dev_settings.py
 ./manage.py syncdb
 ./manage.py migrate
 sudo chown :www-data .
 sudo chmod g+w .
-sudo -u www-data ./manage.py rebuild_index --noinput
-sudo /etc/init.d/apache2 reload
+./manage.py build_solr_schema | tee /etc/solr/conf/schema.xml
+sudo /etc/init.d/tomcat6 restart
+./manage.py rebuild_index --noinput
 
 cd ..
 sudo cp server-scripts/codecatalog-backup /etc/cron.daily/
-sudo cp server-scripts/codecatalog-reindex /etc/cron.hourly/
+
+sudo /etc/init.d/apache2 reload
 
 echo "CodeCatalog Configured"
