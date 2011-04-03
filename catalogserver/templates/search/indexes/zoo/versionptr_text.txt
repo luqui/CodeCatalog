@@ -1,0 +1,3 @@
+{{object.active_spec.name}}
+{{object.active_spec.summary}}
+{{object.active_spec.spec}}
