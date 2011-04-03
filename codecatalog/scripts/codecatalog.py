@@ -5,7 +5,7 @@ import urllib
 import json
 import sys
 import webbrowser
-# CodeCatalog Snippet http://codecatalog.net/52/
+# CodeCatalog Snippet http://codecatalog.net/22/52/
 import re
 # End CodeCatalog Snippet
 
