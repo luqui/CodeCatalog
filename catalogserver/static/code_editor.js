@@ -81,53 +81,53 @@ var code_editor = function(proto, submit_callback) {
         proto_opts.spec_versionptr = proto.spec_versionptr;
         proto_opts.versionptr = proto.versionptr;
 
-        var indeps = proto.dependencies;
-        for (var i in indeps) {
-            add_dep().val(indeps[i]);
+            var indeps = proto.dependencies;
+            for (var i in indeps) {
+                add_dep().val(indeps[i]);
+            }
+
+            languages.val(proto.language);
+            textarea.val(proto.code);
         }
-
-        languages.val(proto.language);
-        textarea.val(proto.code);
-    }
-    else {
-        add_dep();
-    }
-    
-    div.append(textarea, languages, deps_div, add_button, $('<br/>'), submit_button);
-    return div;
-};
-
-// CodeCatalog Snippet http://codecatalog.net/16/119/
-var elt = function(name, attrs) {
-    var r = $(document.createElement(name));
-    if (attrs) {
-        for (var i in attrs) {
-            r.attr(i, attrs[i]);
+        else {
+            add_dep();
         }
-    }
-    for (var i = 2; i < arguments.length; ++i) {
-        r.append(arguments[i]);
-    }
-    return r;
-};
-// End CodeCatalog Snippet
+        
+        div.append(textarea, languages, deps_div, add_button, $('<br/>'), submit_button);
+        return div;
+    };
 
-// CodeCatalog Snippet http://codecatalog.net/49/149/
-var label_table = function(dict) {
-    var ret = elt('table');
-    for (var i in dict) {
-        ret.append(elt('tr', {}, 
-                       elt('td', {}).text(i),
-                       elt('td', {}, dict[i])));
-    }
-    return ret;
-};
-// End CodeCatalog Snippet
+    // CodeCatalog Snippet http://codecatalog.net/16/119/
+    var elt = function(name, attrs) {
+        var r = $(document.createElement(name));
+        if (attrs) {
+            for (var i in attrs) {
+                r.attr(i, attrs[i]);
+            }
+        }
+        for (var i = 2; i < arguments.length; ++i) {
+            r.append(arguments[i]);
+        }
+        return r;
+    };
+    // End CodeCatalog Snippet
 
-var code_editor_with_title = function(proto, submit_callback) {
-    var title_input = elt('input', { type:'text' });
-    var summary_input = elt('input', { type:'text' });
-    title_input.val(proto.title || "");
+    // CodeCatalog Snippet http://codecatalog.net/49/149/
+    var label_table = function(dict) {
+        var ret = elt('table');
+        for (var i in dict) {
+            ret.append(elt('tr', {}, 
+                           elt('td', {}).text(i),
+                           elt('td', {}, dict[i])));
+        }
+        return ret;
+    };
+    // End CodeCatalog Snippet
+
+    var code_editor_with_title = function(proto, submit_callback) {
+        var title_input = elt('input', { type:'text' });
+        var summary_input = elt('input', { type:'text' });
+        title_input.val(proto.title || "");
     summary_input.val(proto.summary || "");
     return elt('div', {},
         label_table({

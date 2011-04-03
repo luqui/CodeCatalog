@@ -21,6 +21,7 @@ def new_version(user, versionptr, comment=""):
         timestamp = datetime.now(),
         user = user_or_none(user),
         approved = True,
+        active = True,
         versionptr = versionptr,
         comment = comment)
 
@@ -40,6 +41,7 @@ def update_active(versionptr):
         activeobj = activeobjs[0]
         activeobj.active=True
         activeobj.save()
+    versionptr.save()
 
 def notify_followers(user, versionptr):
     q = Q(followed=versionptr)
@@ -368,7 +370,9 @@ def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""
 
     results = SearchQuerySet().auto_query(request.GET['q'])[0:10]
-    return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
+    return [ { 'name': r.name,
+               'summary': r.summary,
+               'versionptr': r.versionptrid } 
                         for r in results ]
 
 def user_update(request):

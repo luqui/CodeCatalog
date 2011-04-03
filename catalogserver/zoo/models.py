@@ -24,6 +24,16 @@ class VersionPtr(models.Model):
     votes = models.IntegerField(default=0)
     type = models.IntegerField(choices=ID_TO_PTRTYPE.items())
 
+    def active_version(self):
+        return Version.objects.filter(versionptr=self, active=True)
+
+    def active_spec(self):
+        specset = Spec.objects.filter(version = self.active_version())
+        if specset.exists():
+            return specset[0]
+        else:
+            return None
+
 class Version(models.Model):
     timestamp  = models.DateTimeField()
     user       = models.ForeignKey(User, null=True)

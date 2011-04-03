@@ -49,8 +49,8 @@ $(function() {
       <tbody>
      {% for result in page.object_list %}
        <tr>
-        <td><tt><a href="/{{ result.object.version.versionptr.id }}/">{{ result.object.name }}</a></tt></td>
-        <td>{{ result.object.summary }}</td>
+        <td><tt><a href="/{{ result.versionptrid }}/">{{ result.name }}</a></tt></td>
+        <td>{{ result.summary }}</td>
        </tr>
      {% empty %}
      {% endfor %}
