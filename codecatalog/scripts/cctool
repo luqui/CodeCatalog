@@ -15,7 +15,7 @@ def instance_methods(obj):
                                      if inspect.ismethod(getattr(obj,m)) ])
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/99/286/
+# CodeCatalog Snippet http://codecatalog.net/99/300/
 def command_interface(obj):
     def help():
         sys.stderr.write(name + ": " + (obj.__doc__ or "") + "\n")
@@ -62,14 +62,14 @@ def command_interface(obj):
     func = getattr(obj, cmd)
     try:
         func(*args, **opts)
-    except TypeError:
+    except TypeError as e:
         help_cmd(cmd)
 # End CodeCatalog Snippet
 
 
 class Interface:
     def __init__(self):
-        client = codecatalog.CodeCatalogClient()
+        self.client = codecatalog.CodeCatalogClient()
     
     def post(self, name="unnamed", summary="", language="python"):
         """Posts stdin as a snippet on codecatalog.  Outputs a tagged snippet on stdout
@@ -81,7 +81,7 @@ class Interface:
         """
         code = sys.stdin.read()
         (spec_id, version, code_formatted) = self.client.new(name=name, summary=summary, code=code)
-        webbrowser.open_new_tab('http://' + client.host + '/' + str(spec_id) + '/')
+        webbrowser.open_new_tab('http://' + self.client.host + '/' + str(spec_id) + '/')
         print code_formatted
 
     def sync(self, *files, **opts):
@@ -89,6 +89,7 @@ class Interface:
         Options:
             --language=<str>: The language the code is written in
         """
+
         language = opts.get('language') or 'python'
         for filename in files:
             self.client.update_file(filename, language=language)

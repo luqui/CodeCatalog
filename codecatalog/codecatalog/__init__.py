@@ -116,7 +116,7 @@ class CodeCatalogClient:
         
         snip_info = self._connection.post('/api/new/snippet/', { 
             'spec_versionptr': spec_id,
-            'code': normalized,
+            'code': code_normalized,
             'language': language,
         })
         version = Version(snip_info['versionptr'], snip_info['version'])
@@ -160,7 +160,7 @@ class CodeCatalogClient:
                     'dependencies': ','.join(map(str, snip['dependencies'])),
                 })
                 return self._tag_snippet(new_snip['versionptr'], new_snip['version'], 
-                                         code, indent=indent, language=new_snip['language'])
+                                         code, indent=indent, language=snip['language'])
             else:
                 # Completely unchanged.
                 return self._tag_snippet(latest_version.versionptr, latest_version.version, 
