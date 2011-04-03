@@ -15,6 +15,7 @@ import re
 import difflib
 import codecatalog.commandline
 
+# CodeCatalog Snippet http://codecatalog.net/110/323/
 class JSONClient:
     def __init__(self, host):
         self._host = host
@@ -43,6 +44,7 @@ class JSONClient:
         jsonstr = response.read()
         response.close()
         return json.loads(jsonstr)
+# End CodeCatalog Snippet
 
 # CodeCatalog Snippet http://codecatalog.net/102/294/
 language_list = ["python", "javascript"]
