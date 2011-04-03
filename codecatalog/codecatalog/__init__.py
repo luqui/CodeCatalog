@@ -13,7 +13,6 @@ import json
 import catalog_utils
 import re
 import difflib
-import codecatalog.commandline
 
 # CodeCatalog Snippet http://codecatalog.net/110/323/
 class JSONClient:
