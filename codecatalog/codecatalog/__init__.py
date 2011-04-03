@@ -158,7 +158,7 @@ class CodeCatalogClient:
                     'versionptr': snip['versionptr'],
                     'dependencies': ','.join(map(str, snip['dependencies'])),
                 })
-                return self._tag_snippet(new_snip[versionptr], new_snip['version'], 
+                return self._tag_snippet(new_snip['versionptr'], new_snip['version'], 
                                          code, indent=indent, language=new_snip['language'])
             else:
                 # Completely unchanged.
