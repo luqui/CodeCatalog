@@ -10,7 +10,7 @@
   <style>
    .site { width: 900px; margin: auto }
    .centered { width: 480px; margin: auto }
-   #events > a { background: #c00; color: white }
+   a.new_events { background: #c00; color: white }
    .events_table { background: silver }
    .events_table td { border: 1px solid black }
   </style>
@@ -31,59 +31,61 @@
     };
     // End CodeCatalog Snippet
 
+    // CodeCatalog Snippet http://codecatalog.net/87/231/
+    var dropdown = function(clicker, make_elements) {
+        var div = elt('div', {}, clicker);
+        var onclick = function() {
+            var list = elt('table');
+            div.append(list);
+            clicker.unbind('click');
+            clicker.click(function() {
+                clicker.unbind('click');
+                list.remove();
+                clicker.click(onclick);
+                return false;
+            });
+
+            make_elements(function(e) {
+                list.append(elt('tr', {}, elt('td', {}, e)));
+            });
+        };
+        clicker.click(onclick);
+        return div;
+    };
+    // End CodeCatalog Snippet
+
 {% if user.is_authenticated %}
     $(function() {
         $.get('/api/user/events/check/', function (hasEvents) {
             if (!hasEvents) return;
-            var link = $('<a href="#">New Events</a>');
-            $('#events').append(link);
-
-            var onclick = function() {
-                var event_list = $('<table></table>').addClass('events_table');
-                $('#events').append(event_list);
-                link.unbind('click');
-                link.click(function() {
-                    link.unbind('click');
-                    event_list.remove();
-                    link.click(onclick);
-                    return false;
-                });
-                
-                $.get('/api/user/events/new/', function (events) {
-                    for (var i in events) { (function() {
-                        var cell = elt('td');
-                        var target = '/' + events[i].versionptr + '/' ;
-                        var link = elt('a', { href: '#' }).text(events[i].name);
-                        link.click(function() {
-                            $.post('/api/user/events/mark_viewed/', 
-                                   { versionptr: events[i].versionptr },
-                                   function() {
-                                       window.location.href = target;
-                                   });
-                            return false;
+            $('#events').append(
+                dropdown(elt('a', { href:'#' }).addClass('new_events').text("New Events"), function(adder) {
+                    $.get('/api/user/events/new/', function (events) {
+                        events.forEach(function(e) {
+                            var target = '/' + e.versionptr + '/';
+                            var link = elt('a', { href: '#' }).text(e.name);
+                            link.click(function() {
+                                $.post('/api/user/events/mark_viewed/',
+                                    { versionptr: e.versionptr },
+                                    function () { window.location.href = target });
+                                return false;
+                            });
+                            if (e.type == 'new_version') {
+                                adder(elt('p').text('New version of ').append(link));
+                            }
+                            else if (e.type == 'bug') {
+                                adder(elt('p').text('Bug report: "' + e.bug_title + '" on ').append(link));
+                            }
+                            else if (e.type == 'vote' && e.value > 0) {
+                                adder(elt('p').text('Upvote on ').append(link));
+                            }
+                            else if (e.type == 'vote' && e.value < 0) {
+                                adder(elt('p').text('Downvote on ').append(link));
+                            }
                         });
-                        
-                        if (events[i].type == 'new_version') {
-                            cell.append(elt('p', {}).text('New version of ').append(link));
-                        }
-                        else if (events[i].type == 'bug') {
-                            cell.append(elt('p', {}).text('Bug report: "' + events[i].bug_title + '" on ').append(link));
-                        }
-                        else if (events[i].type == 'vote' && events[i].value > 0) {
-                            cell.append(elt('p', {}).text('Upvote on ').append(link));
-                        }
-                        else if (events[i].type == 'vote' && events[i].value < 0) {
-                            cell.append(elt('p', {}).text('Downvote on ').append(link));
-                        }
-                        else {
-                            return;
-                        }
-                        event_list.append(elt('tr', {}, cell));
-                    })() }
-                });
-                return false;
-            };
-            link.click(onclick);
+                    });
+                }).addClass('events_table')
+            );
         });
     });
 {% endif %}

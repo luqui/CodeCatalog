@@ -9,7 +9,7 @@ $(function() {
     $('#editor').append(code_editor(null, function(obj) { 
         var regsnip = function (snip) {
             $.post('/api/new/snippet/', snip, function (reply) {
-                window.location.href = '/' + reply.version + '/';
+                window.location.href = '/' + reply.versionptr + '/';
             });
         };
         if (obj.spec_versionptr) {

@@ -25,7 +25,8 @@ sudo pip install south
 sudo pip install django-haystack
 sudo pip install python-openid
 sudo pip install django-openid-auth
-sudo pip install whoosh
+sudo pip install pysolr
+sudo pip install beautifulsoup
 
 sudo apt-get -y install libpq-dev
 sudo apt-get -y install python-psycopg2
@@ -34,17 +35,25 @@ sudo apt-get -y install libapache2-mod-wsgi
 sudo cp server-scripts/httpd.conf /etc/apache2/httpd.conf
 sudo cp server-scripts/pg_hba.conf /etc/postgresql/*/main/
 
+sudo /etc/init.d/postgresql* restart
+
+sudo apt-get -y install solr-tomcat
+sudo cp server-scripts/server.xml /etc/tomcat6/server.xml
+
+
 cd catalogserver
 cp settings/dev_settings.py.postgres dev_settings.py
 ./manage.py syncdb
 ./manage.py migrate
 sudo chown :www-data .
 sudo chmod g+w .
-sudo -u www-data ./manage.py rebuild_index --noinput
-sudo /etc/init.d/apache2 reload
+./manage.py build_solr_schema | sudo tee /etc/solr/conf/schema.xml
+sudo /etc/init.d/tomcat6 restart
+./manage.py rebuild_index --noinput
 
 cd ..
 sudo cp server-scripts/codecatalog-backup /etc/cron.daily/
-sudo cp server-scripts/codecatalog-reindex /etc/cron.hourly/
+
+sudo /etc/init.d/apache2 restart
 
 echo "CodeCatalog Configured"
