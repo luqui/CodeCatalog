@@ -306,5 +306,3 @@ class CodeCatalogClient:
         import os.path
         cc = CodeCatalogClient()
         os.path.walk(code_directory, self._scan_directory, language)
-
-CodeCatalogClient().update_project("C:\Max\Development\CodeCatalog")
