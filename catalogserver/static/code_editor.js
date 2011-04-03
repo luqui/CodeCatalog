@@ -52,7 +52,7 @@ var embedded_search = function() {
 
 var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');
-    var textarea = $('<textarea rows="30" cols="80"></textarea>');
+    var textarea = $('<textarea rows="30" style="width:100%"></textarea>');
     var languages = language_selector();
     var deps_div = $('<div></div>');
     var deps = [];
@@ -95,4 +95,48 @@ var code_editor = function(proto, submit_callback) {
     
     div.append(textarea, languages, deps_div, add_button, $('<br/>'), submit_button);
     return div;
+};
+
+// CodeCatalog Snippet http://codecatalog.net/16/119/
+var elt = function(name, attrs) {
+    var r = $(document.createElement(name));
+    if (attrs) {
+        for (var i in attrs) {
+            r.attr(i, attrs[i]);
+        }
+    }
+    for (var i = 2; i < arguments.length; ++i) {
+        r.append(arguments[i]);
+    }
+    return r;
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://codecatalog.net/49/149/
+var label_table = function(dict) {
+    var ret = elt('table');
+    for (var i in dict) {
+        ret.append(elt('tr', {}, 
+                       elt('td', {}).text(i),
+                       elt('td', {}, dict[i])));
+    }
+    return ret;
+};
+// End CodeCatalog Snippet
+
+var code_editor_with_title = function(proto, submit_callback) {
+    var title_input = elt('input', { type:'text' });
+    var summary_input = elt('input', { type:'text' });
+    title_input.val(proto.title || "");
+    summary_input.val(proto.summary || "");
+    return elt('div', {},
+        label_table({
+            'Title': title_input,
+            'Summary': summary_input,
+        }),
+        code_editor(proto, function(snip) {
+            snip.title = title_input.val() || "unnamed";
+            snip.summary = summary_input.val();
+            submit_callback(snip);
+        }));
 };

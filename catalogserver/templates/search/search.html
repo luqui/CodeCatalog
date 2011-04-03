@@ -3,6 +3,8 @@
 {% block header %}
 {{ block.super }}
 
+<script type="text/javascript" src="/static/code_editor.js"></script>
+
 <style>
  .searchresults table {
     width: 100%;
@@ -11,7 +13,31 @@
  .searchresults thead {
     font-weight: bold;
  }
+ #newsnippet {
+    margin-top: 1cm;
+ }
 </style>
+
+<script>
+$(function() {
+    $('#newsnippet').append(code_editor_with_title({ title: "{{query}}" }, function(obj) {
+        var regsnip = function (snip) {
+            $.post('/api/new/snippet/', snip, function (reply) {
+                window.location.href = '/' + reply.versionptr + '/';
+            });
+        };
+        if (obj.spec_versionptr) {
+            regsnip(obj);
+        }
+        else {
+            $.post('/api/new/spec/', { name: obj.title, summary: obj.summary }, function (spec) {
+                obj.spec_versionptr = spec.versionptr;
+                regsnip(obj);
+            });
+        }
+    }));
+});
+</script>
 
 {% endblock %}
 
@@ -37,7 +63,12 @@
         {% if page.has_previous %}<a href="?q={{ query }}&amp;page={{ page.previous_page_number }}">{% endif %}&laquo; Previous{% if page.has_previous %}</a>{% endif %}
         |
         {% if page.has_next %}<a href="?q={{ query }}&amp;page={{ page.next_page_number }}">{% endif %}Next &raquo;{% if page.has_next %}</a>{% endif %}
-        </div>
+    </div>
     {% endif %}
+
+    <div name="newsnippet" id="newsnippet">
+     <h2>New Snippet</h2>
+    </div>
+
 {% endif %}
 {% endblock %}
