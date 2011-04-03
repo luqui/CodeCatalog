@@ -47,7 +47,7 @@ cp settings/dev_settings.py.postgres dev_settings.py
 ./manage.py migrate
 sudo chown :www-data .
 sudo chmod g+w .
-./manage.py build_solr_schema | tee /etc/solr/conf/schema.xml
+./manage.py build_solr_schema | sudo tee /etc/solr/conf/schema.xml
 sudo /etc/init.d/tomcat6 restart
 ./manage.py rebuild_index --noinput
 
