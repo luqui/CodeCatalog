@@ -66,7 +66,6 @@ def get_events_date_range(versionptr, startdate, enddate):
     
     events = []
     name = get_versionptr_name(versionptr)
-    print "Name = " + name
     for v in Version.objects.filter(versionptr=versionptr, timestamp__gt=startdate, timestamp__lt=enddate):
         events.append({
             'type': 'new_version',

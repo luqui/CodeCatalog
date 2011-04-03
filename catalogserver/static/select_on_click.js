@@ -1,8 +1,6 @@
-// CodeCatalog Snippet http://codecatalog.net/22/
 var linecount = function(text) {
     return text.split(/\n/).length;
 };
-// End CodeCatalog Snippet
 
 var select_on_click = function(elt, modify) {
     elt.focus(function() {
