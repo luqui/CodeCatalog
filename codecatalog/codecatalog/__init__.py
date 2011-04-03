@@ -37,19 +37,37 @@ class JSONClient:
         response.close()
         return json.loads(jsonstr)
 
-# CodeCatalog Snippet http://codecatalog.net/33/189/
-line_comment_map = {
+# CodeCatalog Snippet http://codecatalog.net/102/294/
+language_list = ["python", "javascript"]
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/33/299/
+language_to_line_comment_map = {
     'python': '#',
     'javascript': '//',
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/69/171/
-file_extension_map = {
+# CodeCatalog Snippet http://codecatalog.net/69/298/
+language_to_file_extension_map = {
     "python": "py",
     "javascript": "js"
 }
 # End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/104/297/
+def filename_to_language(filename):
+    """
+    Given a filename, use the extension to determine
+    the code-language and return the string associated
+    with that language.
+    """
+    for language, extension in language_to_file_extension_map:
+        if filename.rsplit(".")[1] == extension:
+            return language
+    return None
+# End CodeCatalog Snippet
+
 
 class Version:
     """
@@ -78,11 +96,12 @@ class CodeCatalogClient:
 
     @staticmethod
     def _tag_snippet(versionptr, version, code, indent="", language="python"):
+        line_comment = language_to_line_comment_map[language]
         return "{0}{1} CodeCatalog Snippet http://codecatalog.net/{2}/{3}/\n".format(
-                indent, line_comment_map[language], str(versionptr), str(version)) + \
+                indent, line_comment, str(versionptr), str(version)) + \
                code + \
                "{0}{1} End CodeCatalog Snippet\n".format(
-                indent, line_comment_map[language])
+                indent, line_comment)
 
     def new(self, name, summary, code, language="python"):
         """
@@ -204,21 +223,25 @@ class CodeCatalogClient:
         (_,_,next_section) = cursor.partition("\n")
         return (last_section, (version, snippet), next_section)
     
-    def update_file(self, file_name, language="python"):
+    def update_file(self, filename, language=None):
         """
         Update a source file to keep it synced with the CodeCatalog.
         file_name: the fully-qualified filename to update.
         language: a string representing the language of the code file.
         """
-        tag_start = line_comment_map[language] + " CodeCatalog Snippet http://codecatalog.net/"
-        tag_end = line_comment_map[language] + " End CodeCatalog Snippet"
+        if language is None:
+            language = filename_to_language(filename)
+        
+        line_comment = language_to_line_comment_map[language]
+        tag_start = line_comment + " CodeCatalog Snippet http://codecatalog.net/"
+        tag_end = line_comment + " End CodeCatalog Snippet"
         
         new_code = None
         f = None
         f_copy = None
-        print "Checking: {0}...".format(file_name)
+        print "Checking: {0}...".format(filename)
         try:
-            f = open(file_name, 'r')
+            f = open(filename, 'r')
             code = f.read()
             new_code = ""
             cursor = code
@@ -260,12 +283,12 @@ class CodeCatalogClient:
             
             if update_required:
                 f.close()
-                f = open(file_name, "w")
+                f = open(filename, "w")
                 f.write(new_code)
             f.close()
             f = None
             if update_required:
-                f_copy = open(file_name + "~", 'w')
+                f_copy = open(filename + "~", 'w')
                 f_copy.write(code)
                 f_copy.close()
                 f_copy = None
@@ -285,19 +308,25 @@ class CodeCatalogClient:
         directory: the directory to search.
         """
         import glob
-        for file_name in glob.glob1(directory, "*." + file_extension_map[language]):
-            self.update_file(os.path.join(directory, file_name), language=language)
+        def _do_scan(language):
+            for filename in glob.glob1(directory, "*." + language_to_file_extension_map[language]):
+                self.update_file(os.path.join(directory, filename), language=language)
+        if language is None:
+            for language in language_list:
+                _do_scan(language)
+        else:
+            _do_scan(language)
     
-    def update_directory(self, code_directory, language="python"):
+    def update_directory(self, code_directory, language=None):
         """
         Scan a directory for changes to CodeCatalog snippets in source files of
         the type specified by the language str. Updates will be pulled from the server if there
         are new versions of any code you haven't changed.  Your changes will also
-        be posted to the Code Catalog if you are still at tip. 
+        be posted to the Code Catalog if you are still at tip.
         """
         self._scan_directory(language, code_directory, None)
     
-    def update_project(self, code_directory, language="python"):
+    def update_project(self, code_directory, language=None):
         """
         Scan all the directories under a root "project" directory for updates to
         CodeCatalog snippets.  Updates will be pulled from the server if there
