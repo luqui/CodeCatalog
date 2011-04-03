@@ -1,9 +1,15 @@
 import sys
 import os
 from os import path
+# CodeCatalog Snippet http://codecatalog.net/112/312/
 import urllib
+# End CodeCatalog Snippet
+# CodeCatalog Snippet http://codecatalog.net/114/317/
 import httplib
+# End CodeCatalog Snippet
+# CodeCatalog Snippet http://codecatalog.net/108/306/
 import json
+# End CodeCatalog Snippet
 import catalog_utils
 import re
 import difflib
@@ -69,7 +75,7 @@ def filename_to_language(filename):
     return None
 # End CodeCatalog Snippet
 
-
+# CodeCatalog Snippet http://codecatalog.net/106/302/
 class Version:
     """
     The version of a snippet in the form versionptr/version.
@@ -80,6 +86,7 @@ class Version:
     
     def __str__(self):
         return "{0}/{1}/".format(self.versionptr, self.version)
+# End CodeCatalog Snippet
 
 class CodeCatalogClient:
     """
@@ -277,7 +284,7 @@ class CodeCatalogClient:
                     print "Updated snippet {0}...".format(new_version)
                     print "Diff:\n ********************************************\n"
                     for item in diff:
-                        print item + "\n"
+                        print item
                     print "*******************************************\n"
                 else:
                     print "--->Already at tip."
