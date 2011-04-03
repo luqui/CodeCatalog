@@ -138,33 +138,34 @@ class CodeCatalogClient:
         """
         (code_norm, indent) = catalog_utils.normalize_code(code)
     
+        snip = self._connection.get('/api/snippet/' + str(version.version) + '/')
+        new_code = snip['code']
         latest = self._connection.get('/api/snippets/' + str(version.versionptr) + '/active/')
         
         latest_version = Version(latest['versionptr'], latest['version'])
         latest_code = latest['code']
         
         up_to_date = latest_version.version <= version.version
-        changes = code_norm != latest_code
+        changes = code_norm != new_code
     
         if up_to_date:
-            snip = self._connection.get('/api/snippet/' + str(version.version) + '/')
             if changes:
                 sys.stderr.write("*** Uploading changes to {0}\n".format(version))
-                newsnip = self._connection.post('/api/new/snippet/', {
+                new_snip = self._connection.post('/api/new/snippet/', {
                     'spec_versionptr': snip['spec_versionptr'],
-                    'code': newcode_norm,
+                    'code': code_norm,
                     'language': snip['language'],
                     'versionptr': snip['versionptr'],
                     'dependencies': ','.join(map(str, snip['dependencies'])),
                 })
-                return self._tag_snippet(new_snip[versionptr], newsnip['version'], 
-                                         code, indent=indent, language=newsnip['language'])
+                return self._tag_snippet(new_snip[versionptr], new_snip['version'], 
+                                         code, indent=indent, language=new_snip['language'])
             else:
                 # Completely unchanged.
                 return self._tag_snippet(latest_version.versionptr, latest_version.version, 
                                          code, indent=indent, language=snip['language'])
         else:
-            if not changes or re.match(r'^\s*$', newcode):
+            if not changes or re.match(r'^\s*$', code):
                 sys.stderr.write("*** Downloading changes: {0}->{1}\n".format(version, latest_version))
                 return self._tag_snippet(latest_version.versionptr, latest_version.version, 
                                          catalog_utils.indent_by(indent, latest['code']), 
