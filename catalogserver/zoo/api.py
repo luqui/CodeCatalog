@@ -368,8 +368,7 @@ def vote(request):
 def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""
 
-    # TODO filter out inactive/outdated entries (unless explicitly requested?)
-    results = SearchQuerySet().auto_query(request.GET['q']).filter(active='true')[0:10]
+    results = SearchQuerySet().auto_query(request.GET['q'])[0:10]
     return [ { 'name': r.object.name, 'summary': r.object.summary, 'version': r.object.version.id, 'versionptr': r.object.version.versionptr.id } 
                         for r in results ]
 
