@@ -7,6 +7,7 @@ import json
 import catalog_utils
 import re
 import difflib
+import codecatalog.commandline
 
 class JSONClient:
     def __init__(self, host):
@@ -66,14 +67,14 @@ class CodeCatalogClient:
     """
     An object that manages requests to the code catalog.
     """
-    HOST_ADDRESS = 'www.codecatalog.net'
-    def __init__(self):
+    def __init__(self, host='www.codecatalog.net'):
         self._conn = None
+        self.host = host
 
     @property
     def _connection(self):
         if self._conn is None:
-            self._conn = JSONClient(self.HOST_ADDRESS)
+            self._conn = JSONClient(self.host)
         return self._conn
 
     @staticmethod
