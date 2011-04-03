@@ -146,8 +146,14 @@ class CodeCatalogClient:
             'language': language,
         })
         version = Version(snip_info['versionptr'], snip_info['version'])
-        
-        return (version, catalog_utils.indent_by(indent, code_normalized))
+
+        code_formatted = catalog_utils.indent_by(indent, self._tag_snippet(
+                                version.versionptr, 
+                                version.version, 
+                                code_normalized, 
+                                language=language))
+
+        return (version, code_formatted)
 
     def get(self, version):
         """
