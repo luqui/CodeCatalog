@@ -65,10 +65,12 @@ class CodeCatalogClient:
         return self._conn
 
     @staticmethod
-    def _tag_snippet(id, code, indent="", language="python"):
-        return indent + line_comment_map[language] + " CodeCatalog Snippet http://codecatalog.net/" + str(id) + "/\n" + \
+    def _tag_snippet(versionptr, id, code, indent="", language="python"):
+        return "{0}{1} CodeCatalog Snippet http://codecatalog.net/{2}/{3}/\n".format(
+                indent, line_comment_map[language], str(versionptr), str(id)) + \
                code + \
-               indent + line_comment_map[language] + " End CodeCatalog Snippet\n"
+               "{0}{1} End CodeCatalog Snippet\n".format(
+                indent, line_comment_map[language])
 
     def new(self, name, summary, code, language="python"):
         """
@@ -113,7 +115,7 @@ class CodeCatalogClient:
         Get the snippet associated with a given spec id.
         """
         snip_info = self._connection.get('/api/snippet/' + str(snip_id) + '/')
-        tagged_snip = self._tag_snippet(snip_info['version'], snip_info['code'], language=snip_info['language'])
+        tagged_snip = self._tag_snippet(snip_info['versionptr'], snip_info['version'], snip_info['code'], language=snip_info['language'])
         return tagged_snip
 
     def check_and_update(self, snip_id, newcode):
@@ -140,17 +142,17 @@ class CodeCatalogClient:
                     'versionptr': snip['versionptr'],
                     'dependencies': ','.join(map(str, snip['dependencies'])),
                 })
-                return self._tag_snippet(newsnip['version'], newcode, indent=indent, language=snip['language'])
+                return self._tag_snippet(new_snip[versionptr], newsnip['version'], newcode, indent=indent, language=snip['language'])
             else:
                 # Completely unchanged.  Don't even move your lips.
-                return self._tag_snippet(snip_id, newcode, indent=indent, language=snip['language'])
+                return self._tag_snippet(snip['versionptr'], snip_id, newcode, indent=indent, language=snip['language'])
         else:
             if not changes or re.match(r'^\s*$', newcode):
                 sys.stderr.write("*** Downloading changes to " + str(snip_id) + "\n")
-                return self._tag_snippet(latest['version'], catalog_utils.indent_by(indent,latest['code']), indent=indent, language=latest['language'])
+                return self._tag_snippet(latest['versionptr'], latest['version'], catalog_utils.indent_by(indent,latest['code']), indent=indent, language=latest['language'])
             else:
                 sys.stderr.write("*** Snippet " + str(snip_id) + " is not up-to-date but has changes.  Leaving be.\n")
-                return self._tag_snippet(snip_id, newcode, indent=indent, language=snip['language'])
+                return self._tag_snippet(snip['versionptr'], snip_id, newcode, indent=indent, language=snip['language'])
             
     def search(self, *args):
         """
@@ -168,6 +170,9 @@ def _partition_around_catalog_block(code, tag_start, tag_end):
     if not cursor:
         return (last_section, (None, ""), "")
     (snip_id_str, _, cursor) = cursor.partition("/")
+    if not cursor.startswith("\n"):
+        # New version where /versionptr/version is the tag
+        (snip_id_str, _, cursor) = cursor.partition("/")
     snip_id = int(snip_id_str)
     cursor = cursor.lstrip()
     (snippet, _, cursor) = cursor.partition(tag_end)
@@ -215,7 +220,7 @@ def _update_file(catalog_client, language, fqn):
                     diff = differ.compare(new_snippet.split("\n"), snippet.split("\n"))
                 else:
                     old_version = catalog_client.get(snippet_id)
-                    (_,(_,old_version),_) = _partition_around_catalog_block(old_version)
+                    (_,(_,old_version),_) = _partition_around_catalog_block(old_version, tag_start, tag_end)
                     diff = differ.compare(new_snippet.split("\n"), old_snippet.split("\n"))
     
                 print "Updated snippet {0}...".format(new_snippet_id)
@@ -242,6 +247,7 @@ def _update_file(catalog_client, language, fqn):
             f.close()
         if f_copy is not None:
             f_copy.close()
+    print("Done checking.")
     return new_code
 
 def _scan_directory(data, directory, _):
