@@ -130,25 +130,26 @@ class CodeCatalogClient:
         tagged_snip = self._tag_snippet(snip_info['versionptr'], snip_info['version'], snip_info['code'], language=snip_info['language'])
         return tagged_snip
 
-    def check_and_update(self, version, newcode):
+    def check_and_update(self, version, code):
         """
         Check a snippet code-block against the CodeCatalog database and return the latest
         version.  This will update the catalog version to the given code if it was at tip
         when modified.
         """
-        (newcode_norm, indent) = catalog_utils.normalize_code(newcode)
+        (code_norm, indent) = catalog_utils.normalize_code(code)
     
-        snip = self._connection.get('/api/snippet/' + str(version.version) + '/')
-        latest = self._connection.get('/api/snippets/' + str(snip['versionptr']) + '/active/')
+        latest = self._connection.get('/api/snippets/' + str(version.versionptr) + '/active/')
         
         latest_version = Version(latest['versionptr'], latest['version'])
+        latest_code = latest['code']
         
-        up_to_date = latest['version'] <= snip['version']
-        changes = newcode_norm != snip['code']
+        up_to_date = latest_version.version <= version.version
+        changes = code_norm != latest_code
     
         if up_to_date:
+            snip = self._connection.get('/api/snippet/' + str(version.version) + '/')
             if changes:
-                sys.stderr.write("*** Uploading changes to " + str(snip_id) + "\n")
+                sys.stderr.write("*** Uploading changes to {0}\n".format(version))
                 newsnip = self._connection.post('/api/new/snippet/', {
                     'spec_versionptr': snip['spec_versionptr'],
                     'code': newcode_norm,
@@ -156,17 +157,21 @@ class CodeCatalogClient:
                     'versionptr': snip['versionptr'],
                     'dependencies': ','.join(map(str, snip['dependencies'])),
                 })
-                return self._tag_snippet(new_snip[versionptr], newsnip['version'], newcode, indent=indent, language=snip['language'])
+                return self._tag_snippet(new_snip[versionptr], newsnip['version'], 
+                                         code, indent=indent, language=newsnip['language'])
             else:
-                # Completely unchanged.  Don't even move your lips.
-                return self._tag_snippet(latest_version.versionptr, latest_version.version, newcode, indent=indent, language=snip['language'])
+                # Completely unchanged.
+                return self._tag_snippet(latest_version.versionptr, latest_version.version, 
+                                         code, indent=indent, language=snip['language'])
         else:
             if not changes or re.match(r'^\s*$', newcode):
-                sys.stderr.write("*** Downloading changes to " + str(snip_id) + "\n")
-                return self._tag_snippet(latest_version.versionptr, latest_version.version, catalog_utils.indent_by(indent,latest['code']), indent=indent, language=latest['language'])
+                sys.stderr.write("*** Downloading changes: {0}->{1}\n".format(version, latest_version))
+                return self._tag_snippet(latest_version.versionptr, latest_version.version, 
+                                         catalog_utils.indent_by(indent, latest['code']), 
+                                         indent=indent, language=latest['language'])
             else:
-                sys.stderr.write("*** Snippet " + str(snip_id) + " is not up-to-date but has changes.  Leaving be.\n")
-                return self._tag_snippet(latest_version.versionptr, latest_version.version, newcode, indent=indent, language=snip['language'])
+                sys.stderr.write("*** Snippet {0} is not up-to-date but has changes (New version: {1}).  Leaving be.\n".format(version, latest_version))
+                return self._tag_snippet(version.versionptr, version.version, code, indent=indent, language=snip['language'])
             
     def search(self, *args):
         """
@@ -301,3 +306,5 @@ class CodeCatalogClient:
         import os.path
         cc = CodeCatalogClient()
         os.path.walk(code_directory, self._scan_directory, language)
+
+CodeCatalogClient().update_project("C:\Max\Development\CodeCatalog")
