@@ -13,6 +13,7 @@ import json
 import catalog_utils
 import re
 import difflib
+import codecatalog.commandline
 
 # CodeCatalog Snippet http://codecatalog.net/110/323/
 class JSONClient:
@@ -93,14 +94,14 @@ class CodeCatalogClient:
     """
     An object that manages requests to the code catalog.
     """
-    HOST_ADDRESS = 'www.codecatalog.net'
-    def __init__(self):
+    def __init__(self, host='www.codecatalog.net'):
         self._conn = None
+        self.host = host
 
     @property
     def _connection(self):
         if self._conn is None:
-            self._conn = JSONClient(self.HOST_ADDRESS)
+            self._conn = JSONClient(self.host)
         return self._conn
 
     @staticmethod
@@ -143,7 +144,7 @@ class CodeCatalogClient:
         
         snip_info = self._connection.post('/api/new/snippet/', { 
             'spec_versionptr': spec_id,
-            'code': normalized,
+            'code': code_normalized,
             'language': language,
         })
         version = Version(snip_info['versionptr'], snip_info['version'])
@@ -187,7 +188,7 @@ class CodeCatalogClient:
                     'dependencies': ','.join(map(str, snip['dependencies'])),
                 })
                 return self._tag_snippet(new_snip['versionptr'], new_snip['version'], 
-                                         code, indent=indent, language=new_snip['language'])
+                                         code, indent=indent, language=snip['language'])
             else:
                 # Completely unchanged.
                 return self._tag_snippet(latest_version.versionptr, latest_version.version, 

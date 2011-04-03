@@ -1,0 +1,97 @@
+#!/usr/bin/python
+
+import sys
+import webbrowser
+import codecatalog
+import re
+
+# CodeCatalog Snippet http://codecatalog.net/89/248/
+import inspect
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/95/266/
+def instance_methods(obj):
+    return dict([ (m,getattr(obj,m)) for m in dir(obj) 
+                                     if inspect.ismethod(getattr(obj,m)) ])
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/99/300/
+def command_interface(obj):
+    def help():
+        sys.stderr.write(name + ": " + (obj.__doc__ or "") + "\n")
+        sys.stderr.write("Commands:\n")
+        for k,v in instance_methods(obj).items():
+            if re.match(r'^_', k): continue
+            doc = ((v.__doc__ or "").splitlines() or [""])[0]
+            sys.stderr.write("    " + k + ":\t" + doc + "\n")
+    
+    def help_cmd(cmd):
+        func = getattr(obj, cmd)
+        sys.stderr.write(name + " " + cmd + ": " + func.__doc__ + "\n")
+
+    name = sys.argv[0]
+    if len(sys.argv) < 2:
+        help()
+        return    
+    cmd = sys.argv[1]
+
+    if cmd == 'help':
+        if len(sys.argv) > 2 and hasattr(obj, sys.argv[2]):
+            help_cmd(sys.argv[2])
+        else:
+            help()
+        return
+
+    args = []
+    opts = {}
+    for arg in sys.argv[2:]:
+        m = re.match(r'^--(\w+)$', arg)
+        if m:
+            opts[m.group(1)] = True
+            continue
+        m = re.match(r'^--(\w+)=(.*)$', arg)
+        if m:
+            opts[m.group(1)] = m.group(2)
+            continue
+        args.append(arg)
+
+    if not hasattr(obj, cmd):
+        help()
+        return
+    
+    func = getattr(obj, cmd)
+    try:
+        func(*args, **opts)
+    except TypeError as e:
+        help_cmd(cmd)
+# End CodeCatalog Snippet
+
+
+class Interface:
+    def __init__(self):
+        self.client = codecatalog.CodeCatalogClient()
+    
+    def post(self, name="unnamed", summary="", language="python"):
+        """Posts stdin as a snippet on codecatalog.  Outputs a tagged snippet on stdout
+            and opens the web browser to the new page.
+        Options:
+            --name=<str>:     (optional) The name of the new spec.
+            --summary=<str>:  (optional) The summary of the new spec.
+            --language=<str>: (optional) The language the code is written in (default: python)
+        """
+        code = sys.stdin.read()
+        (spec_id, version, code_formatted) = self.client.new(name=name, summary=summary, code=code)
+        webbrowser.open_new_tab('http://' + self.client.host + '/' + str(spec_id) + '/')
+        print code_formatted
+
+    def sync(self, *files, **opts):
+        """Syncs to the latest version of all snippets in the given files.
+        Options:
+            --language=<str>: The language the code is written in
+        """
+
+        language = opts.get('language') or 'python'
+        for filename in files:
+            self.client.update_file(filename, language=language)
+
+command_interface(Interface())
