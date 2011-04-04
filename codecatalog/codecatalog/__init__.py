@@ -266,7 +266,7 @@ def confirmation_formatter(client):
         print
         print get_diff(orig, new)
         print
-        print "Downlaod changes?"
+        print "Download changes?"
         print "  (y) Download"
         print "  (n) Leave alone"
         answer = None
@@ -274,8 +274,10 @@ def confirmation_formatter(client):
             answer = raw_input("?")
         
         if answer == 'y':
+            print "new version installed!"
             return format_snippet(new)
         elif answer == 'n':
+            print "keeping local version."
             return format_snippet(orig)
     
     def conflict(orig, new, local):
