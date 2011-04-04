@@ -342,6 +342,9 @@ def update_project(formatter, directory, language=None):
         lambda arg,dirname,names: update_directory(formatter, dirname, language),
         None)
     
+def update_project_interactive(directory="."):
+    formatter = confirmation_formatter(Client())
+    update_project(formatter, directory)
 
 class Client:
     """
