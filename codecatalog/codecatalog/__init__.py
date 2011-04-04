@@ -1,20 +1,23 @@
 import sys
 import os
 from os import path
-# CodeCatalog Snippet http://codecatalog.net/112/312/
+# CodeCatalog Snippet http://www.codecatalog.net/112/312/
 import urllib
 # End CodeCatalog Snippet
-# CodeCatalog Snippet http://codecatalog.net/114/317/
+
+# CodeCatalog Snippet http://www.codecatalog.net/114/317/
 import httplib
 # End CodeCatalog Snippet
-# CodeCatalog Snippet http://codecatalog.net/108/306/
+
+# CodeCatalog Snippet http://www.codecatalog.net/108/306/
 import json
 # End CodeCatalog Snippet
+
 import catalog_utils
 import re
 import difflib
 
-# CodeCatalog Snippet http://codecatalog.net/110/323/
+# CodeCatalog Snippet http://www.codecatalog.net/110/323/
 class JSONClient:
     def __init__(self, host):
         self._host = host
@@ -45,25 +48,25 @@ class JSONClient:
         return json.loads(jsonstr)
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/102/294/
+# CodeCatalog Snippet http://www.codecatalog.net/102/294/
 language_list = ["python", "javascript"]
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/33/299/
+# CodeCatalog Snippet http://www.codecatalog.net/33/299/
 language_to_line_comment_map = {
     'python': '#',
     'javascript': '//',
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/69/298/
+# CodeCatalog Snippet http://www.codecatalog.net/69/298/
 language_to_file_extension_map = {
     "python": "py",
     "javascript": "js"
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/104/297/
+# CodeCatalog Snippet http://www.codecatalog.net/104/297/
 def filename_to_language(filename):
     """
     Given a filename, use the extension to determine
@@ -76,7 +79,7 @@ def filename_to_language(filename):
     return None
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/106/302/
+# CodeCatalog Snippet http://www.codecatalog.net/106/341/
 class Version:
     """
     The version of a snippet in the form versionptr/version.
@@ -86,128 +89,339 @@ class Version:
         self.version = version
     
     def __str__(self):
-        return "{0}/{1}/".format(self.versionptr, self.version)
+        return "{0}/{1}".format(self.versionptr, self.version)
 # End CodeCatalog Snippet
 
-class CodeCatalogClient:
+from collections import namedtuple
+
+Spec = namedtuple('Spec', ('version', 'name', 'summary', 'description'))
+Snippet = namedtuple('Snippet', ('version', 'code', 'language', 'dependencies', 'spec_versionptr'))
+
+# CodeCatalog Snippet http://www.codecatalog.net/134/351/
+def maximum_by(f, lst):
+    (bestx,xs) = (lst[0],lst[1:])
+    bestf = f(bestx)
+    for x in xs:
+        fx = f(x)
+        if fx > bestf:
+            (bestf,bestx)=(fx,x)
+    return bestx
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://www.codecatalog.net/136/356/
+def detect_by_pattern(text, patterns):
+    scores = {}
+    for k,pats in patterns.items():
+        scores[k] = 0
+        for p in pats:
+            scores[k] += len(p.findall(text))
+    
+    return maximum_by(lambda (k,v): v, scores.items())[0]
+# End CodeCatalog Snippet
+
+
+language_patterns = {
+    'python': [
+        re.compile(r'def\s+\w+\s*\(.*:\s*$', re.MULTILINE),
+        re.compile(r'for\s+\w+\s+in\s+\w+\s*:\s*$', re.MULTILINE),
+        re.compile(r'if\s+.*:\s*$', re.MULTILINE),
+    ],
+    'javascript': [
+        re.compile(r'var\s+\w+\s*=', re.MULTILINE),
+        re.compile(r'function\s+(?:\w+)?\s*\([\w\s,]*\)\s*{'),  #not multiline
+        re.compile(r'for\s*\((?:\s*var\s)?\s*\w+\s+in\s+.*\)', re.MULTILINE),
+    ],
+}
+
+def detect_language(text):
+    return detect_by_pattern(text, language_patterns)
+
+def format_snippet(snippet, indent=""):
+    leader = indent + language_to_line_comment_map[snippet.language]
+    return "{0} CodeCatalog Snippet http://www.codecatalog.net/{1}/\n".format(
+                 leader, snippet.version) + \
+           snippet.code + \
+           "{0} End CodeCatalog Snippet\n".format(leader);
+
+def partition(pattern, text):
+    m = pattern.search(text)
+    if m:
+        return (text[0:m.start()], m.groups(), text[m.end():])
+    else:
+        return None
+
+def partition_region(startre, stopre, text):
+    p1 = partition(startre, text)
+    if p1 is None: return None
+    p2 = partition(stopre, p1[2])
+    if p2 is None: return None
+    return (p1[0], p1[1], p2[0], p2[1], p2[2])
+
+
+def partition_snippet(text):
+    open_pattern = re.compile(r'^.*CodeCatalog\s+Snippet\s+http://(?:www\.)?codecatalog.net/(\d+)(?:/(\d+))?/?\s*$', re.MULTILINE)
+    close_pattern = re.compile(r'^.*End\s+CodeCatalog\s+Snippet\s*$', re.MULTILINE)
+
+    r = partition_region(open_pattern, close_pattern, text)
+    if r is None: return None
+    
+    (before, opendelim, code, closedelim, after) = r
+    (code_norm, indent) = catalog_utils.normalize_code(code)
+
+    if opendelim[1] is not None:
+        version = Version(opendelim[0], opendelim[1])
+    else:
+        # old style
+        version = Version(None, opendelim[0])
+
+    snippet = Snippet(version  = version,
+                      code     = code_norm,
+                      language = detect_language(code_norm),
+                      dependencies = [],
+                      spec_versionptr = None)
+
+    return (before, (snippet, indent), after)
+
+def case(proj, value, cases):
+    return cases[proj(value)](value)
+
+def check_changes(client, snippet):
+    orig = client.get_snippet(snippet.version)
+    new = client.get_snippet(Version(orig.version.versionptr, None))
+    
+    if orig.version.version == new.version.version:
+        # we're at latest, see if we have changes
+        if orig.code == snippet.code:
+            # no changes
+            return namedtuple('Unchanged', ('orig',))(orig)
+        else:
+            return namedtuple('Upload', ('orig', 'local'))(orig, snippet)
+    else:
+        # we're not at latest, see if we have changes
+        if orig.code == snippet.code:
+            # no changes
+            return namedtuple('Download', ('orig', 'new'))(orig, new)
+        else:
+            # uh oh
+            return namedtuple('Conflict', ('orig', 'new', 'local'))(orig, new, snippet)
+
+def process_file_contents(formatter, text):
+    """A formatter is a function that takes a snippet and returns some text
+    that it should be rendered as.  formatter is allowed to have side effects,
+    to ask the user about things and consult the server.
+    """
+    result = ""
+    while True:
+        r = partition_snippet(text)
+        if r is None: return result + text
+        
+        (before, (snippet,indent), after) = r
+        result += before
+        result += catalog_utils.indent_by(indent, formatter(snippet))
+        text = after
+
+def get_diff(old, new):
+    return '\n'.join(difflib.unified_diff(old.code.splitlines(), new.code.splitlines(), lineterm="", n=10)) \
+         + '\n'
+
+def confirmation_formatter(client):
+    def unchanged(orig):
+        print "Snippet {0} unchanged.".format(orig.version)
+        return format_snippet(orig)
+    
+    def upload(orig, local):
+        print "Snippet {0} changed locally.".format(orig.version)
+        print
+        print get_diff(orig, local)
+        print
+        print "Upload changes?"
+        print "  (y) Upload"
+        print "  (n) Leave alone"
+        print "  (r) Revert"
+        answer = None
+        while answer != 'y' and answer != 'n' and answer != 'r':
+            answer = raw_input("?")
+
+        if answer == 'y':
+            snip = client.new_snippet(orig.spec_versionptr, local.code, orig.language, orig.dependencies, source=orig)
+            return format_snippet(snip)
+        elif answer == 'n':
+            return format_snippet(local)
+        elif answer == 'r':
+            return format_snippet(orig)            
+
+    def download(orig, new):
+        print "Snippet {0} changed remotely.".format(orig.version)
+        print
+        print get_diff(orig, new)
+        print
+        print "Downlaod changes?"
+        print "  (y) Download"
+        print "  (n) Leave alone"
+        answer = None
+        while answer != 'y' and answer != 'n':
+            answer = raw_input("?")
+        
+        if answer == 'y':
+            return format_snippet(new)
+        elif answer == 'n':
+            return format_snippet(orig)
+    
+    def conflict(orig, new, local):
+        print "Snippet {0} merge conflict.".format(orig.version)
+        print
+        print "******* LOCAL CHANGES ********"
+        print get_diff(orig, local)
+        print "******************************"
+        print
+        print "******* REMOTE CHANGES *******"
+        print get_diff(orig, new)
+        print "******************************"
+        print
+        print "What to do?"
+        print "  (remote) DOWNLOAD remote changes, destroying local changes"
+        print "  (local)  UPLOAD local changes, destroying remote changes"
+        print "  (ignore) KEEP local changes, but do not upload or download anything"
+        print "  (both)   KEEP them both, and let me work out the conflict"
+        answer = None
+        while answer != 'remote' and answer != 'local' and answer != 'ignore' and answer != 'both':
+            answer = raw_input("?")
+        
+        if answer == 'remote':
+            return format_snippet(new)
+        elif answer == 'local':
+            snip = client.new_snippet(orig.spec_versionptr, local.code, orig.language, orig.dependencies, source=orig)
+            return format_snippet(snip)
+        elif answer == 'ignore':
+            return format_snippet(local)
+        elif answer == 'both':
+            return "<<<<<<<<<<< MERGE CONFLICT >>>>>>>>>>>\n" + \
+                   format_snippet(new) + format_snippet(local) + \
+                   "<<<<<<<<< END MERGE CONFLICT >>>>>>>>>\n"
+    
+    def formatter(snippet):    
+        changes = check_changes(client, snippet)
+        return case(lambda x: x.__class__.__name__, changes, {
+            'Unchanged': lambda t: unchanged(*t),
+            'Upload': lambda t: upload(*t),
+            'Download': lambda t: download(*t),
+            'Conflict': lambda t: conflict(*t),
+        })
+    return formatter
+
+def update_file(formatter, filename):
+    fh = open(filename, 'r')
+    contents = fh.read()
+    fh.close()
+    processed = process_file_contents(formatter, contents)
+    if processed != contents:
+        backup = open(filename + "~", 'w')
+        backup.write(contents)
+        backup.close()
+        fh = open(filename, 'w')
+        fh.write(processed)
+        fh.close()
+
+def update_directory(formatter, directory, language=None):
+    import glob
+    def _do_scan(language):
+        for filename in glob.glob1(directory, "*." + language_to_file_extension_map[language]):
+            fullpath = os.path.join(directory, filename)
+            print "Scanning " + fullpath
+            update_file(formatter, fullpath)
+    
+    if language is None:
+        for language in language_list:
+            _do_scan(language)
+    else:
+        _do_scan(language)
+
+def update_project(formatter, directory, language=None):
+    import os.path
+    os.path.walk(directory, 
+        lambda arg,dirname,names: update_directory(formatter, dirname, language),
+        None)
+    
+
+class Client:
     """
     An object that manages requests to the code catalog.
     """
     def __init__(self, host='www.codecatalog.net'):
-        self._conn = None
+        self._connection = JSONClient(host)
         self.host = host
-
-    @property
-    def _connection(self):
-        if self._conn is None:
-            self._conn = JSONClient(self.host)
-        return self._conn
 
     @staticmethod
     def _tag_snippet(versionptr, version, code, indent="", language="python"):
         line_comment = language_to_line_comment_map[language]
         return "{0}{1} CodeCatalog Snippet http://codecatalog.net/{2}/{3}/\n".format(
-                indent, line_comment, str(versionptr), str(version)) + \
+               indent, line_comment, str(versionptr), str(version)) + \
                code + \
                "{0}{1} End CodeCatalog Snippet\n".format(
-                indent, line_comment)
+               indent, line_comment)
 
-    def new(self, name, summary, code, language="python"):
+    def new_spec(self, name, summary, description, source=None):
         """
-        Create a new spec and add it and a new snippet for that spec to the CodeCatalog.
-        
-        name: the name of the spec.
-        summary: the spec summary.
-        code: the raw code for the snippet.
-        language: a string representing the language of the snippet. "python" is the default.
+        Creates a new spec with the given fields. If source is given,
+        then the new spec is assumed to be an edit of source (which is
+        itself a Spec)
         """
-        spec_info = self._connection.post('/api/new/spec/', 
-        {
+
+        q = {
             'name': name,
             'summary': summary,
-        })
-        spec_id = spec_info['versionptr']
+            'description': description,
+        }
+        if source is not None:
+            q['versionptr'] = source.version.versionptr
         
-        (version, code_formatted) = self.add(spec_id, code, language=language)
-        return (spec_id, version, code_formatted)
-    
-    def add(self, spec_id, code, language="python"):
-        """
-        Add a new snippet to an existing spec.
+        spec_info = self._connection.post('/api/new/spec/', q)
         
-        spec_id: the id of the spec (int).
-        code: the raw code for the snippet
-        language = the language of the snippet ("python" is the default).
-        """
-        (code_normalized, indent) = catalog_utils.normalize_code(code)
-        
-        snip_info = self._connection.post('/api/new/snippet/', { 
-            'spec_versionptr': spec_id,
-            'code': code_normalized,
-            'language': language,
-        })
-        version = Version(snip_info['versionptr'], snip_info['version'])
+        return Spec(version = Version(spec_info['versionptr'], spec_info['version']),
+                    name = name,
+                    summary = summary,
+                    description = description)
 
-        code_formatted = catalog_utils.indent_by(indent, self._tag_snippet(
-                                version.versionptr, 
-                                version.version, 
-                                code_normalized, 
-                                language=language))
-
-        return (version, code_formatted)
-
-    def get(self, version):
-        """
-        Get the snippet associated with a given spec id.
-        """
-        snip_info = self._connection.get('/api/snippet/' + str(version.version) + '/')
-        tagged_snip = self._tag_snippet(snip_info['versionptr'], snip_info['version'], snip_info['code'], language=snip_info['language'])
-        return tagged_snip
-
-    def check_and_update(self, version, code):
-        """
-        Check a snippet code-block against the CodeCatalog database and return the latest
-        version.  This will update the catalog version to the given code if it was at tip
-        when modified.
-        """
-        (code_norm, indent) = catalog_utils.normalize_code(code)
-    
-        snip = self._connection.get('/api/snippet/' + str(version.version) + '/')
-        new_code = snip['code']
-        latest = self._connection.get('/api/snippets/' + str(version.versionptr) + '/active/')
-        
-        latest_version = Version(latest['versionptr'], latest['version'])
-        latest_code = latest['code']
-        
-        up_to_date = latest_version.version <= version.version
-        changes = code_norm != new_code
-    
-        if up_to_date:
-            if changes:
-                sys.stderr.write("*** Uploading changes to {0}\n".format(version))
-                new_snip = self._connection.post('/api/new/snippet/', {
-                    'spec_versionptr': snip['spec_versionptr'],
-                    'code': code_norm,
-                    'language': snip['language'],
-                    'versionptr': snip['versionptr'],
-                    'dependencies': ','.join(map(str, snip['dependencies'])),
-                })
-                return self._tag_snippet(new_snip['versionptr'], new_snip['version'], 
-                                         code, indent=indent, language=snip['language'])
-            else:
-                # Completely unchanged.
-                return self._tag_snippet(latest_version.versionptr, latest_version.version, 
-                                         code, indent=indent, language=snip['language'])
+    def get_spec(self, version):
+        if version.version is not None:
+            spec_info = self._connection.get('/api/spec/' + str(version.version) + '/')
         else:
-            if not changes or re.match(r'^\s*$', code):
-                sys.stderr.write("*** Downloading changes: {0}->{1}\n".format(version, latest_version))
-                return self._tag_snippet(latest_version.versionptr, latest_version.version, 
-                                         catalog_utils.indent_by(indent, latest['code']), 
-                                         indent=indent, language=latest['language'])
-            else:
-                sys.stderr.write("*** Snippet {0} is not up-to-date but has changes (New version: {1}).  Leaving be.\n".format(version, latest_version))
-                return self._tag_snippet(version.versionptr, version.version, code, indent=indent, language=snip['language'])
-            
+            spec_info = self._connection.get('/api/specs/' + str(version.versionptr) + '/active/')
+
+        return Spec(version     = Version(spec_info['versionptr'], spec_info['version']),
+                    name        = spec_info['name'],
+                    summary     = spec_info['summary'],
+                    description = spec_info['active'])
+    
+    def new_snippet(self, spec_versionptr, code, language, dependencies=[], source=None):
+        q = {
+            'spec_versionptr': spec_versionptr,
+            'code': code,
+            'language': language,
+        }
+        if source is not None:
+            q['versionptr'] = source.version.versionptr
+        
+        snip_info = self._connection.post('/api/new/snippet/', q)
+        
+        return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
+                       code            = code,
+                       language        = language,
+                       dependencies    = dependencies,
+                       spec_versionptr = spec_versionptr)
+
+    def get_snippet(self, version):
+        if version.version is not None:
+            snip_info = self._connection.get('/api/snippet/' + str(version.version) + '/')
+        else:
+            snip_info = self._connection.get('/api/snippets/' + str(version.versionptr) + '/active/')
+    
+        return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
+                       code            = snip_info['code'],
+                       language        = snip_info['language'],
+                       dependencies    = snip_info['dependencies'],
+                       spec_versionptr = snip_info['spec_versionptr'])
+    
     def search(self, *args):
         """
         Search the database for a sequence of strings.  Returns a list of result specs.
@@ -215,139 +429,3 @@ class CodeCatalogClient:
         text = ' '.join(args)
         results = self._connection.get('/api/search/', { 'q': text })
         return results
-
-    @staticmethod
-    def _partition_around_catalog_block(code, tag_start, tag_end):
-        """
-        Parse a block of code and return a tuple of (code, (version, snippet), next).
-        """
-        (last_section, _, cursor) = code.partition(tag_start)
-        if not cursor:
-            return (last_section, (None, ""), "")
-        (version_ptr_str, _, cursor) = cursor.partition("/")
-        if cursor.startswith("\n"):
-            # Old version where /version is the tag
-            version_str = version_ptr_str
-            version_ptr_str = "-1"
-        else:
-            # New version where /versionptr/version is the tag
-            (version_str, _, cursor) = cursor.partition("/")
-        version = Version(int(version_ptr_str), int(version_str))
-        cursor = cursor.lstrip()
-        (snippet, _, cursor) = cursor.partition(tag_end)
-        (_,_,next_section) = cursor.partition("\n")
-        return (last_section, (version, snippet), next_section)
-    
-    def update_file(self, filename, language=None):
-        """
-        Update a source file to keep it synced with the CodeCatalog.
-        file_name: the fully-qualified filename to update.
-        language: a string representing the language of the code file.
-        """
-        if language is None:
-            language = filename_to_language(filename)
-        
-        line_comment = language_to_line_comment_map[language]
-        tag_start = line_comment + " CodeCatalog Snippet http://codecatalog.net/"
-        tag_end = line_comment + " End CodeCatalog Snippet"
-        
-        new_code = None
-        f = None
-        f_copy = None
-        print "Checking: {0}...".format(filename)
-        try:
-            f = open(filename, 'r')
-            code = f.read()
-            new_code = ""
-            cursor = code
-            update_required = False
-            while True:
-                if not cursor:
-                    break
-                (last_section, (version, snippet), cursor) = self._partition_around_catalog_block(cursor, tag_start, tag_end)
-                new_code += last_section
-                if not snippet:
-                    break
-                print("Found www.codecatalog.net/{0}.".format(version))
-                
-                new_snippet = self.check_and_update(version, snippet)
-                if new_snippet:
-                    new_code += new_snippet
-                else:
-                    # In case we Failed to get from the server
-                    new_code += snippet
-                (_, (new_version, new_snippet), _) = self._partition_around_catalog_block(new_snippet, tag_start, tag_end)
-                
-                if new_snippet != snippet or new_version.version != version.version or version.versionptr < 0:
-                    update_required = True
-                    differ = difflib.Differ()
-                    if new_version:
-                        diff = differ.compare(new_snippet.split("\n"), snippet.split("\n"))
-                    else:
-                        old_version = catalog_client.get(snippet_id)
-                        (_,(_,old_version),_) = _partition_around_catalog_block(old_version, tag_start, tag_end)
-                        diff = differ.compare(new_snippet.split("\n"), old_snippet.split("\n"))
-        
-                    print "Updated snippet {0}...".format(new_version)
-                    print "Diff:\n ********************************************\n"
-                    for item in diff:
-                        print item
-                    print "*******************************************\n"
-                else:
-                    print "--->Already at tip."
-            
-            if update_required:
-                f.close()
-                f = open(filename, "w")
-                f.write(new_code)
-            f.close()
-            f = None
-            if update_required:
-                f_copy = open(filename + "~", 'w')
-                f_copy.write(code)
-                f_copy.close()
-                f_copy = None
-        finally:
-            if f is not None:
-                f.close()
-            if f_copy is not None:
-                f_copy.close()
-        print("Done checking.")
-        return new_code
-    
-    def _scan_directory(self, language, directory, _):
-        """
-        Scan a directory for files and use CodeCatalog to update any source 
-        files of the given language type.
-        data: a tuple of (CatalogClient, language), where language is a str.
-        directory: the directory to search.
-        """
-        import glob
-        def _do_scan(language):
-            for filename in glob.glob1(directory, "*." + language_to_file_extension_map[language]):
-                self.update_file(os.path.join(directory, filename), language=language)
-        if language is None:
-            for language in language_list:
-                _do_scan(language)
-        else:
-            _do_scan(language)
-    
-    def update_directory(self, code_directory, language=None):
-        """
-        Scan a directory for changes to CodeCatalog snippets in source files of
-        the type specified by the language str. Updates will be pulled from the server if there
-        are new versions of any code you haven't changed.  Your changes will also
-        be posted to the Code Catalog if you are still at tip.
-        """
-        self._scan_directory(language, code_directory, None)
-    
-    def update_project(self, code_directory, language=None):
-        """
-        Scan all the directories under a root "project" directory for updates to
-        CodeCatalog snippets.  Updates will be pulled from the server if there
-        are new versions of any code you haven't changed.  Your changes will also
-        be posted to the Code Catalog if you are still at tip.
-        """
-        import os.path
-        cc = CodeCatalogClient()
-        os.path.walk(code_directory, self._scan_directory, language)

@@ -3,6 +3,7 @@
 import sys
 import webbrowser
 import codecatalog
+from codecatalog import catalog_utils
 import re
 
 # CodeCatalog Snippet http://codecatalog.net/89/248/
@@ -69,9 +70,9 @@ def command_interface(obj):
 
 class Interface:
     def __init__(self):
-        self.client = codecatalog.CodeCatalogClient()
+        self.client = codecatalog.Client()
     
-    def post(self, name="unnamed", summary="", language="python"):
+    def post(self, name="unnamed", summary="", language=None):
         """Posts stdin as a snippet on codecatalog.  Outputs a tagged snippet on stdout
             and opens the web browser to the new page.
         Options:
@@ -80,18 +81,25 @@ class Interface:
             --language=<str>: (optional) The language the code is written in (default: python)
         """
         code = sys.stdin.read()
-        (spec_id, version, code_formatted) = self.client.new(name=name, summary=summary, code=code)
-        webbrowser.open_new_tab('http://' + self.client.host + '/' + str(spec_id) + '/')
-        print code_formatted
+
+        (code_norm, indent) = catalog_utils.normalize_code(code)
+
+        if language is None:
+            language = codecatalog.detect_language(code)
+            sys.stderr.write("Detected language: " + language + "\n")
+
+        spec = self.client.new_spec(name, summary, "")
+        snip = self.client.new_snippet(spec.version.versionptr, code, language, [])
+        webbrowser.open_new_tab('http://' + self.client.host + '/' + str(snip.version.versionptr) + '/')
+        print catalog_utils.indent_by(indent, codecatalog.format_snippet(snip))
 
     def sync(self, *files, **opts):
-        """Syncs to the latest version of all snippets in the given files.
-        Options:
-            --language=<str>: The language the code is written in
-        """
+        """Syncs to the latest version of all snippets in the given files."""
 
-        language = opts.get('language') or 'python'
+        formatter = codecatalog.confirmation_formatter(self.client)
         for filename in files:
-            self.client.update_file(filename, language=language)
+            print "Scanning " + filename
+            codecatalog.update_file(formatter, filename)
+        print "Done."
 
 command_interface(Interface())
