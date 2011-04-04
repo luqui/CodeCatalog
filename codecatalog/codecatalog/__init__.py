@@ -120,6 +120,7 @@ def detect_by_pattern(text, patterns):
 # End CodeCatalog Snippet
 
 
+# CodeCatalog Snippet http://www.codecatalog.net/138/364/
 language_patterns = {
     'python': [
         re.compile(r'def\s+\w+\s*\(.*:\s*$', re.MULTILINE),
@@ -132,9 +133,13 @@ language_patterns = {
         re.compile(r'for\s*\((?:\s*var\s)?\s*\w+\s+in\s+.*\)', re.MULTILINE),
     ],
 }
+# End CodeCatalog Snippet
 
+# CodeCatalog Snippet http://www.codecatalog.net/140/370/
 def detect_language(text):
     return detect_by_pattern(text, language_patterns)
+# End CodeCatalog Snippet
+
 
 def format_snippet(snippet, indent=""):
     leader = indent + language_to_line_comment_map[snippet.language]
@@ -143,12 +148,15 @@ def format_snippet(snippet, indent=""):
            snippet.code + \
            "{0} End CodeCatalog Snippet\n".format(leader);
 
+# CodeCatalog Snippet http://www.codecatalog.net/142/376/
 def partition(pattern, text):
     m = pattern.search(text)
     if m:
         return (text[0:m.start()], m.groups(), text[m.end():])
     else:
         return None
+# End CodeCatalog Snippet
+
 
 def partition_region(startre, stopre, text):
     p1 = partition(startre, text)
@@ -182,8 +190,11 @@ def partition_snippet(text):
 
     return (before, (snippet, indent), after)
 
+# CodeCatalog Snippet http://www.codecatalog.net/144/381/
 def case(proj, value, cases):
     return cases[proj(value)](value)
+# End CodeCatalog Snippet
+
 
 def check_changes(client, snippet):
     orig = client.get_snippet(snippet.version)
