@@ -178,13 +178,21 @@
             }));
         };
 
+        var votes;
+        if (logged_in) {
+            votes = horizontal(
+                        button('-', function() { votedown_snip(snip.versionptr) }),
+                        votesbox,
+                        button('+', function() { voteup_snip(snip.versionptr) }));
+        }
+        else {
+            votes = elt('span');
+        }
+
         var infoarea = 
             vertical(
                 $('<span class="languagemark"></span>').text(snip.language),
-                horizontal(
-                    button('-', function() { votedown_snip(snip.versionptr) }),
-                    votesbox,
-                    button('+', function() { voteup_snip(snip.versionptr) })),
+                votes,
                 button("edit", edit),
                 dependencies_area(snip));
 
@@ -213,13 +221,11 @@
             for (var i in bugs) {
                 div.append(render_bug_version(bugs[i]));
             }
-            if (logged_in) {
-                var link = button('Update', function() {
-                    var last = bugs[bugs.length-1];
-                    link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
-                });
-                div.append(link);
-            }
+            var link = button('Update', function() {
+                var last = bugs[bugs.length-1];
+                link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
+            });
+            div.append(link);
             div.append(button('Hide', function() { div.replaceWith(render_bug(bug)) }));
         });
         return div;
@@ -227,7 +233,7 @@
 
     var render_bug_version = function(bug) {
         return elt('div', {}, 
-            horizontal(elt('b').text(bug.title), elt('span').text(bug.user), elt('span').text(bug.status)),
+            horizontal(elt('b').text(bug.title), elt('span').text(bug.user || 'Anonymous'), elt('span').text(bug.status)),
             elt('p').text(bug.comment));
     };
 
@@ -280,14 +286,12 @@
     var bugs_box = function(versionptr) {
         var div = elt('div', { 'class': 'bugs_box' });
 
-        if (logged_in) {
-            var newbug = elt('a', { href: '#' }).text("Report Bug");
-            newbug.click(function() {
-                newbug.before(bug_edit_box(versionptr, {}, render_bug));
-                return false;
-            });
-            div.append(newbug);
-        }
+        var newbug = elt('a', { href: '#' }).text("Report Bug");
+        newbug.click(function() {
+            newbug.before(bug_edit_box(versionptr, {}, render_bug));
+            return false;
+        });
+        div.append(newbug);
         
         $.get('/api/specs/' + versionptr + '/bugs/active/', function(bugs) {
             for (var i in bugs) {

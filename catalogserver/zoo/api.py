@@ -140,7 +140,7 @@ def dump_bug(bug):
         'status': BugReport.ID_TO_STATUS[bug.status],
         'timestamp': bug.version.timestamp.isoformat(),
         'comment': bug.version.comment,
-        'user': bug.version.user.username,
+        'user': bug.version.user and bug.version.user.username,
     }
         
 
