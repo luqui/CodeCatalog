@@ -214,6 +214,11 @@
             var expand_deps_button = elt('button', {}).text("Expand All");
             expand_deps_button.click(function() {
                 $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
+                    if (!snips) {
+                        alert("Couldn't expand dependencies.  Possibly because of a circular " +
+                              "dependency, or dependency on a spec with no implementations in " + snip.language);
+                        return;
+                    }
                     var code = assemble(snips);
                     var code_tagged = assemble_and_tag(snips);
                     var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', class: 'maincode' });
