@@ -138,30 +138,47 @@
     };
     // End CodeCatalog Snippet
 
-    var dependencies_area = function(snip) {
+    var dependencies_area = function(snip, replacement) {
         if (snip.dependencies.length == 0) {
             return $('');
         }
         
-        var b = button('Depends...', function() {
+        var b = button('Dependencies', function() {
             var table = elt('table');
             snip.dependencies.forEach(function (dep) {
                 $.get('/api/specs/' + dep + '/active/', function (result) {
                     table.append(
                         elt('tr', {}, 
                             elt('td', {},
-                                elt('a', { href: '/' + result.versionptr + '/' })
-                                    .text(result.name)),
+                                elt('a', { href: '/' + result.versionptr + '/' },
+                                    elt('tt').text(result.name))),
                             elt('td', {}).text(result.summary)));
                 });
             });
+            table.append(replacement());
             b.replaceWith(table);
         });
         return b;
     };
 
+    var assemble = function(snips) {
+        var str = "";
+        for (var i in snips) {
+            str += snips[i].code + "\n";
+        }
+        return str;
+    };
+    var assemble_and_tag = function(snips) {
+        var str = "";
+        for (var i in snips) {
+            console.log(snips[i]);
+            str += annotator(snips[i])(snips[i].code) + "\n";
+        }
+        return str;
+    };
+
     var displaysnip = function(snip) {
-        var div = elt('div', { class: 'snippet' });
+        var div = elt('div', { 'class': 'snippet' });
 
         var textarea = elt('textarea', { rows: 30, cols: 72, readonly: 'readonly' });
         textarea.val(snip.code);
@@ -193,15 +210,28 @@
             vertical(
                 $('<span class="languagemark"></span>').text(snip.language),
                 votes,
-                button("edit", edit),
-                dependencies_area(snip));
+                button("edit", edit));
 
-        var expand_deps_button = elt('button', {}).text("Expand Dependencies");
-        expand_deps_button.click(function() {
-            
+        var deps_area = dependencies_area(snip, function() {
+            var expand_deps_button = elt('button', {}).text("Expand All");
+            expand_deps_button.click(function() {
+                $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
+                    var code = assemble(snips);
+                    var code_tagged = assemble_and_tag(snips);
+                    var newtextarea = elt('textarea', { rows: 30, cols: 72, readonly: 'readonly' });
+                    // TODO evilness  (undo it I mean)
+                    newtextarea.attr('rows', linecount(code));
+                    newtextarea.val(code);
+                    select_on_click(newtextarea, function() { return code_tagged; });
+                    textarea.replaceWith(newtextarea);
+                    textarea = newtextarea;
+                    expand_deps_button.remove();  // TODO toggle instead
+                });
+            });
+            return expand_deps_button;
         });
         
-        var table = horizontal(textarea, infoarea);
+        var table = horizontal(vertical(textarea, deps_area), infoarea);
 
         div.append(table);
         return div;
