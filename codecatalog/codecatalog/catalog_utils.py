@@ -28,10 +28,11 @@ def initial_whitespace(line):
     return re.search(r'^\s*', line).group(0)
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/26/182/
+# CodeCatalog Snippet http://www.codecatalog.net/26/417/
 def strip_indent(text):
     lines = text.splitlines()
-    lengths = map(lambda l: len(initial_whitespace(l)), lines)
+    all_ws = re.compile('^\s*$')
+    lengths = map(lambda l: len(initial_whitespace(l)), filter(lambda s: not all_ws.match(s), lines))
     if not lengths:
         return ("", "")
     initial = min(1000, *lengths) # indenting by 1000 characters?  yow!

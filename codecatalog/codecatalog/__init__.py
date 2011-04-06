@@ -108,7 +108,7 @@ def maximum_by(f, lst):
     return bestx
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/136/356/
+# CodeCatalog Snippet http://www.codecatalog.net/136/362/
 def detect_by_pattern(text, patterns):
     scores = {}
     for k,pats in patterns.items():
@@ -120,7 +120,7 @@ def detect_by_pattern(text, patterns):
 # End CodeCatalog Snippet
 
 
-# CodeCatalog Snippet http://www.codecatalog.net/138/364/
+# CodeCatalog Snippet http://www.codecatalog.net/138/368/
 language_patterns = {
     'python': [
         re.compile(r'def\s+\w+\s*\(.*:\s*$', re.MULTILINE),
@@ -135,7 +135,7 @@ language_patterns = {
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/140/370/
+# CodeCatalog Snippet http://www.codecatalog.net/140/373/
 def detect_language(text):
     return detect_by_pattern(text, language_patterns)
 # End CodeCatalog Snippet
@@ -167,8 +167,8 @@ def partition_region(startre, stopre, text):
 
 
 def partition_snippet(text):
-    open_pattern = re.compile(r'^.*CodeCatalog\s+Snippet\s+http://(?:www\.)?codecatalog.net/(\d+)(?:/(\d+))?/?\s*$', re.MULTILINE)
-    close_pattern = re.compile(r'^.*End\s+CodeCatalog\s+Snippet\s*$', re.MULTILINE)
+    open_pattern = re.compile(r'^.*CodeCatalog[ \t]+Snippet[ \t]+http://(?:www\.)?codecatalog.net/(\d+)(?:/(\d+))?/?[ \t]*\n', re.MULTILINE)
+    close_pattern = re.compile(r'^.*End[ \t]+CodeCatalog[ \t]+Snippet[ \t]*\n', re.MULTILINE)
 
     r = partition_region(open_pattern, close_pattern, text)
     if r is None: return None
@@ -209,7 +209,10 @@ def check_changes(client, snippet):
             return namedtuple('Upload', ('orig', 'local'))(orig, snippet)
     else:
         # we're not at latest, see if we have changes
-        if orig.code == snippet.code:
+        if new.code == snippet.code:
+            # fast forward
+            return namedtuple('FastForward', ('orig', 'new'))(orig, new)
+        elif orig.code == snippet.code:
             # no changes
             return namedtuple('Download', ('orig', 'new'))(orig, new)
         else:
@@ -235,6 +238,11 @@ def get_diff(old, new):
     return '\n'.join(difflib.unified_diff(old.code.splitlines(), new.code.splitlines(), lineterm="", n=10)) \
          + '\n'
 
+def patchup_snippet(orig, local):
+    newlocal = dict(local)
+    newlocal.version = orig.version
+    return newlocal
+
 def confirmation_formatter(client):
     def unchanged(orig):
         print "Snippet {0} unchanged.".format(orig.version)
@@ -254,11 +262,15 @@ def confirmation_formatter(client):
             answer = raw_input("?")
 
         if answer == 'y':
+            print "Uploading changes."
             snip = client.new_snippet(orig.spec_versionptr, local.code, orig.language, orig.dependencies, source=orig)
+            print "Done."
             return format_snippet(snip)
         elif answer == 'n':
-            return format_snippet(local)
+            print "Kept local version."
+            return format_snippet(patchup_snippet(orig, local))
         elif answer == 'r':
+            print "Reverted to version {0}".format(orig.version)
             return format_snippet(orig)            
 
     def download(orig, new):
@@ -274,10 +286,10 @@ def confirmation_formatter(client):
             answer = raw_input("?")
         
         if answer == 'y':
-            print "new version installed!"
+            print "New version installed."
             return format_snippet(new)
         elif answer == 'n':
-            print "keeping local version."
+            print "Kept local version."
             return format_snippet(orig)
     
     def conflict(orig, new, local):
@@ -301,17 +313,39 @@ def confirmation_formatter(client):
             answer = raw_input("?")
         
         if answer == 'remote':
+            print "Local changes ignored, new version installed."
             return format_snippet(new)
         elif answer == 'local':
+            print "Remote changes ignored, overwriting with local version."
             snip = client.new_snippet(orig.spec_versionptr, local.code, orig.language, orig.dependencies, source=orig)
             return format_snippet(snip)
         elif answer == 'ignore':
-            return format_snippet(local)
+            print "Left it alone."
+            return format_snippet(patchup_snippet(orig, local))
         elif answer == 'both':
+            print "Both versions inserted, please resolve manually."
             return "<<<<<<<<<<< MERGE CONFLICT >>>>>>>>>>>\n" + \
                    format_snippet(new) + format_snippet(local) + \
                    "<<<<<<<<< END MERGE CONFLICT >>>>>>>>>\n"
     
+    def fastforward(orig, new):
+        print "Fast Forward from {0} to {1}".format(orig.version, new.version);
+        print "The code didn't change, but the version did."
+        print
+        print orig.code
+        print
+        print "OK to tag this snippet with the latest version number?"
+        answer = None
+        while answer != 'y' and answer != 'n':
+            answer = raw_input("?")
+        
+        if answer == 'y':
+            print "Code retagged with version {0}".format(new.version)
+            return format_snippet(new)
+        else:
+            print "Left it as it was."
+            return format_snippet(orig.version)
+
     def formatter(snippet):    
         changes = check_changes(client, snippet)
         return case(lambda x: x.__class__.__name__, changes, {
@@ -319,6 +353,7 @@ def confirmation_formatter(client):
             'Upload': lambda t: upload(*t),
             'Download': lambda t: download(*t),
             'Conflict': lambda t: conflict(*t),
+            'FastForward': lambda t: fastforward(*t),
         })
     return formatter
 
