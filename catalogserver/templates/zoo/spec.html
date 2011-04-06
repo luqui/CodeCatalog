@@ -196,6 +196,11 @@
                 button("edit", edit),
                 dependencies_area(snip));
 
+        var expand_deps_button = elt('button', {}).text("Expand Dependencies");
+        expand_deps_button.click(function() {
+            
+        });
+        
         var table = horizontal(textarea, infoarea);
 
         div.append(table);

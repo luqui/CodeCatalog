@@ -144,7 +144,7 @@ def dump_bug(bug):
     }
         
 
-# Begin CodeCatalog Snippet http://codecatalog.net/20/
+# CodeCatalog Snippet http://www.codecatalog.net/10/20/
 def traverse_cons_list(conslist):
     while conslist is not ():
         (x,xs) = conslist
@@ -152,11 +152,11 @@ def traverse_cons_list(conslist):
         conslist = xs
 # End CodeCatalog Snippet
 
-# Begin CodeCatalog Snippet http://codecatalog.net/25/
+# CodeCatalog Snippet http://www.codecatalog.net/12/186/
 import heapq
 # End CodeCatalog Snippet
 
-# Begin CodeCatalog Snippet http://codecatalog.net/30/
+# CodeCatalog Snippet http://www.codecatalog.net/14/32/
 def shortest_path(children, success, init):
     seen = {}
     q = [(0, init, ())]
@@ -173,19 +173,63 @@ def shortest_path(children, success, init):
     return None
 # End CodeCatalog Snippet
 
+# CodeCatalog Snippet http://www.codecatalog.net/146/390/
+def uncons_set(s):
+    clone = set(s)
+    x = clone.pop()
+    return (x, frozenset(clone))
+# End CodeCatalog Snippet
 
-def assemble(request, versionptr):
-    """GET /api/specs/<ptr>/assemble/ : Get a list of snippets which transitively assemble a spec"""
+# CodeCatalog Snippet http://www.codecatalog.net/148/413/
+def dependency_search(members, type):
     def children(elem):
-        (vptr, rest) = (elem[0], elem[1:])
-        snips = Snippet.objects.filter(spec_versionptr=vptr, version__active=True)
-        return (( -snip.version.versionptr.votes
-                , snip.dependency_set.values_list('target', flat=True)
-                , snip ) 
-                for snip in snips)
-    def success(elem):
-        return len(elem) == 0
-    return map(dump_snippet, shortest_path(children, success, (versionptr,)) or ()) or None
+        (typ, rest) = uncons_set(elem)
+        mems = list(members(typ))
+        return (( mem.weight, mem.deps | rest, mem.object ) for mem in mems)
+    def success(satset):
+        return len(satset) == 0
+    return shortest_path(children, success, frozenset((type,)))
+# End CodeCatalog Snippet
+
+from collections import namedtuple
+AnnotatedMember = namedtuple('AnnotatedMember', ['weight', 'deps', 'object'])
+
+def snippet_dependencies(snip):
+    return frozenset(snip.dependency_set.values_list('target', flat=True))
+
+def specs_assemble(request, versionptr):
+    """GET /api/specs/<ptr>/assemble/ : Get a list of snippets which transitively assemble a spec"""
+    def members(vptr):
+        for o in Snippet.objects.filter(spec_versionptr=vptr, version__active=True):
+            yield AnnotatedMember(
+                    weight=-o.version.versionptr.votes+1, 
+                    deps=snippet_dependencies(o),
+                    object=o)
+    return map(dump_snippet, dependency_search(members, versionptr) or ()) or None
+
+def snippet_assemble(request, version):
+    """GET /api/snippet/<version>/assemble/ : Get a list of snippets which transitively assemble,
+       a spec, where the top level is a specific snippet.
+    """
+    snippet = Snippet.objects.get(version=int(version))
+    
+    def lang_members(vptr):
+        for o in Snippet.objects.filter(
+                    spec_versionptr=vptr, 
+                    version__active=True,
+                    language=snippet.language):
+            yield AnnotatedMember(
+                    weight=-o.version.versionptr.votes+1,
+                    deps=snippet_dependencies(o),
+                    object=o)
+    def members(vptr):
+        def filt(o):
+            return not o.object.spec_versionptr == snippet.spec_versionptr \
+                   or o.object.version == snippet.version
+        return filter(filt, lang_members(vptr))
+    
+    return map(dump_snippet, dependency_search(members, snippet.spec_versionptr) or ()) or None
+    
 
 def specs_active(request, versionptr):
     """GET /api/specs/<ptr>/active/ : Get the latest active spec with versionptr <ptr>."""
