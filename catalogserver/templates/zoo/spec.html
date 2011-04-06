@@ -169,7 +169,6 @@
     var assemble_and_tag = function(snips) {
         var str = "";
         for (var i in snips) {
-            console.log(snips[i]);
             str += annotator(snips[i])(snips[i].code) + "\n";
         }
         return str;
