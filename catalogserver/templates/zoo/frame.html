@@ -54,8 +54,8 @@
     };
     // End CodeCatalog Snippet
 
-{% if user.is_authenticated %}
     $(function() {
+{% if user.is_authenticated %}
         $.get('/api/user/events/check/', function (hasEvents) {
             if (!hasEvents) return;
             $('#events').append(
@@ -87,8 +87,14 @@
                 }).addClass('events_table')
             );
         });
-    });
+{% else %}
+        $('#loginbutton').click(function() {
+            var path = window.location.pathname;
+            window.location.href = "/openid/login/?next=" + escape(path);
+            return false;
+        });
 {% endif %}
+    });
   </script>
   <script type="text/javascript">
 
@@ -113,7 +119,7 @@
        {% if user.is_authenticated %}
         <b><a href="/profile/">{{user.username}}</a></b> (<a href="/logout/">logout</a>)
        {% else %}
-        <a href="/openid/login/">login</a>
+        <a href="/openid/login/" name="loginbutton" id="loginbutton">login</a>
        {% endif %}
       </td> 
       <td>
