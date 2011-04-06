@@ -20,7 +20,7 @@ class SpecIndex(RealTimeSearchIndex):
 
     def prepare_summary(self, obj):
         active = obj.active_spec()
-        return active and active.name
+        return active and active.summary
 
     def prepare_versionptrid(self, obj):
         return obj.id
