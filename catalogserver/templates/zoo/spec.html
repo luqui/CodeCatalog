@@ -13,9 +13,9 @@
     #name { font-family: monospace }
     .hidden { display: none; visibility: hidden; width: 10px }
     #hack { display: none; visibility: hidden; width: 10px }
+    textarea.maincode { width: 750px }
     .snippet { background: #ddb; margin-top: 5mm }
-    .snippet > table { width: 100% }
-    .snippet textarea { background: #eee; width: 100% }
+    .snippet textarea { background: #eee }
     .languagemark { background: #db9; font-weight: bold }
     .depmark { background: #db9; float: left }
     .bugs_box { margin-left: 1in }
@@ -31,22 +31,20 @@
 
     var logged_in = '{{user.is_authenticated}}' == 'True';
 
-    // CodeCatalog Snippet http://codecatalog.net/45/
+    // CodeCatalog Snippet http://www.codecatalog.net/18/45/
     var reload = function() { document.location.reload(); };
     // End CodeCatalog Snippet
-
     var post = function(url, dict, callback) {
         dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
         $.post(url, dict, callback);
     };
 
-    // CodeCatalog Snippet http://codecatalog.net/79/
+    // CodeCatalog Snippet http://www.codecatalog.net/30/79/
     var linecomment = {
         python: '#',
         javascript: '//',
     };
     // End CodeCatalog Snippet
-
     var annotator = function (snip) { 
         return function (text) {
             return linecomment[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
@@ -63,7 +61,7 @@
         post('/api/vote/', { versionptr: versionptr, value: 1 }, reload);
     };
 
-    // CodeCatalog Snippet http://codecatalog.net/85/
+    // CodeCatalog Snippet http://www.codecatalog.net/32/85/
     var max = function() {
         var r = arguments[0];
         for (var i = 1; i < arguments.length; ++i) {
@@ -73,7 +71,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/96/
+    // CodeCatalog Snippet http://www.codecatalog.net/35/96/
     var min = function() {
         var r = arguments[0];
         for (var i = 1; i < arguments.length; ++i) {
@@ -92,7 +90,7 @@
         });
     };
 
-    // CodeCatalog Snippet http://codecatalog.net/119/
+    // CodeCatalog Snippet http://www.codecatalog.net/16/119/
     var elt = function(name, attrs) {
         var r = $(document.createElement(name));
         if (attrs) {
@@ -107,7 +105,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/99/
+    // CodeCatalog Snippet http://www.codecatalog.net/37/99/
     var button = function(text, click) {
         var r = elt('button');
         r.text(text);
@@ -116,7 +114,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/120/
+    // CodeCatalog Snippet http://www.codecatalog.net/39/416/
     var horizontal = function() {
         var row = elt('tr');
         for (var i = 0; i < arguments.length; ++i) {
@@ -127,7 +125,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/121/
+    // CodeCatalog Snippet http://www.codecatalog.net/41/121/
     var vertical = function() {
         var r = elt('table');
         for (var i = 0; i < arguments.length; ++i) {
@@ -137,7 +135,7 @@
         return r;
     };
     // End CodeCatalog Snippet
-
+    
     var dependencies_area = function(snip, replacement) {
         if (snip.dependencies.length == 0) {
             return $('');
@@ -180,7 +178,7 @@
     var displaysnip = function(snip) {
         var div = elt('div', { 'class': 'snippet' });
 
-        var textarea = elt('textarea', { rows: 30, cols: 72, readonly: 'readonly' });
+        var textarea = elt('textarea', { rows: 30, readonly: 'readonly', class: 'maincode' });
         textarea.val(snip.code);
         textarea.attr('rows', linecount(snip.code));
 
@@ -218,7 +216,7 @@
                 $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
                     var code = assemble(snips);
                     var code_tagged = assemble_and_tag(snips);
-                    var newtextarea = elt('textarea', { rows: 30, cols: 72, readonly: 'readonly' });
+                    var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', class: 'maincode' });
                     // TODO evilness  (undo it I mean)
                     newtextarea.attr('rows', linecount(code));
                     newtextarea.val(code);
@@ -272,7 +270,7 @@
             elt('p').text(bug.comment));
     };
 
-    // CodeCatalog Snippet http://codecatalog.net/149/
+    // CodeCatalog Snippet http://www.codecatalog.net/49/149/
     var label_table = function(dict) {
         var ret = elt('table');
         for (var i in dict) {
@@ -283,7 +281,6 @@
         return ret;
     };
     // End CodeCatalog Snippet
-
     var simple_select = function(options) {
         var ret = elt('select', {});
         for (var i in options) {
@@ -365,7 +362,7 @@
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
-<textarea id="spec" name="spec" rows="15" cols="72">{{spec.spec}}</textarea>
+<textarea id="spec" name="spec" rows="30" class="maincode">{{spec.spec}}</textarea>
 <div id="spec_bugs"></div>
 {% endblock spec %}
 

@@ -16,7 +16,7 @@
   </style>
 
   <script>
-    // CodeCatalog Snippet http://codecatalog.net/119/
+    // CodeCatalog Snippet http://www.codecatalog.net/16/119/
     var elt = function(name, attrs) {
         var r = $(document.createElement(name));
         if (attrs) {
@@ -31,7 +31,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/87/231/
+    // CodeCatalog Snippet http://www.codecatalog.net/87/231/
     var dropdown = function(clicker, make_elements) {
         var div = elt('div', {}, clicker);
         var onclick = function() {
@@ -44,7 +44,7 @@
                 clicker.click(onclick);
                 return false;
             });
-
+    
             make_elements(function(e) {
                 list.append(elt('tr', {}, elt('td', {}, e)));
             });
