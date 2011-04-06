@@ -177,7 +177,7 @@
     var displaysnip = function(snip) {
         var div = elt('div', { 'class': 'snippet' });
 
-        var textarea = elt('textarea', { rows: 30, readonly: 'readonly', class: 'maincode' });
+        var textarea = elt('textarea', { rows: 30, readonly: 'readonly', 'class': 'maincode', wrap: 'off' });
         textarea.val(snip.code);
         textarea.attr('rows', linecount(snip.code));
 
@@ -220,7 +220,7 @@
                     }
                     var code = assemble(snips);
                     var code_tagged = assemble_and_tag(snips);
-                    var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', class: 'maincode' });
+                    var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', 'class': 'maincode', wrap: 'off'});
                     // TODO evilness  (undo it I mean)
                     newtextarea.attr('rows', linecount(code));
                     newtextarea.val(code);
@@ -366,7 +366,7 @@
 <h2>Summary</h2>
 <span id="summary" name="summary" class="editable">{{spec.summary}}</span>
 <h2>Spec</h2>
-<textarea id="spec" name="spec" rows="30" class="maincode">{{spec.spec}}</textarea>
+<textarea id="spec" name="spec" rows="30" class="maincode" wrap="off">{{spec.spec}}</textarea>
 <div id="spec_bugs"></div>
 {% endblock spec %}
 
