@@ -48,6 +48,7 @@ urlpatterns = patterns('',
     (r'^profile/$', views.profile),
     (r'^static/(?P<path>[\w+\./-]+)$', django.views.static.serve, 
             { 'document_root': 'static'} ),
-    (r'^openid/', include('django_openid_auth.urls')),
+    url(r'^openid/login/$', 'django_openid_auth.views.login_begin', { 'template_name': 'registration/login.html' }, name='openid-login'),
+    url(r'^openid/complete/$', 'django_openid_auth.views.login_complete', name='openid-complete'),
     (r'^logout/$', 'django.contrib.auth.views.logout', { 'next_page': '/' }),
 )
