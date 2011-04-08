@@ -354,6 +354,15 @@
             e.replaceWith(snip);
             snip.after(bugs_box(data.versionptr));
         });
+
+        $('#addsnippet').click(function() {
+            var proto = {
+                spec_versionptr: {{spec.versionptr}},
+            };
+            $('#addsnippet').replaceWith(code_editor(proto, function(newsnip) {
+                $.post('/api/new/snippet/', newsnip, reload);
+            }));
+        });
     });
   </script>
 {% endblock scripting %}
@@ -376,7 +385,8 @@
  <textarea class="code" readonly="readonly">{{snip.code}}</textarea>
  <textarea id="hack" class="data hidden" readonly="readonly">{{snip|json}}</textarea>
 </div>
-
 {% endfor %}
+
+<button name="addsnippet" id="addsnippet">Add Snippet</button>
 {% endblock impls %}
 {% endblock content %}
