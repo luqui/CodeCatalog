@@ -114,6 +114,14 @@
     };
     // End CodeCatalog Snippet
 
+    # CodeCatalog Snippet http://www.codecatalog.net/167/450/
+    var dynamic_link = function(text, click) {
+        var r = elt('a', {'href': '#'}).text(text);
+        r.click(function() { click(); return false; });
+        return r;
+    };
+    # End CodeCatalog Snippet
+
     // CodeCatalog Snippet http://www.codecatalog.net/39/416/
     var horizontal = function() {
         var row = elt('tr');
@@ -174,11 +182,7 @@
         return str;
     };
 
-    var display_history = function(snips) {
-        
-    };
-
-    var code_box = function(snip) {
+    var display_snip_version = function(snip) {
         var textarea = elt('textarea', { rows:30, readonly: 'readonly', 'class': 'maincode', wrap: 'off' });
         textarea.val(snip.code);
         textarea.attr('rows', linecount(snip.code));
@@ -216,7 +220,86 @@
                 
     };
 
-    var display_snip = function(snip) {
+    var display_snips_history = function(snips) {
+        var table = elt('table');
+        for (var i in snips) {
+            (function() {
+                var snip = snips[i];
+                var info;
+                if (snip.active) {
+                    info = $('');
+                }
+                else if (!snip.active) {
+                    info = dynamic_link('Revert to this version', function() {
+                        var newsnip = $.extend({}, snip);
+                        newsnip.dependencies = snip.dependencies.join(',');
+                        newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.version;
+                        delete newsnip.version;
+                        $.post('/api/new/snippet/', newsnip, reload);
+                    });
+                }
+                var text = snip.comment;
+                if (!text) {
+                    text = "<No comment>";
+                }
+                var d = vertical(display_snip_version(snip), elt('span').text(text));
+                table.append(elt('tr', {}, elt('td', {}, horizontal(d, info))));
+            })();
+        }
+        return table;
+    };
+
+    var display_snip_history = function(snip) {
+        var div = elt('div');
+        $.get('/api/snippets/' + snip.versionptr + '/all/', function(snips) {
+            snips.sort(function(a,b) {
+                return a.timestamp < b.timestamp ? 1 : -1;
+            });
+            div.append(display_snips_history(snips));
+        });
+        return div;
+    };
+
+    var tabs = function(ts) {
+        var tablabels = elt('tr', {});
+        var tabtable = elt('table', {}, tablabels);
+        var content = elt('div', {});
+        var container = elt('div', {}, tabtable, content);      
+        var cur;
+
+        for (var i in ts) {
+            (function() {
+                var t = ts[i];
+                var cb = function() {
+                    if (!t.contentCache) {
+                        if (typeof t.content == "function") {
+                            t.contentCache = t.content();
+                        }
+                        else {
+                            t.contentCache = t.content;
+                        }
+                        content.append(t.contentCache);
+                    }
+                    if (cur) { cur.addClass('hidden'); }
+                    t.contentCache.removeClass('hidden');
+                    cur = t.contentCache;
+                };
+                tablabels.append(elt('td', {}, dynamic_link(t.label, cb)));
+                if (i == 0) cb();
+            })();
+        }
+        
+        return container;
+    };
+
+    var display_snip_container = function(snip) {
+        return tabs([
+            { label: 'Active', content: function() { return display_snip_versionptr(snip) } },
+            { label: 'History', content: function() { return display_snip_history(snip) } },
+        ]);
+    };
+
+    var display_snip_versionptr = function(snip) {
         var div = elt('div', { 'class': 'snippet' });
 
         var votesbox = elt('span');
@@ -244,7 +327,7 @@
                 votes,
                 button("edit", edit));
 
-        div.append(horizontal(code_box(snip), infoarea));
+        div.append(horizontal(display_snip_version(snip), infoarea));
         return div;
     };
 
@@ -359,7 +442,7 @@
         $('.snippet').each(function (i,e) {
             e = $(e);
             var data = JSON.parse(e.find('.data').val());
-            var snip = display_snip(data);
+            var snip = display_snip_container(data);
             e.replaceWith(snip);
             snip.after(bugs_box(data.versionptr));
         });

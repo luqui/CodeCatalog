@@ -148,9 +148,9 @@ def format_snippet(snippet, indent=""):
            snippet.code + \
            "{0} End CodeCatalog Snippet\n".format(leader);
 
-# CodeCatalog Snippet http://www.codecatalog.net/142/376/
+# CodeCatalog Snippet http://www.codecatalog.net/142/418/
 def partition(pattern, text):
-    m = pattern.search(text)
+    m = re.search(pattern, text)
     if m:
         return (text[0:m.start()], m.groups(), text[m.end():])
     else:
@@ -239,8 +239,8 @@ def get_diff(old, new):
          + '\n'
 
 def patchup_snippet(orig, local):
-    newlocal = dict(local)
-    newlocal.version = orig.version
+    newlocal = Snippet(**dict(local._asdict(), version=orig.version))
+    assert(newlocal.version==orig.version)
     return newlocal
 
 def confirmation_formatter(client):
@@ -407,13 +407,13 @@ class Client:
         self._connection = JSONClient(host)
         self.host = host
 
-    def _spec_info_to_spec(spec_info):
+    def _spec_info_to_spec(self, spec_info):
         return Spec(version     = Version(spec_info['versionptr'], spec_info['version']),
                     name        = spec_info['name'],
                     summary     = spec_info['summary'],
-                    description = spec_info['active'])
+                    description = spec_info['description'])
 
-    def _snip_info_to_snippet(snip_info):
+    def _snip_info_to_snippet(self, snip_info):
         return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
                        code            = snip_info['code'],
                        language        = snip_info['language'],
@@ -448,11 +448,12 @@ class Client:
         return self._spec_info_to_spec(spec_info)
     
     def new_snippet(self, spec_versionptr, code, language, dependencies=[], source=None):
+        (code_norm, indent) = catalog_utils.normalize_code(code)
         q = {
             'spec_versionptr': spec_versionptr,
-            'code': code,
+            'code': code_norm,
             'language': language,
-            'dependencies': dependencies,
+            'dependencies': ','.join(dependencies),
         }
         if source is not None:
             q['versionptr'] = source.version.versionptr

@@ -61,10 +61,7 @@ def command_interface(obj):
         return
     
     func = getattr(obj, cmd)
-    try:
-        func(*args, **opts)
-    except TypeError as e:
-        help_cmd(cmd)
+    func(*args, **opts)
 # End CodeCatalog Snippet
 
 
