@@ -87,13 +87,13 @@
                 }).addClass('events_table')
             );
         });
-{% else %}
-        $('#loginbutton').click(function() {
+{% endif %}
+
+        $('#loginoutbutton').click(function() {
             var path = window.location.pathname;
-            window.location.href = "/openid/login/?next=" + escape(path);
+            window.location.href = $('#loginoutbutton').attr('href') + "?next=" + escape(path);
             return false;
         });
-{% endif %}
     });
   </script>
   <script type="text/javascript">
@@ -117,9 +117,9 @@
      <tr>
       <td>
        {% if user.is_authenticated %}
-        <b><a href="/profile/">{{user.username}}</a></b> (<a href="/logout/">logout</a>)
+        <b><a href="/profile/">{{user.username}}</a></b> (<a href="/logout/" name="loginoutbutton" id="loginoutbutton">logout</a>)
        {% else %}
-        <a href="/openid/login/" name="loginbutton" id="loginbutton">login</a>
+        <a href="/openid/login/" name="loginoutbutton" id="loginoutbutton">login</a>
        {% endif %}
       </td> 
       <td>

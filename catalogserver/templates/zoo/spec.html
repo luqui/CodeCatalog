@@ -174,41 +174,16 @@
         return str;
     };
 
-    var displaysnip = function(snip) {
-        var div = elt('div', { 'class': 'snippet' });
+    var display_history = function(snips) {
+        
+    };
 
-        var textarea = elt('textarea', { rows: 30, readonly: 'readonly', 'class': 'maincode', wrap: 'off' });
+    var code_box = function(snip) {
+        var textarea = elt('textarea', { rows:30, readonly: 'readonly', 'class': 'maincode', wrap: 'off' });
         textarea.val(snip.code);
         textarea.attr('rows', linecount(snip.code));
-
         select_on_click(textarea, annotator(snip));
-
-        var votesbox = elt('span');
-        votesbox.text(snip.votes);
-
-        var edit = function() {
-            div.replaceWith(code_editor(snip, function(newsnip) {
-                $.post('/api/new/snippet/', newsnip, reload);
-            }));
-        };
-
-        var votes;
-        if (logged_in) {
-            votes = horizontal(
-                        button('-', function() { votedown_snip(snip.versionptr) }),
-                        votesbox,
-                        button('+', function() { voteup_snip(snip.versionptr) }));
-        }
-        else {
-            votes = elt('span');
-        }
-
-        var infoarea = 
-            vertical(
-                $('<span class="languagemark"></span>').text(snip.language),
-                votes,
-                button("edit", edit));
-
+        
         var deps_area = dependencies_area(snip, function() {
             var expand_deps_button = elt('button', {}).text("Expand All");
             expand_deps_button.click(function() {
@@ -233,9 +208,43 @@
             return expand_deps_button;
         });
         
-        var table = horizontal(vertical(textarea, deps_area), infoarea);
+        return vertical(
+            textarea,
+            horizontal(
+                $('<span class="languagemark"></span>').text(snip.language),
+                deps_area));
+                
+    };
 
-        div.append(table);
+    var display_snip = function(snip) {
+        var div = elt('div', { 'class': 'snippet' });
+
+        var votesbox = elt('span');
+        votesbox.text(snip.votes);
+
+        var edit = function() {
+            div.replaceWith(code_editor(snip, function(newsnip) {
+                $.post('/api/new/snippet/', newsnip, reload);
+            }));
+        };
+
+        var votes;
+        if (logged_in) {
+            votes = horizontal(
+                        button('-', function() { votedown_snip(snip.versionptr) }),
+                        votesbox,
+                        button('+', function() { voteup_snip(snip.versionptr) }));
+        }
+        else {
+            votes = elt('span',{}, votesbox);
+        }
+
+        var infoarea = 
+            vertical(
+                votes,
+                button("edit", edit));
+
+        div.append(horizontal(code_box(snip), infoarea));
         return div;
     };
 
@@ -350,7 +359,7 @@
         $('.snippet').each(function (i,e) {
             e = $(e);
             var data = JSON.parse(e.find('.data').val());
-            var snip = displaysnip(data);
+            var snip = display_snip(data);
             e.replaceWith(snip);
             snip.after(bugs_box(data.versionptr));
         });
