@@ -394,22 +394,31 @@ def update_project_interactive(directory="."):
     formatter = confirmation_formatter(Client())
     update_project(formatter, directory)
 
+# CodeCatalog Snippet http://www.codecatalog.net/154/423/
+def merge(dict1, dict2):
+    return dict(dict1, **dict2)
+# End CodeCatalog Snippet
+
 class Client:
     """
-    An object that manages requests to the code catalog.
+    An object that manages requests to the online catalog.
     """
     def __init__(self, host='www.codecatalog.net'):
         self._connection = JSONClient(host)
         self.host = host
 
-    @staticmethod
-    def _tag_snippet(versionptr, version, code, indent="", language="python"):
-        line_comment = language_to_line_comment_map[language]
-        return "{0}{1} CodeCatalog Snippet http://codecatalog.net/{2}/{3}/\n".format(
-               indent, line_comment, str(versionptr), str(version)) + \
-               code + \
-               "{0}{1} End CodeCatalog Snippet\n".format(
-               indent, line_comment)
+    def _spec_info_to_spec(spec_info):
+        return Spec(version     = Version(spec_info['versionptr'], spec_info['version']),
+                    name        = spec_info['name'],
+                    summary     = spec_info['summary'],
+                    description = spec_info['active'])
+
+    def _snip_info_to_snippet(snip_info):
+        return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
+                       code            = snip_info['code'],
+                       language        = snip_info['language'],
+                       dependencies    = snip_info['dependencies'],
+                       spec_versionptr = snip_info['spec_versionptr'])
 
     def new_spec(self, name, summary, description, source=None):
         """
@@ -428,10 +437,7 @@ class Client:
         
         spec_info = self._connection.post('/api/new/spec/', q)
         
-        return Spec(version = Version(spec_info['versionptr'], spec_info['version']),
-                    name = name,
-                    summary = summary,
-                    description = description)
+        return self._spec_info_to_spec(merge(q,spec_info))
 
     def get_spec(self, version):
         if version.version is not None:
@@ -439,44 +445,40 @@ class Client:
         else:
             spec_info = self._connection.get('/api/specs/' + str(version.versionptr) + '/active/')
 
-        return Spec(version     = Version(spec_info['versionptr'], spec_info['version']),
-                    name        = spec_info['name'],
-                    summary     = spec_info['summary'],
-                    description = spec_info['active'])
+        return self._spec_info_to_spec(spec_info)
     
     def new_snippet(self, spec_versionptr, code, language, dependencies=[], source=None):
         q = {
             'spec_versionptr': spec_versionptr,
             'code': code,
             'language': language,
+            'dependencies': dependencies,
         }
         if source is not None:
             q['versionptr'] = source.version.versionptr
         
         snip_info = self._connection.post('/api/new/snippet/', q)
         
-        return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
-                       code            = code,
-                       language        = language,
-                       dependencies    = dependencies,
-                       spec_versionptr = spec_versionptr)
+        return self._snip_info_to_snippet(merge(q,snip_info))
 
     def get_snippet(self, version):
         if version.version is not None:
             snip_info = self._connection.get('/api/snippet/' + str(version.version) + '/')
         else:
             snip_info = self._connection.get('/api/snippets/' + str(version.versionptr) + '/active/')
+        
+        return self._snip_info_to_snippet(snip_info)
     
-        return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
-                       code            = snip_info['code'],
-                       language        = snip_info['language'],
-                       dependencies    = snip_info['dependencies'],
-                       spec_versionptr = snip_info['spec_versionptr'])
-    
-    def search(self, *args):
+    def assemble_spec(self, versionptr):
+        snips = self._connection.get('/api/specs/' + str(versionptr) + '/assemble/')
+        return map(self._snip_info_to_snippet, snips)
+
+    def search(self, text):
         """
-        Search the database for a sequence of strings.  Returns a list of result specs.
+        Search the database for a string.  Returns a list of spec "skeletons"; they only have 
+        a version, name, and summary.
         """
-        text = ' '.join(args)
         results = self._connection.get('/api/search/', { 'q': text })
+        for r in results:
+            r['version'] = Version(r['versionptr'], None)
         return results
