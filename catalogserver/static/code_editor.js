@@ -8,7 +8,15 @@ var language_selector = function() {
         opt.text(languages[i]);
         select.append(opt);
     }
-    div.val = select.val;
+    div.val = function(newval) {
+        if (newval) {
+            select.find('option').attr('selected', undefined);
+            select.find('option[value="' + newval + '"]').attr('selected', 'selected');
+        }
+        else {
+            return select.val();
+        }
+    };
     div.append(select);
     return div;
 };
@@ -41,6 +49,7 @@ var embedded_search = function() {
                 opt.val(versionptr);
                 select.append(opt);
             });
+            return div;
         }
         else {
             return select.val(); 
@@ -54,6 +63,7 @@ var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');
     var textarea = $('<textarea rows="30" style="width:100%"></textarea>');
     var languages = language_selector();
+    if (proto.language) { languages.val(proto.language); }
     var deps_div = $('<div></div>');
     var deps = [];
     var add_dep = function() {
