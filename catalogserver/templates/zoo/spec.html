@@ -33,9 +33,10 @@
         margin-top: 1cm;
     }
     
+    .tabs .tabstrip { border-spacing: 0; border-collapse: collapse; }
     .tabs .tab { 
         background: #bb9;
-        margin-bottom: 0;
+        padding-bottom: 0px;
         padding-right: 1cm;
         border: 1px solid black;
         border-bottom: none;
@@ -316,7 +317,7 @@
 
     var tabs = function(ts) {
         var tablabels = elt('tr');
-        var tabtable = elt('table', {}, tablabels);
+        var tabtable = elt('table', { 'class': 'tabstrip' }, tablabels);
         var content = elt('div', { 'class': 'content' });
         var container = elt('div', { 'class': 'tabs' }, tabtable, content); 
         var cur;
