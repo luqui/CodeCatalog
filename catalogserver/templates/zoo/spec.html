@@ -280,10 +280,10 @@
             (function() {
                 var snip = snips[i];
                 var info;
-                if (snip.active) {
+                if (snip.active || !logged_in) {
                     info = $('');
                 }
-                else if (!snip.active) {
+                else {
                     info = dynamic_link('Revert to this version', function() {
                         var newsnip = $.extend({}, snip);
                         newsnip.dependencies = snip.dependencies.join(',');
@@ -292,11 +292,11 @@
                         $.post('/api/new/snippet/', newsnip, reload);
                     });
                 }
-                var text = snip.comment;
-                if (!text) {
-                    text = "<No comment>";
+                var comment = elt('span', {}, snip.comment);
+                if (!comment) {
+                    comment = elt('span', {}, "<No comment>");
                 }
-                var d = vertical(display_snip_version(snip), elt('span').text(text));
+                var d = vertical(display_snip_version(snip), elt('span', {}, comment, elt('span').text("-- by " + snip.user)));
                 table.append(elt('tr', {}, elt('td', {}, horizontal(d, info))));
             })();
         }

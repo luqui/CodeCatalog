@@ -112,6 +112,7 @@ def dump_spec(spec):
         'votes': spec.version.versionptr.votes,
         'timestamp': spec.version.timestamp.isoformat(),
         'comment': spec.version.comment,
+        'user': spec.version.user and spec.version.user.username,
     }
 
 def dump_snippet(snippet):
@@ -128,6 +129,7 @@ def dump_snippet(snippet):
         'votes': snippet.version.versionptr.votes,
         'timestamp': snippet.version.timestamp.isoformat(),
         'comment': snippet.version.comment,
+        'user': snippet.version.user and snippet.version.user.username,
     }
 
 def dump_bug(bug):
