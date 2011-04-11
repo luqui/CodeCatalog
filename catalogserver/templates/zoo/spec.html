@@ -14,6 +14,9 @@
     .data { display: none; visibility: hidden; width: 10px }
     .cc_code { width: 750px }
 
+    /* Alert */
+    .alert { background: #fd9 }
+
     /* Documentation */
     .spec_name { font-family: monospace; margin-bottom: 0px }
     .summary { margin-left: 1cm; font-style: italic }
@@ -505,6 +508,9 @@
 {% endblock header %}
 
 {% block content %}
+
+{% block alert %}
+{% endblock %}
 
 {% block spec %}
 <h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>

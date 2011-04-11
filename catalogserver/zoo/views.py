@@ -42,7 +42,7 @@ def render_spec(request, spec):
 
 def render_snippet(request, snippet):
     spec = api.specs_active(request, snippet['spec_versionptr'])
-    return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': [snippet] })
+    return render(request, 'zoo/snippet.html', {'spec': spec, 'snippets': [snippet] })
 
 def static(request, path):
     import re
