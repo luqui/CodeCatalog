@@ -1,0 +1,9 @@
+{% extends "zoo/spec.html" %}
+
+{% block alert %}
+<div class="alert">
+This is a <b>Snippet Page</b>.  It shows only one snippet branch, not all the 
+snippets for this spec.  Go to the <a href="/{{spec.versionptr}}/">Spec</a>
+page for the more usual view.
+</div>
+{% endblock %}
