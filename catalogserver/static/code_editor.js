@@ -61,7 +61,7 @@ var embedded_search = function() {
 
 var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');
-    var textarea = $('<textarea rows="30" style="width:100%"></textarea>');
+    var textarea = $('<textarea rows="15" style="width:100%"></textarea>');
     var languages = language_selector();
     if (proto.language) { languages.val(proto.language); }
     var deps_div = $('<div></div>');
