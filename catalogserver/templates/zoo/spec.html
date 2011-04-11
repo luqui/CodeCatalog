@@ -10,19 +10,50 @@
   <script type="text/javascript" src="/static/code_editor.js"></script>
 
   <style>
-    #name { font-family: monospace }
     .hidden { display: none; visibility: hidden; width: 10px }
-    #hack { display: none; visibility: hidden; width: 10px }
-    textarea.maincode { width: 750px }
-    .snippet { background: #ddb; margin-top: 5mm }
-    .snippet textarea { background: #eee }
-    .languagemark { background: #db9; font-weight: bold }
-    .depmark { background: #db9; float: left }
-    .bugs_box { margin-left: 1in }
-    .bug_summary { color: #666 }
-    .bugs_box table,input,textarea { width: 100% }
-    .bugs_box textarea { height: 1in }
-    .bug_details { border: 1px solid black; background: #fd9 }
+    .data { display: none; visibility: hidden; width: 10px }
+    .cc_code { width: 750px }
+
+    /* Documentation */
+    .spec_name { font-family: monospace; margin-bottom: 0px }
+    .summary { margin-left: 1cm; font-style: italic }
+    .spec { background: #eee; margin-top: 1cm }
+    .spec h1 { font-size: 16pt; text-decoration: underline }
+    .spec h2 { font-size: 14pt }
+    .spec pre { padding-left: 1cm; background: #ccc }
+
+    /* Snippet box */
+    .snippet_box textarea { 
+        background: #eee;
+    }
+    .snippet_box {
+        margin-top: 1cm;
+    }
+    
+    .tabs .tab { 
+        background: #bb9;
+        margin-bottom: 0;
+        padding-right: 1cm;
+        border: 1px solid black;
+        border-bottom: none;
+        cursor: pointer;
+    }
+    .tabs .selected {
+        background: #ddb;
+    }
+    .tabs .content {
+        background: #ddb;
+    }
+    .language { background: #db9; font-weight: bold }
+
+    /* Bugs box */
+    .bugs { margin-left: 1in }
+    .bugs .open { color: #f66 }
+    .bugs .resolved { color: #6a6 }
+    .bugs .closed { color: #666 }
+    .bugs table,input,textarea { width: 100% }
+    .bugs textarea { height: 1in }
+    .bugs .details, .bugs .editor { border: 1px solid black; background: #feb }
   </style>
 
 {% block scripting %}
@@ -143,6 +174,26 @@
         return r;
     };
     // End CodeCatalog Snippet
+
+    // CodeCatalog Snippet http://www.codecatalog.net/49/149/
+    var label_table = function(dict) {
+        var ret = elt('table');
+        for (var i in dict) {
+            ret.append(elt('tr', {}, 
+                           elt('td', {'width': '1', 'class': 'label'}).text(i),
+                           elt('td', {}, dict[i])));
+        }
+        return ret;
+    };
+    // End CodeCatalog Snippet
+
+    var simple_select = function(options) {
+        var ret = elt('select', {});
+        for (var i in options) {
+            ret.append(elt('option', {}).text(options[i]).val(options[i]));
+        }
+        return ret;
+    };
     
     var dependencies_area = function(snip, replacement) {
         if (snip.dependencies.length == 0) {
@@ -183,7 +234,7 @@
     };
 
     var display_snip_version = function(snip) {
-        var textarea = elt('textarea', { rows:30, readonly: 'readonly', 'class': 'maincode', wrap: 'off' });
+        var textarea = elt('textarea', { rows:30, readonly: 'readonly', 'class': 'cc_code', wrap: 'off' });
         textarea.val(snip.code);
         textarea.attr('rows', linecount(snip.code));
         select_on_click(textarea, annotator(snip));
@@ -199,7 +250,7 @@
                     }
                     var code = assemble(snips);
                     var code_tagged = assemble_and_tag(snips);
-                    var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', 'class': 'maincode', wrap: 'off'});
+                    var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', 'class': 'cc_code', wrap: 'off'});
                     // TODO evilness  (undo it I mean)
                     newtextarea.attr('rows', linecount(code));
                     newtextarea.val(code);
@@ -215,8 +266,8 @@
         return vertical(
             textarea,
             horizontal(
-                $('<span class="languagemark"></span>').text(snip.language),
-                deps_area));
+                elt('span', {'class': 'language'}).text(snip.language),
+                deps_area)).addClass("snippet");
                 
     };
 
@@ -261,10 +312,10 @@
     };
 
     var tabs = function(ts) {
-        var tablabels = elt('tr', {});
+        var tablabels = elt('tr');
         var tabtable = elt('table', {}, tablabels);
-        var content = elt('div', {});
-        var container = elt('div', {}, tabtable, content);      
+        var content = elt('div', { 'class': 'content' });
+        var container = elt('div', { 'class': 'tabs' }, tabtable, content); 
         var cur;
 
         for (var i in ts) {
@@ -280,11 +331,17 @@
                         }
                         content.append(t.contentCache);
                     }
-                    if (cur) { cur.addClass('hidden'); }
+                    if (cur) { 
+                        cur.contentCache.addClass('hidden'); 
+                        cur.tab.removeClass('selected');
+                    }
+                    cur = t;
                     t.contentCache.removeClass('hidden');
-                    cur = t.contentCache;
+                    t.tab.addClass('selected');
                 };
-                tablabels.append(elt('td', {}, dynamic_link(t.label, cb)));
+                t.tab = elt('td', { 'class': 'tab' }).text(t.label);
+                t.tab.click(cb);
+                tablabels.append(t.tab);
                 if (i == 0) cb();
             })();
         }
@@ -296,11 +353,11 @@
         return tabs([
             { label: 'Active', content: function() { return display_snip_versionptr(snip) } },
             { label: 'History', content: function() { return display_snip_history(snip) } },
-        ]);
+        ]).addClass('snippet_box');
     };
 
     var display_snip_versionptr = function(snip) {
-        var div = elt('div', { 'class': 'snippet' });
+        var div = elt('div');
 
         var votesbox = elt('span');
         votesbox.text(snip.votes);
@@ -333,10 +390,15 @@
 
     var render_bug = function(bug) {
         var details = elt('a', {href:'#'}).text("Details...");
-        var ret = elt('div', {},
+        var cls = 
+            bug.status == 'Open'     ? 'open' :
+            bug.status == 'Resolved' ? 'resolved' :
+            bug.status == 'Closed'   ? 'closed'
+                                     : 'unknown';
+        var ret = elt('div', {'class': cls},
             elt('p').text(bug.title).append(
                 elt('b').text(" -- " + bug.status + ". "),
-                details)).addClass("bug_summary");
+                details));
         details.click(function() {
             ret.replaceWith(render_bug_details(bug));
             return false;
@@ -345,7 +407,7 @@
     };
 
     var render_bug_details = function(bug) {
-        var div = elt('div').addClass("bug_details");
+        var div = elt('div').addClass("details");
         $.get('/api/bugs/' + bug.versionptr + '/all/', function(bugs) {
             for (var i in bugs) {
                 div.append(render_bug_version(bugs[i]));
@@ -366,27 +428,8 @@
             elt('p').text(bug.comment));
     };
 
-    // CodeCatalog Snippet http://www.codecatalog.net/49/149/
-    var label_table = function(dict) {
-        var ret = elt('table');
-        for (var i in dict) {
-            ret.append(elt('tr', {}, 
-                           elt('td', {}).text(i),
-                           elt('td', {}, dict[i])));
-        }
-        return ret;
-    };
-    // End CodeCatalog Snippet
-    var simple_select = function(options) {
-        var ret = elt('select', {});
-        for (var i in options) {
-            ret.append(elt('option', {}).text(options[i]).val(options[i]));
-        }
-        return ret;
-    };
-
     var bug_edit_box = function(target, bug, cont) {
-        var newdiv = elt('div');
+        var newdiv = elt('div', { 'class': 'editor' });
         var input = elt('input', { type: 'text' }).val(bug.title);
         var textarea = elt('textarea');
         var select = simple_select([ 'Open', 'Resolved', 'Closed' ]);
@@ -403,16 +446,17 @@
             
             newdiv.replaceWith(cont(newbug));
         });
+        var cancelbtn = button('Cancel', function() { newdiv.remove() });
         newdiv.append(label_table({
-                Title: input,
-                Status: select,
-                Details: textarea}),
-            btn);
+                'Bug Title': input,
+                'Status': select,
+                'Details/Comment': textarea}),
+            btn, cancelbtn);
         return newdiv;
     };
 
     var bugs_box = function(versionptr) {
-        var div = elt('div', { 'class': 'bugs_box' });
+        var div = elt('div', { 'class': 'bugs' });
 
         var newbug = elt('a', { href: '#' }).text("Report Bug");
         newbug.click(function() {
@@ -463,11 +507,9 @@
 {% block content %}
 
 {% block spec %}
-<h1><span id="name" name="name" class="editable"><a href="/{{spec.versionptr}}">{% block title %}{{spec.name}}{% endblock %}</a></span></h1>
-<h2>Summary</h2>
-<span id="summary" name="summary" class="editable">{{spec.summary}}</span>
-<h2>Spec</h2>
-<textarea id="spec" name="spec" rows="30" class="maincode" wrap="off">{{spec.spec}}</textarea>
+<h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
+<span id="summary" name="summary" class="summary editable">{{spec.summary}}</span>
+<textarea id="spec" name="spec" rows="30" class="cc_code" wrap="off">{{spec.spec}}</textarea>
 <div id="spec_bugs"></div>
 {% endblock spec %}
 
@@ -475,7 +517,7 @@
 {% for snip in snippets %}
 <div class="snippet">
  <textarea class="code" readonly="readonly">{{snip.code}}</textarea>
- <textarea id="hack" class="data hidden" readonly="readonly">{{snip|json}}</textarea>
+ <textarea class="data hidden" readonly="readonly">{{snip|json}}</textarea>
 </div>
 {% endfor %}
 
