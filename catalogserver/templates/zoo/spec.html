@@ -271,12 +271,15 @@
             return expand_deps_button;
         });
         
-        return vertical(
-            textarea,
-            horizontal(
-                elt('span', {'class': 'language'}).text(snip.language),
-                deps_area)).addClass("snippet");
-                
+        return function(info) {
+            return horizontal(
+                     vertical(
+                       textarea,
+                       deps_area).addClass("snippet"),
+                     vertical(
+                       elt('span', {'class': 'language'}).text(snip.language),
+                       info));
+        };
     };
 
     var display_snips_history = function(snips) {
@@ -301,8 +304,8 @@
                 if (!comment) {
                     comment = elt('span', {}, "<No comment>");
                 }
-                var d = vertical(display_snip_version(snip), elt('span', {}, comment, elt('span').text("-- by " + snip.user)));
-                table.append(elt('tr', {}, elt('td', {}, horizontal(d, info))));
+                var d = vertical(display_snip_version(snip)(info), elt('span', {}, comment, elt('span').text("-- by " + snip.user)));
+                table.append(elt('tr', {}, elt('td', {}, d)));
             })();
         }
         return table;
@@ -392,7 +395,7 @@
                 votes,
                 button("edit", edit));
 
-        div.append(horizontal(display_snip_version(snip), infoarea));
+        div.append(display_snip_version(snip)(infoarea));
         return div;
     };
 
