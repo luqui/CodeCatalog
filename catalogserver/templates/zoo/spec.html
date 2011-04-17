@@ -442,6 +442,7 @@
         votesbox.text(snip.votes);
 
         var edit = function() {
+            if (!editbutton()) return;
             div.replaceWith(code_editor(snip, function(newsnip) {
                 $.post('/api/new/snippet/', newsnip, reload);
             }));
@@ -552,13 +553,27 @@
         return div;
     };
 
+    var editbutton = function() {
+        if (logged_in) {
+            return true;
+        }
+        else {
+            var path = window.location.pathname;
+            window.location.href = '/openid/login/?next=' + escape(path);
+            return false;
+        }
+    };
+
     $(function() {
-        var e = editable({ onedit: function() { savespec(); } });
+        e = editable({ 
+            onedit: function() { savespec(); },
+            custom_on_click: editbutton,
+        });
         e.installEditButtons();
         
         makeMarkdownArea($('#spec'), 'spec', function(text) { 
             savespec();
-        });
+        }, editbutton);
 
         $('#spec_history').click(function () {
             $('#spec_region').replaceWith(display_spec_history(JSON.parse($('#spec_data').val())));

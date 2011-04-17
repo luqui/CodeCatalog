@@ -34,7 +34,9 @@ var editable = function(settings) {
         span.append(elt).append(editlink);
 
         editlink.click(function() {
+            if (settings.custom_on_click && !settings.custom_on_click()) return;
             span.replaceWith(makeEditBox(elt));
+            return false;
         });
         return span;
     };

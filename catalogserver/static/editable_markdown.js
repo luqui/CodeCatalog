@@ -1,4 +1,4 @@
-var makeMarkdownArea = function(textarea, divclass, editcallback){
+var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_click){
     var container = $('<div></div>');
     container.addClass(divclass);
     var div = $('<div></div>');
@@ -13,6 +13,7 @@ var makeMarkdownArea = function(textarea, divclass, editcallback){
     textarea.keyup(update);
     
     editlink.click(function() {
+        if (custom_on_click && !custom_on_click()) return;
         pretext = textarea.val();
         textarea.show();
 
