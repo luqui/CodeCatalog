@@ -1,7 +1,27 @@
-var search_box = function(dosearch) {
-    var inp = elt('input');
-    
+// CodeCatalog Snippet http://www.codecatalog.net/175/460/
+var rate_limited_callback = function(rate, cb) {
+    var timeout = null;
+
+    return function() {
+        if (timeout) { clearTimeout(timeout); timeout = null; }
+        timeout = setTimeout(cb, rate);
+    };
 };
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/177/469/
+var realtime_input = function(rate, cb) {
+    var input = elt('input', {'type':'text'});
+    var pvalue = null;
+    var rlcb = rate_limited_callback(rate, function() { 
+        var value = input.val();
+        if (value == pvalue) return;
+        pvalue = value;
+        cb(value);
+    });
+    return input.keydown(rlcb).change(rlcb).blur(rlcb);
+};
+// End CodeCatalog Snippet
 
 var language_selector = function() {
     var div = $('<div></div>');
@@ -28,23 +48,30 @@ var language_selector = function() {
 
 var embedded_search_tr = function() {
     var tr = elt('tr');
-    var inp = elt('input', {'type': 'text'});
     var select = elt('select');
-    var remove = elt('button').text('-');
-    tr.append(elt('td', {}, inp), elt('td', {}, select), elt('td', {}, remove));
-
-    inp.change(function() {
-        $.get('/api/search/', { q: inp.val() }, function(results) {
-            var opt;
+    
+    var inp = realtime_input(250, function(value) {
+        if (value == pvalue) return;
+        pvalue = value;
+        if (value) {
+            $.get('/api/search/', { q: value }, function(results) {
+                var opt;
+                select.empty();
+                for (var i in results) {
+                    opt = $('<option></option>');
+                    opt.text(results[i].name + " - " + results[i].summary);
+                    opt.val(results[i].versionptr);
+                    select.append(opt);
+                }
+            });
+        }
+        else {
             select.empty();
-            for (var i in results) {
-                opt = $('<option></option>');
-                opt.text(results[i].name + " - " + results[i].summary);
-                opt.val(results[i].versionptr);
-                select.append(opt);
-            }
-        });
+        }
     });
+    var remove = elt('button').text('-');
+
+    tr.append(elt('td', {}, inp), elt('td', {}, select), elt('td', {}, remove));
 
     remove.click(function() { tr.remove() });
 
@@ -128,7 +155,7 @@ var code_editor = function(proto, submit_callback) {
     return div;
 };
 
-// CodeCatalog Snippet http://codecatalog.net/16/119/
+// CodeCatalog Snippet http://www.codecatalog.net/16/119/
 var elt = function(name, attrs) {
     var r = $(document.createElement(name));
     if (attrs) {
@@ -143,7 +170,7 @@ var elt = function(name, attrs) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://codecatalog.net/49/149/
+// CodeCatalog Snippet http://www.codecatalog.net/49/149/
 var label_table = function(dict) {
     var ret = elt('table');
     for (var i in dict) {
