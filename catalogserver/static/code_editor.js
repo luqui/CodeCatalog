@@ -1,3 +1,8 @@
+var search_box = function(dosearch) {
+    var inp = elt('input');
+    
+};
+
 var language_selector = function() {
     var div = $('<div></div>');
     var languages = [ 'python', 'javascript' ];
@@ -21,11 +26,12 @@ var language_selector = function() {
     return div;
 };
 
-var embedded_search = function() {
-    var div = $('<div></div>');
-    var inp = $('<input type="text" />');
-    var select = $('<select></select>');
-    div.append(inp, select);
+var embedded_search_tr = function() {
+    var tr = elt('tr');
+    var inp = elt('input', {'type': 'text'});
+    var select = elt('select');
+    var remove = elt('button').text('-');
+    tr.append(elt('td', {}, inp), elt('td', {}, select), elt('td', {}, remove));
 
     inp.change(function() {
         $.get('/api/search/', { q: inp.val() }, function(results) {
@@ -40,7 +46,9 @@ var embedded_search = function() {
         });
     });
 
-    div.val = function(versionptr) { 
+    remove.click(function() { tr.remove() });
+
+    tr.val = function(versionptr) { 
         if (versionptr) {
             $.get('/api/specs/' + versionptr + '/active/', function(result) {
                 select.empty();
@@ -49,14 +57,14 @@ var embedded_search = function() {
                 opt.val(versionptr);
                 select.append(opt);
             });
-            return div;
+            return tr;
         }
         else {
             return select.val(); 
         }
     };
     
-    return div;
+    return tr;
 };
 
 var code_editor = function(proto, submit_callback) {
@@ -64,26 +72,39 @@ var code_editor = function(proto, submit_callback) {
     var textarea = $('<textarea rows="15" style="width:100%"></textarea>');
     var languages = language_selector();
     if (proto.language) { languages.val(proto.language); }
-    var deps_div = $('<div></div>');
-    var deps = [];
+    var deps_tbody = elt('tbody');
+    var deps_table = 
+        elt('table', {}, 
+            elt('thead', {}, 
+                elt('tr', {},
+                    elt('td').text("Search"),
+                    elt('td').text("Select"),
+                    elt('td'))),
+            deps_tbody);
     var add_dep = function() {
-        var dep = embedded_search();
-        deps.push(dep);
-        deps_div.append(dep);
+        var dep = embedded_search_tr();
+        deps_tbody.append(dep);
         return dep;
     };
-    var add_button = $('<button>Add Dependency</button>');
+    var add_button = elt('button', {}).text('+');
     add_button.click(add_dep);
+    
+    var deps_div = elt('div', { 'class': 'deps' }, 
+                        elt('b').text('Dependencies'),
+                        deps_table, add_button);
 
     var submit_button = $('<button>Submit</button>');
     submit_button.click(function() {
-        submit_callback($.extend({}, proto_opts, {
+        var sub = $.extend({}, proto_opts, {
             code: textarea.val(),
-            dependencies: deps.map(function(x) { return x.val() })
-                              .filter(function (x) { return x })
-                              .join(','),
+            dependencies: deps_table.find('select')
+                                    .map(function(_,x) { return $(x).val() })
+                                    .toArray()
+                                    .sort()
+                                    .join(','),
             language: languages.find('option:selected').val(),
-        }));
+        });
+        submit_callback(sub);
     });
 
     var proto_opts = {};
@@ -103,7 +124,7 @@ var code_editor = function(proto, submit_callback) {
         add_dep();
     }
     
-    div.append(textarea, languages, deps_div, add_button, $('<br/>'), submit_button);
+    div.append(textarea, languages, deps_div, $('<br/>'), submit_button);
     return div;
 };
 
