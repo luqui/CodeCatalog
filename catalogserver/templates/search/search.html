@@ -53,6 +53,9 @@ $(function() {
         <td>{{ result.summary }}</td>
        </tr>
      {% empty %}
+       <tr>
+        <td colspan="2"><b>No results</b></td>
+       </tr>
      {% endfor %}
       </tbody>
      </table>
