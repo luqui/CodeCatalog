@@ -23,9 +23,27 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
+// CodeCatalog Snippet http://www.codecatalog.net/30/488/
+var language_to_line_comment_map = {
+    python: '#',
+    javascript: '//',
+    haskell: '--',
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/183/491/
+var keys = function(obj) {
+    var r = [];
+    for (var key in obj) {
+        r.push(key);
+    }
+    return r;
+};
+// End CodeCatalog Snippet
+
 var language_selector = function() {
     var div = $('<div></div>');
-    var languages = [ 'python', 'javascript' ];
+    var languages = keys(language_to_line_comment_map);
     var select = $('<select></select>');
     for (var i in languages) {
         var opt = $('<option></option>');

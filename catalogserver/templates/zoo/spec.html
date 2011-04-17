@@ -84,17 +84,19 @@
         $.post(url, dict, callback);
     };
 
-    // CodeCatalog Snippet http://www.codecatalog.net/30/79/
-    var linecomment = {
+    // CodeCatalog Snippet http://www.codecatalog.net/30/488/
+    var language_to_line_comment_map = {
         python: '#',
         javascript: '//',
+        haskell: '--',
     };
     // End CodeCatalog Snippet
+
     var annotator = function (snip) { 
         return function (text) {
-            return linecomment[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
+            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
                  + text
-                 + linecomment[snip.language] + " End CodeCatalog Snippet\n";
+                 + language_to_line_comment_map[snip.language] + " End CodeCatalog Snippet\n";
         };
     };
 
@@ -189,7 +191,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/49/149/
+    // CodeCatalog Snippet http://www.codecatalog.net/49/498/
     var label_table = function(dict) {
         var ret = elt('table');
         for (var i in dict) {
@@ -390,13 +392,14 @@
         return div;
     };
 
+    // CodeCatalog Snippet http://www.codecatalog.net/181/475/
     var tabs = function(ts) {
         var tablabels = elt('tr');
         var tabtable = elt('table', { 'class': 'tabstrip' }, tablabels);
         var content = elt('div', { 'class': 'content' });
         var container = elt('div', { 'class': 'tabs' }, tabtable, content); 
         var cur;
-
+    
         for (var i in ts) {
             (function() {
                 var t = ts[i];
@@ -427,6 +430,7 @@
         
         return container;
     };
+    // End CodeCatalog Snippet
 
     var display_snip_container = function(snip) {
         return tabs([

@@ -48,22 +48,24 @@ class JSONClient:
         return json.loads(jsonstr)
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/102/294/
-language_list = ["python", "javascript"]
-# End CodeCatalog Snippet
-
-# CodeCatalog Snippet http://www.codecatalog.net/33/299/
+# CodeCatalog Snippet http://www.codecatalog.net/33/483/
 language_to_line_comment_map = {
     'python': '#',
     'javascript': '//',
+    'haskell': '--',
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/69/298/
+# CodeCatalog Snippet http://www.codecatalog.net/69/485/
 language_to_file_extension_map = {
     "python": "py",
-    "javascript": "js"
+    "javascript": "js",
+    "haskell": "hs",
 }
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://www.codecatalog.net/102/496/
+language_list = [ k for k in language_to_line_comment_map.keys() if k in language_to_file_extension_map ]
 # End CodeCatalog Snippet
 
 # CodeCatalog Snippet http://www.codecatalog.net/104/297/
@@ -120,7 +122,7 @@ def detect_by_pattern(text, patterns):
 # End CodeCatalog Snippet
 
 
-# CodeCatalog Snippet http://www.codecatalog.net/138/368/
+# CodeCatalog Snippet http://www.codecatalog.net/138/481/
 language_patterns = {
     'python': [
         re.compile(r'def\s+\w+\s*\(.*:\s*$', re.MULTILINE),
@@ -131,6 +133,12 @@ language_patterns = {
         re.compile(r'var\s+\w+\s*=', re.MULTILINE),
         re.compile(r'function\s+(?:\w+)?\s*\([\w\s,]*\)\s*{'),  #not multiline
         re.compile(r'for\s*\((?:\s*var\s)?\s*\w+\s+in\s+.*\)', re.MULTILINE),
+    ],
+    'haskell': [
+        re.compile(r'^\w+\s*(?:,\s*\w+\s*)*::.*->.*', re.MULTILINE),
+        re.compile(r'^\w+\s*=', re.MULTILINE),
+        re.compile(r'^\s*where', re.MULTILINE),
+        re.compile(r'where\s*$', re.MULTILINE),
     ],
 }
 # End CodeCatalog Snippet
@@ -459,7 +467,7 @@ class Client:
             'spec_versionptr': spec_versionptr,
             'code': code_norm,
             'language': language,
-            'dependencies': ','.join(dependencies),
+            'dependencies': ','.join(map(str, dependencies)),
             'user': self.user,
             'api_key': self.api_key,
         }
