@@ -13,6 +13,7 @@
     .hidden { display: none; visibility: hidden; width: 10px }
     .data { display: none; visibility: hidden; width: 10px }
     .cc_code { width: 750px }
+    .cc_history { width: 650px }
 
     /* Alert */
     .alert { background: #fd9 }
@@ -24,6 +25,10 @@
     .spec h1 { font-size: 16pt; text-decoration: underline }
     .spec h2 { font-size: 14pt }
     .spec pre { padding-left: 1cm; background: #ccc }
+
+    .spec_history { float: right }
+    .spec_history_table { border: 1px solid black; background: #ddf }
+    .spec_history_table textarea { background: #eee }
 
     /* Snippet box */
     .snippet_box textarea { 
@@ -53,6 +58,7 @@
         font-style: italic;
         text-transform: capitalize; 
     }
+
 
     /* Bugs box */
     .bugs { margin-left: 1in }
@@ -300,9 +306,12 @@
                         $.post('/api/new/snippet/', newsnip, reload);
                     });
                 }
-                var comment = elt('span', {}, snip.comment);
-                if (!comment) {
-                    comment = elt('span', {}, "<No comment>");
+                var comment;
+                if (snip.comment) {
+                    comment = elt('span').text(snip.comment);
+                }
+                else {
+                    comment = elt('span').text("<No comment>");
                 }
                 var d = vertical(display_snip_version(snip)(info), elt('span', {}, comment, elt('span').text("-- by " + snip.user)));
                 table.append(elt('tr', {}, elt('td', {}, d)));
@@ -318,6 +327,65 @@
                 return a.timestamp < b.timestamp ? 1 : -1;
             });
             div.append(display_snips_history(snips));
+        });
+        return div;
+    };
+
+    var display_spec_version = function(spec) {
+        return function (info) {
+            return horizontal(
+                elt('table', { 'class': 'spec_history_table' },
+                    elt('tr', {},
+                        elt('td').text("Title"),
+                        elt('td').text(spec.title)),
+                    elt('tr', {},
+                        elt('td').text("Summary"),
+                        elt('td').text(spec.summary)),
+                    elt('tr', {},
+                        elt('td').text("Description"),
+                        elt('td', {}, elt('textarea', { 'readonly': 'readonly', 'class': 'cc_history', 'rows': 10 }).val(spec.spec)))),
+                info);
+        };
+    };
+
+    var display_specs_history = function(specs) {
+        var table = elt('table');
+        for (var i in specs) {
+            (function() {
+                var spec = specs[i];
+                var info;
+                if (spec.active || !logged_in) {
+                    info = $('');
+                }
+                else {
+                    info = dynamic_link('Revert to this version', function() {
+                        var newspec = $.extend({}, spec);
+                        newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.version;
+                        delete newspec.version;
+                        $.post('/api/new/spec/', newspec, reload);
+                    });
+                }
+                var comment;
+                if (spec.comment) {
+                    comment = elt('span').text(spec.comment);
+                }
+                else {
+                    comment = elt('span').text("<No comment>");
+                }
+                var d = vertical(display_spec_version(spec)(info), elt('span', {}, comment, elt('span').text('-- by ' + spec.user)));
+                table.append(elt('tr', {}, elt('td', {}, d)));
+            })();
+        }
+        return table;
+    };
+
+    var display_spec_history = function(spec) {
+        var div = elt('div');
+        $.get('/api/specs/' + spec.versionptr + '/all/', function (specs) {
+            specs.sort(function(a,b) {
+                return a.timestamp < b.timestamp ? 1 : -1;
+            });
+            div.append(display_specs_history(specs));
         });
         return div;
     };
@@ -492,6 +560,11 @@
             savespec();
         });
 
+        $('#spec_history').click(function () {
+            $('#spec_region').replaceWith(display_spec_history(JSON.parse($('#spec_data').val())));
+            return false;
+        });
+
         $('#spec_bugs').append(bugs_box({{spec.versionptr}}));
 
         $('.snippet').each(function (i,e) {
@@ -521,9 +594,13 @@
 {% endblock %}
 
 {% block spec %}
-<h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
-<span id="summary" name="summary" class="summary editable">{{spec.summary}}</span>
-<textarea id="spec" name="spec" rows="30" class="cc_code">{{spec.spec}}</textarea>
+<div id="spec_region">
+ <h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
+ <a id="spec_history" name="spec_history" class="spec_history" href="#">History</a>
+ <span id="summary" name="summary" class="summary editable">{{spec.summary}}</span>
+ <textarea id="spec" name="spec" rows="30" class="cc_code">{{spec.spec}}</textarea>
+ <textarea id="spec_data" name="spec_data" class="hidden" readonly="readonly">{{spec|json}}</textarea>
+</div>
 <div id="spec_bugs"></div>
 {% endblock spec %}
 
