@@ -51,8 +51,6 @@ var embedded_search_tr = function() {
     var select = elt('select');
     
     var inp = realtime_input(250, function(value) {
-        if (value == pvalue) return;
-        pvalue = value;
         if (value) {
             $.get('/api/search/', { q: value }, function(results) {
                 var opt;
