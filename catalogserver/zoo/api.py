@@ -2,6 +2,7 @@ from zoo.models import *
 from datetime import datetime
 from haystack.query import SearchQuerySet
 from django.db.models import Q
+from django.contrib.auth import authenticate
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -9,6 +10,24 @@ from django.db.models import Q
 # the latest active version.
 # Versions and versionptrs are separate, numeric namespaces. Versionptr 1
 # and version 1 are not related.
+
+
+def login_required(f):
+    def fprime(request, *args, **kwargs):
+        if request.user.is_authenticated():
+            return f(request, *args, **kwargs)
+        else:
+            post = request.POST
+            if 'user' in post and 'api_key' in post:
+                user = authenticate(username=request.POST['user'], password=request.POST['api_key'])
+                if user is not None:
+                    request.user = user
+                    return f(request, *args, **kwargs)
+                else:
+                    return { 'error': 'Authentication failed' }
+            else:
+                return { 'error': 'Request requires authentication' }
+    return fprime
 
 def user_or_none(user):
     if user.is_anonymous():
@@ -232,7 +251,6 @@ def snippet_assemble(request, version):
     
     return map(dump_snippet, dependency_search(members, snippet.spec_versionptr) or ()) or None
     
-
 def specs_active(request, versionptr):
     """GET /api/specs/<ptr>/active/ : Get the latest active spec with versionptr <ptr>."""
     return dump_spec(Spec.objects.get(version__versionptr=versionptr, version__active=True))
@@ -281,6 +299,7 @@ def bugs_all(request, versionptr):
     """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
     return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr).order_by('version__timestamp'))
     
+@login_required
 def new_spec(request):
     """POST /api/new/spec/ : Creates a new spec.
 
@@ -309,6 +328,7 @@ def new_spec(request):
         'version': version.id,
     }
 
+@login_required
 def new_snippet(request):
     """POST /api/new/snippet/ : Creates a new snippet.
 
@@ -384,6 +404,7 @@ def new_bug(request):
         'version': version.id,
     }
 
+@login_required
 def vote(request):
     """POST /api/vote/ : Votes on a versionptr.  Cancels out any previous vote.
 
@@ -421,6 +442,7 @@ def search(request):
                'versionptr': r.versionptrid } 
                         for r in results ]
 
+@login_required
 def user_update(request):
     """POST /api/user/update/ : Update the details of a user
 
@@ -448,6 +470,7 @@ def follow(user, versionptr, enabled):
             last_check=datetime.now())
     
 
+@login_required
 def user_follow(request):
     """POST /api/user/follow/ : Have the authenticated user subscribe to any changes of a versionptr
 
@@ -474,6 +497,7 @@ def user_events_new(request):
         ret.extend(get_events_date_range(fol.followed, fol.last_check, now))
     return ret
 
+@login_required
 def user_events_mark_viewed(request):
     """POST /api/user/events/mark_viewed/ : Mark a versionptr as viewed.
 
@@ -483,3 +507,24 @@ def user_events_mark_viewed(request):
     Following.objects.filter(follower=request.user, new_events=True, followed=request.POST['versionptr']).update(new_events=False, last_check=datetime.now())
     
     return ""
+
+# CodeCatalog Snippet http://codecatalog.net/91/253/
+import random
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/179/472/
+def random_hex_string(length):
+    return ''.join("0123456789abcdef"[random.randint(0,15)] for i in range(length))
+# End CodeCatalog Snippet
+
+@login_required
+def user_make_api_key(request):
+    """POST /api/user/make_api_key/ : Make and return a new API key."""
+
+    if request.user.is_authenticated():
+        pwd = random_hex_string(32)
+        request.user.set_password(pwd)
+        request.user.save()
+        return pwd
+    else:
+        return None

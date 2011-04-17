@@ -5,6 +5,8 @@ import webbrowser
 import codecatalog
 from codecatalog import catalog_utils
 import re
+import ConfigParser
+import os
 
 # CodeCatalog Snippet http://codecatalog.net/89/248/
 import inspect
@@ -64,10 +66,19 @@ def command_interface(obj):
     func(*args, **opts)
 # End CodeCatalog Snippet
 
+cfg = ConfigParser.ConfigParser()
+if not cfg.read([os.path.expanduser('~/.cctool'), os.path.expanduser('~/cctool.cfg')]):
+    sys.stderr.write("""
+Config file not found.  Please create ~/.cctool or ~/cctool.cfg with the following contents:
+[auth]
+user = <username>
+api_key = <your api key>  (see your profile on codecatalog.net)
+""")
+    sys.exit()
 
 class Interface:
     def __init__(self):
-        self.client = codecatalog.Client()
+        self.client = codecatalog.Client(user=cfg.get("auth", "user"), api_key=cfg.get("auth", "api_key"))
     
     def post(self, name="unnamed", summary="", language=None):
         """Posts stdin as a snippet on codecatalog.  Outputs a tagged snippet on stdout

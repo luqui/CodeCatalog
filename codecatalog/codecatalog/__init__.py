@@ -403,9 +403,11 @@ class Client:
     """
     An object that manages requests to the online catalog.
     """
-    def __init__(self, host='www.codecatalog.net'):
+    def __init__(self, user, api_key, host='www.codecatalog.net'):
         self._connection = JSONClient(host)
         self.host = host
+        self.user = user
+        self.api_key = api_key
 
     def _spec_info_to_spec(self, spec_info):
         return Spec(version     = Version(spec_info['versionptr'], spec_info['version']),
@@ -431,11 +433,15 @@ class Client:
             'name': name,
             'summary': summary,
             'description': description,
+            'user': self.user,
+            'api_key': self.api_key,
         }
         if source is not None:
             q['versionptr'] = source.version.versionptr
         
         spec_info = self._connection.post('/api/new/spec/', q)
+        if 'error' in spec_info:
+            raise RuntimeError(spec_info.error)
         
         return self._spec_info_to_spec(merge(q,spec_info))
 
@@ -454,11 +460,15 @@ class Client:
             'code': code_norm,
             'language': language,
             'dependencies': ','.join(dependencies),
+            'user': self.user,
+            'api_key': self.api_key,
         }
         if source is not None:
             q['versionptr'] = source.version.versionptr
         
         snip_info = self._connection.post('/api/new/snippet/', q)
+        if 'error' in snip_info:
+            raise RuntimeError(snip_info.error)
         
         return self._snip_info_to_snippet(merge(q,snip_info))
 

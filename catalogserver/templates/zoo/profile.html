@@ -1,5 +1,25 @@
 {% extends "zoo/frame.html" %}
 
+{% block header %}
+<script>
+$(function() {
+    var button = $('#generate_api_key');
+    button.click(function() {
+        button.attr('disabled', 'disabled');
+        $.post('/api/user/make_api_key/', function(r) {
+            $('#api_key').val(r);
+            button.removeAttr('disabled');
+        });
+    });
+
+    $('#api_key').click(function() {
+        $('#api_key').select();
+        return false;
+    });
+})
+</script>
+{% endblock %}
+
 {% block content %}
 <h1>User: {{user.username}}</h1>
 
@@ -22,6 +42,10 @@
    <td>Email</td>
    <td><input name="email" type="text" value="{{user.email}}" /></td>
   </tr>
+  <tr>
+   <td>API Key</td>
+   <td><input name="api_key" id="api_key" type="text" readonly="readonly" size="32" value="<Hidden>" />
+       <button name="generate_api_key" id="generate_api_key">Generate New</button></td>
   <tr>
    <td colspan="2"><input type="submit" /></td>
   </tr>
