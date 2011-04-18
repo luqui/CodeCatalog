@@ -62,25 +62,35 @@
                 dropdown(elt('a', { href:'#' }).addClass('new_events').text("New Events"), function(adder) {
                     $.get('/api/user/events/new/', function (events) {
                         events.forEach(function(e) {
-                            var target = '/' + e.versionptr + '/';
                             var link = elt('a', { href: '#' }).text(e.name);
-                            link.click(function() {
-                                $.post('/api/user/events/mark_viewed/',
-                                    { versionptr: e.versionptr },
-                                    function () { window.location.href = target });
-                                return false;
-                            });
+                            var mklink = function(tvptr) {
+                                link.click(function() {
+                                    $.post('/api/user/events/mark_viewed/',
+                                        { versionptr: e.versionptr },
+                                        function () { window.location.href = '/' + tvptr + '/' });
+                                    return false;
+                                });
+                                return link;
+                            };
                             if (e.type == 'new_version') {
-                                adder(elt('p').text('New version of ').append(link));
+                                if (e.versionptr_type == 'Spec' || e.versionptr_type == 'Snippet') {
+                                    adder(elt('p').text('New version of ').append(mklink(e.versionptr)));
+                                }
+                                else if (e.versionptr_type == 'BugReport') {
+                                    adder(elt('p').text('Bug activity on ').append(link));
+                                    $.get('/api/bug/' + e.version + '/', function(r) {
+                                        mklink(r.target_versionptr);
+                                    });
+                                }
                             }
                             else if (e.type == 'bug') {
-                                adder(elt('p').text('Bug report: "' + e.bug_title + '" on ').append(link));
+                                adder(elt('p').text('Bug report: "' + e.bug_title + '" on ').append(mklink(e.versionptr)));
                             }
                             else if (e.type == 'vote' && e.value > 0) {
-                                adder(elt('p').text('Upvote on ').append(link));
+                                adder(elt('p').text('Upvote on ').append(mklink(e.versionptr)));
                             }
                             else if (e.type == 'vote' && e.value < 0) {
-                                adder(elt('p').text('Downvote on ').append(link));
+                                adder(elt('p').text('Downvote on ').append(mklink(e.versionptr)));
                             }
                         });
                     });

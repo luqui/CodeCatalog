@@ -164,7 +164,6 @@ def dump_bug(bug):
         'comment': bug.version.comment,
         'user': bug.version.user and bug.version.user.username,
     }
-        
 
 # CodeCatalog Snippet http://www.codecatalog.net/10/20/
 def traverse_cons_list(conslist):
@@ -299,6 +298,10 @@ def bugs(request, versionptr):
 def bugs_all(request, versionptr):
     """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
     return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr).order_by('version__timestamp'))
+
+def bug(request, version):
+    """GET /api/bug/<ver>/: get a specific bug version"""
+    return dump_bug(BugReport.objects.get(version=version))
 
 def maybe(value, defined, undefined=None):
     if value is None:
