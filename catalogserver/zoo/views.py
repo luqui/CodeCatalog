@@ -57,6 +57,9 @@ def home(request):
     latest = Spec.objects.filter(version__active=True).order_by('-version__timestamp')
     return render(request, 'zoo/home.html', {'specs': latest[0:10]})
 
+def faq(request):
+    return render(request, 'zoo/faq.html')
+
 @login_required
 def profile(request):
     if request.method == 'POST':

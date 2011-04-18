@@ -1,0 +1,72 @@
+{% extends "zoo/frame.html" %}
+
+{% block header %}
+<script>
+$(function() {
+    $('h2').each(function(_,e) {
+        e = $(e);
+        if (!e.attr('id')) return;
+        $('#contents').append(elt('div', {}, elt('a', { href: '#' + e.attr('id') }).html(e.html())));
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>FAQ</h1>
+
+<div id="contents" name="contents">
+</div>
+
+<h2 id="q1">What is this place?</h2>
+<p>CodeCatalog is a lot like a wiki for source code.  We aim to socially build
+a database of high-quality, well-documented, instantly-usable code in a variety
+of languages.</p>
+<h2 id="q2">So it's like GitHub/SourceForge/Google Code?</h2>
+<p>Not exactly.  CodeCatalog focuses on <i>small, reusable</i> snippets of
+code.  So this isn't the place for your RPG game or complete
+website&mdash;although many of the generally applicable functions and classes
+you used to create it do belong here. For example: API integration, functions
+for working with geometry, networking utilities, natural language processing
+tools, ...</p>
+<h2 id="q3">How do I use code from the site?</h2>
+<p>Just copy and paste, or use our <a href="/tools/">tools</a>.  Copy and paste
+and duplicate to your heart's content: we tag the snippets from the site so
+that you can use our tools can scan your code for updates and bugfixes.  That
+means (most of) the usual evils of copying and pasting are mitigated.</p>
+<h2 id="q4">What are these <tt>// CodeCatalog Snippet</tt> comments?</h2>
+<p>Those are the tags that our tools use to cross-reference the code in your
+codebase with the code on the site.  The URL brings you to the page with the
+documentation for that snippet.  It's okay to change the code between the tags;
+if you run the updater tool, it will ask you if you want to upload your changes
+or keep them for yourself.</p>
+<h2 id="q5">How do I put new code on the site?</h2>
+<p>First, you need to be <a href="/openid/login/?next=/faq/">logged in</a> to
+change anything on the site except for filing bugs.  Once you are logged in,
+search for it.  If you find a <i>spec</i> (a collection of snippets that do the
+same thing, possibly in multiple languages) that describes your function, click
+<b>Add Snippet</b> at the bottom of the page.  Otherwise, there is a place to
+add a new snippet at the bottom of the search results page.</p>
+<p>If your code depends on any libraries or other snippets, there is a place at
+the bottom of new snippet box to add them.  See <a href="/90/">this</a> for an
+example of how we do external library dependencies.</p>
+<h2 id="q6">I have some code from my project.  Should I put on the site?</h2>
+<p>We want the code on the site to be <i>generally reusable</i>, so there
+should be a chance that somebody else could benefit from your code.  A good
+rule of thumb is that if you need to mention the name of your project in order
+to describe what the function does, it <i>shouldn't</i> go on the site.</p>
+<h2 id="q7">Why would I want to risk letting other people change my code?</h2>
+<p>It's the same philosophy as a wiki.  Some people will change it for the
+worse, but the general good and skill of the community will tend to improve the
+code over time.  You get the benefit of many skilled eyes looking over your
+code for bugs and corner cases.  Besides, you always keep a local copy of any
+code you are using and you get a chance to review any changes before they enter
+your codebase.  If you don't like them, you can fix it on the site for everyone
+to see, or just remove the tags to fork the code into your own local version
+independent of the site.</p>
+<h2 id="q8">Just small reusable snippets? Doesn't that mean that nothing complex can ever be on the site?</h2>
+<p>No, we hope that complex code does evolve on the site.  Snippets can depend
+on other snippets and on external libraries in each language, so complex code
+should be built as a <i>composition</i> of simpler, generally-applicable ideas,
+instead of as a big mass of coupled logic.</p>
+{% endblock %}
