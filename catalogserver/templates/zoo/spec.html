@@ -609,17 +609,20 @@
             }));
         });
 
-        $('#spec_status').change(function() {
-            var s = $('#spec_status').val();
-            if (s != "{{spec.status}}") {
-                if (confirm("Are you sure you want to mark this spec as " + s + "?")) {
-                    savespec(reload);
+        var spec_status = $('#spec_status');
+        if (spec_status.length) {
+            spec_status.change(function() {
+                var s = spec_status.val();
+                if (s != "{{spec.status}}") {
+                    if (confirm("Are you sure you want to mark this spec as " + s + "?")) {
+                        savespec(reload);
+                    }
+                    else {
+                        spec_status.val("{{spec.status}}");
+                    }
                 }
-                else {
-                    $('#spec_status').val("{{spec.status}}");
-                }
-            }
-        });
+            });
+        }
     });
   </script>
 {% endblock scripting %}
@@ -643,12 +646,14 @@
    <div>
     <a id="spec_history" name="spec_history" href="#">History</a>
    </div>
+   {% if user.is_authenticated %}
    <div>
     <select id="spec_status" name="spec_status">
      <option value="Open" {%if spec.status == 'Open' %}selected{%endif%}>Open</option>
      <option value="Deprecated" {%if spec.status == 'Deprecated' %}selected{%endif%}>Deprecated</option>
     </select>
    </div>
+   {% endif %}
  </div>
  <span id="summary" name="summary" class="summary editable">{{spec.summary}}</span>
  <textarea id="spec" name="spec" rows="30" class="cc_code">{{spec.spec}}</textarea>

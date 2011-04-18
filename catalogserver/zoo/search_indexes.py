@@ -17,7 +17,8 @@ class SpecIndex(RealTimeSearchIndex):
     def should_update(self, obj, **kwargs):
         specptr = obj.type == VersionPtr.PTRTYPE_TO_ID['Spec']
         if specptr:
-            if obj.active_spec().status != Spec.STATUS_TO_ID['Open']:
+            active = obj.active_spec()
+            if active and obj.active_spec().status != Spec.STATUS_TO_ID['Open']:
                 self.remove_object(obj)
                 return False
         return specptr        
