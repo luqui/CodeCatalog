@@ -43,10 +43,17 @@ class Version(models.Model):
     comment    = models.TextField()
 
 class Spec(models.Model):
+    ID_TO_STATUS = {
+        0: 'Open',
+        1: 'Deprecated',
+    }
+    STATUS_TO_ID = dict_inverse(ID_TO_STATUS)
+
     version = models.OneToOneField(Version, primary_key=True)
     name    = models.CharField(max_length=64)
     summary = models.TextField()
     spec    = models.TextField()
+    status  = models.IntegerField(choices=ID_TO_STATUS.items())
 
 class Snippet(models.Model):
     version         = models.OneToOneField(Version, primary_key=True)

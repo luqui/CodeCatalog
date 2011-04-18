@@ -9,10 +9,18 @@ class SpecIndex(RealTimeSearchIndex):
     text = CharField(document=True, use_template=True)
 
     def get_queryset(self):
-        return VersionPtr.objects.filter(type=VersionPtr.PTRTYPE_TO_ID['Spec'])
+        return VersionPtr.objects.filter(
+            type=VersionPtr.PTRTYPE_TO_ID['Spec'],
+            version__active=True,
+            version__spec__status=Spec.STATUS_TO_ID['Open'])
 
     def should_update(self, obj, **kwargs):
-        return obj.type == VersionPtr.PTRTYPE_TO_ID['Spec']
+        specptr = obj.type == VersionPtr.PTRTYPE_TO_ID['Spec']
+        if specptr:
+            if obj.active_spec().status != Spec.STATUS_TO_ID['Open']:
+                self.remove_object(obj)
+                return False
+        return specptr        
 
     def prepare_name(self, obj):
         active = obj.active_spec()

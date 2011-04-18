@@ -132,6 +132,7 @@ def dump_spec(spec):
         'timestamp': spec.version.timestamp.isoformat(),
         'comment': spec.version.comment,
         'user': spec.version.user and spec.version.user.username,
+        'status': Spec.ID_TO_STATUS[spec.status],
     }
 
 def dump_snippet(snippet):
@@ -298,7 +299,13 @@ def bugs(request, versionptr):
 def bugs_all(request, versionptr):
     """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
     return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr).order_by('version__timestamp'))
-    
+
+def maybe(value, defined, undefined=None):
+    if value is None:
+        return undefined
+    else:
+        return defined(value)
+
 @login_required
 def new_spec(request):
     """POST /api/new/spec/ : Creates a new spec.
@@ -316,7 +323,12 @@ def new_spec(request):
     version = new_version(request.user, versionptr, request.POST.get('comment') or "")
     version.save()
 
-    spec = Spec(version=version, name=request.POST.get('name') or "unnamed", summary=request.POST.get('summary') or "", spec=request.POST.get('spec') or "")
+    spec = Spec(
+        version=version,
+        name=request.POST.get('name') or "unnamed", 
+        summary=request.POST.get('summary') or "",
+        spec=request.POST.get('spec') or "",
+        status=maybe(request.POST.get('status'), lambda x: Spec.STATUS_TO_ID[x], 0))
     spec.save()
 
     update_active(versionptr)
