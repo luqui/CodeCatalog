@@ -23,11 +23,12 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/488/
+// CodeCatalog Snippet http://www.codecatalog.net/30/510/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
     haskell: '--',
+    c: '//',
 };
 // End CodeCatalog Snippet
 
@@ -186,12 +187,12 @@ var elt = function(name, attrs) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/49/149/
+// CodeCatalog Snippet http://www.codecatalog.net/49/498/
 var label_table = function(dict) {
     var ret = elt('table');
     for (var i in dict) {
         ret.append(elt('tr', {}, 
-                       elt('td', {}).text(i),
+                       elt('td', {'width': '1', 'class': 'label'}).text(i),
                        elt('td', {}, dict[i])));
     }
     return ret;
