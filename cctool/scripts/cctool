@@ -1,0 +1,113 @@
+#!/usr/bin/python
+
+import sys
+import webbrowser
+import codecatalog
+from codecatalog import catalog_utils
+import re
+import ConfigParser
+import os
+
+# CodeCatalog Snippet http://codecatalog.net/89/248/
+import inspect
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/95/266/
+def instance_methods(obj):
+    return dict([ (m,getattr(obj,m)) for m in dir(obj) 
+                                     if inspect.ismethod(getattr(obj,m)) ])
+# End CodeCatalog Snippet
+
+# CodeCatalog Snippet http://codecatalog.net/99/300/
+def command_interface(obj):
+    def help():
+        sys.stderr.write(name + ": " + (obj.__doc__ or "") + "\n")
+        sys.stderr.write("Commands:\n")
+        for k,v in instance_methods(obj).items():
+            if re.match(r'^_', k): continue
+            doc = ((v.__doc__ or "").splitlines() or [""])[0]
+            sys.stderr.write("    " + k + ":\t" + doc + "\n")
+    
+    def help_cmd(cmd):
+        func = getattr(obj, cmd)
+        sys.stderr.write(name + " " + cmd + ": " + func.__doc__ + "\n")
+
+    name = sys.argv[0]
+    if len(sys.argv) < 2:
+        help()
+        return    
+    cmd = sys.argv[1]
+
+    if cmd == 'help':
+        if len(sys.argv) > 2 and hasattr(obj, sys.argv[2]):
+            help_cmd(sys.argv[2])
+        else:
+            help()
+        return
+
+    args = []
+    opts = {}
+    for arg in sys.argv[2:]:
+        m = re.match(r'^--(\w+)$', arg)
+        if m:
+            opts[m.group(1)] = True
+            continue
+        m = re.match(r'^--(\w+)=(.*)$', arg)
+        if m:
+            opts[m.group(1)] = m.group(2)
+            continue
+        args.append(arg)
+
+    if not hasattr(obj, cmd):
+        help()
+        return
+    
+    func = getattr(obj, cmd)
+    func(*args, **opts)
+# End CodeCatalog Snippet
+
+cfg = ConfigParser.ConfigParser()
+if not cfg.read([os.path.expanduser('~/.cctool'), os.path.expanduser('~/cctool.cfg')]):
+    sys.stderr.write("""
+Config file not found.  Please create ~/.cctool or ~/cctool.cfg with the following contents:
+[auth]
+user = <username>
+api_key = <your api key>  (see your profile on codecatalog.net)
+""")
+    sys.exit()
+
+class Interface:
+    def __init__(self):
+        self.client = codecatalog.Client(user=cfg.get("auth", "user"), api_key=cfg.get("auth", "api_key"))
+    
+    def post(self, name="unnamed", summary="", language=None):
+        """Posts stdin as a snippet on codecatalog.  Outputs a tagged snippet on stdout
+            and opens the web browser to the new page.
+        Options:
+            --name=<str>:     (optional) The name of the new spec.
+            --summary=<str>:  (optional) The summary of the new spec.
+            --language=<str>: (optional) The language the code is written in (default: python)
+        """
+        code = sys.stdin.read()
+
+        (code_norm, indent) = catalog_utils.normalize_code(code)
+
+        if language is None:
+            language = codecatalog.detect_language(code)
+            sys.stderr.write("Detected language: " + language + "\n")
+
+        spec = self.client.new_spec(name, summary, "")
+        snip = self.client.new_snippet(spec.version.versionptr, code, language, [])
+        webbrowser.open_new_tab('http://' + self.client.host + '/' + str(snip.version.versionptr) + '/')
+        print catalog_utils.indent_by(indent, codecatalog.format_snippet(snip))
+
+    def sync(self, *files, **opts):
+        """Syncs to the latest version of all snippets in the given files."""
+
+        formatter = codecatalog.confirmation_formatter(self.client)
+        for filename in files:
+            print "Scanning " + filename
+            codecatalog.update_file(formatter, filename)
+        print "Done."
+
+command_interface(Interface())
