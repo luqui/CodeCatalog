@@ -49,7 +49,19 @@ same thing, possibly in multiple languages) that describes your code, click
 add a new snippet at the bottom of the search results page.</p>
 <p>If your code depends on any libraries or other snippets, there is a place at
 the bottom of new snippet box to add them.  See <a href="/90/">this</a> for an
-example of how we do external library dependencies.</p>
+example of how we do external library dependencies.  We want code to be
+<i>instantly usable</i>, so fill out all the dependencies if you are able,
+so that if someone clicks <b>Expand Dependencies</b>, they can drop the code
+anywhere and it will just work.</p>
+<h2 id="q7">My favorite language isn't in the list of languages.  Will you support it?</h2>
+<p>The bare minimum we need to support a language is to know its single
+line comment character (e.g. <tt>//</tt> in C++).  So add your language
+to the snippets on the <a href="/29/">line comment map</a> spec in Python
+and Javascript and we will support it within a day (we are working on a
+solution that will allow us to support it in 5 minutes).  You can also
+add its <a href="/68/">file extension</a> to support it in our
+<a href="/tools/">command line tool</a>.  As we add more types of support,
+we'll list the specs that "understand" language features here.</p>
 <h2 id="q6">I have some code from my project.  Should I put on the site?</h2>
 <p>We want the code on the site to be <i>generally reusable</i>, so there
 should be a chance that somebody else could benefit from your code.  A good
