@@ -138,6 +138,10 @@ var code_editor = function(proto, submit_callback) {
                         elt('b').text('Dependencies'),
                         deps_table, add_button);
 
+    var license = $('<p>By clicking the <i>Submit</i> button, you irrevocably agree to release your contribution under the '
+                  + 'terms of the <a href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a> '
+                  + 'license.</p>');
+                  
     var submit_button = $('<button>Submit</button>');
     submit_button.click(function() {
         var sub = $.extend({}, proto_opts, {
@@ -169,7 +173,7 @@ var code_editor = function(proto, submit_callback) {
         add_dep();
     }
     
-    div.append(textarea, languages, deps_div, $('<br/>'), submit_button);
+    div.append(textarea, languages, deps_div, license, submit_button);
     return div;
 };
 
