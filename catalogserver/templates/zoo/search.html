@@ -6,10 +6,10 @@
 {{ block.super }}
 
 <style>
- .searchbox { padding-top: 1cm; width: 480px; margin: auto }
- .searchbox table { width: 100% }
+ .searchbox { padding-top: 1cm }
+ .searchbox .center-aligned { text-align: center }
  .searchbox input { height: 30px; font-size: large }
- .searchbox #q { width: 100% }
+ .searchbox #q { min-width: 300px }
 </style>
 
 <script>
@@ -23,11 +23,10 @@ $(function() {
 
 <div class="searchbox">
 <form action="/search/" method="get">
- <table>
-  <tr>
-   <td><input type="text" name="q" id="q" /></td>
-   <td><input type="submit" value="Search" /></td>
-  </table>
+ <div class='center-aligned'>
+  <input type='text' name='q' id='q' />
+  <input type='submit' value='Search' />
+ </div>
 </form>
 </div>
 
