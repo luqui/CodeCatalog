@@ -23,13 +23,15 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/527/
+// CodeCatalog Snippet http://www.codecatalog.net/30/556/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
     haskell: '--',
     c: '//',
-    csharp: '//'};
+    csharp: '//',
+    java: '//', 
+};
 // End CodeCatalog Snippet
 
 // CodeCatalog Snippet http://www.codecatalog.net/183/491/
