@@ -23,15 +23,13 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/556/
+// CodeCatalog Snippet http://www.codecatalog.net/30/527/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
     haskell: '--',
     c: '//',
-    csharp: '//',
-    java: '//', 
-};
+    csharp: '//'};
 // End CodeCatalog Snippet
 
 // CodeCatalog Snippet http://www.codecatalog.net/183/491/
@@ -152,8 +150,7 @@ var code_editor = function(proto, submit_callback) {
                                     .toArray()
                                     .sort()
                                     .join(','),
-            language: languages.find('option:selected').val(),
-        });
+            language: languages.find('option:selected').val()});
         submit_callback(sub);
     });
 
@@ -213,8 +210,7 @@ var code_editor_with_title = function(proto, submit_callback) {
     return elt('div', {},
         label_table({
             'Title': title_input,
-            'Summary': summary_input,
-        }),
+            'Summary': summary_input}),
         code_editor(proto, function(snip) {
             snip.title = title_input.val() || "unnamed";
             snip.summary = summary_input.val();

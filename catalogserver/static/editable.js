@@ -48,6 +48,5 @@ var editable = function(settings) {
       });
     };
     return {
-        installEditButtons: installEditButtons,
-    };
+        installEditButtons: installEditButtons};
 };

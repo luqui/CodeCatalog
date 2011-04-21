@@ -84,15 +84,13 @@
         $.post(url, dict, callback);
     };
 
-    // CodeCatalog Snippet http://www.codecatalog.net/30/556/
+    // CodeCatalog Snippet http://www.codecatalog.net/30/527/
     var language_to_line_comment_map = {
         python: '#',
         javascript: '//',
         haskell: '--',
         c: '//',
-        csharp: '//',
-        java: '//', 
-    };
+        csharp: '//'};
     // End CodeCatalog Snippet
 
     var annotator = function (snip) { 
@@ -137,8 +135,8 @@
             'name': $('#name').text(),
             'summary': $('#summary').text(),
             'spec': $('#spec').val(),
-            'status': $('#spec_status').val(),
-        }, function(r) {
+            'status': $('#spec_status').val()},
+        function(r) {
             if (cont) cont();
         });
     };
@@ -444,8 +442,7 @@
     var display_snip_container = function(snip) {
         return tabs([
             { label: 'Active', content: function() { return display_snip_versionptr(snip) } },
-            { label: 'History', content: function() { return display_snip_history(snip) } },
-        ]).addClass('snippet_box');
+            { label: 'History', content: function() { return display_snip_history(snip) } } ]).addClass('snippet_box');
     };
 
     var display_snip_versionptr = function(snip) {
@@ -580,8 +577,8 @@
     $(function() {
         e = editable({ 
             onedit: function() { savespec(); },
-            custom_on_click: editbutton,
-        });
+            custom_on_click: editbutton});
+
         e.installEditButtons();
         
         makeMarkdownArea($('#spec'), 'spec', function(text) { 
@@ -605,8 +602,7 @@
 
         $('#addsnippet').click(function() {
             var proto = {
-                spec_versionptr: {{spec.versionptr}},
-            };
+                spec_versionptr: {{spec.versionptr}}};
             $('#addsnippet').replaceWith(code_editor(proto, function(newsnip) {
                 $.post('/api/new/snippet/', newsnip, reload);
             }));
