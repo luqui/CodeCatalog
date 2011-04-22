@@ -23,11 +23,14 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/488/
+// CodeCatalog Snippet http://www.codecatalog.net/30/556/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
     haskell: '--',
+    c: '//',
+    csharp: '//',
+    java: '//', 
 };
 // End CodeCatalog Snippet
 
@@ -136,6 +139,10 @@ var code_editor = function(proto, submit_callback) {
                         elt('b').text('Dependencies'),
                         deps_table, add_button);
 
+    var license = $('<p>By clicking the <i>Submit</i> button, you irrevocably agree to release your contribution under the '
+                  + 'terms of the <a href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a> '
+                  + 'license.</p>');
+                  
     var submit_button = $('<button>Submit</button>');
     submit_button.click(function() {
         var sub = $.extend({}, proto_opts, {
@@ -145,8 +152,7 @@ var code_editor = function(proto, submit_callback) {
                                     .toArray()
                                     .sort()
                                     .join(','),
-            language: languages.find('option:selected').val(),
-        });
+            language: languages.find('option:selected').val()});
         submit_callback(sub);
     });
 
@@ -167,7 +173,7 @@ var code_editor = function(proto, submit_callback) {
         add_dep();
     }
     
-    div.append(textarea, languages, deps_div, $('<br/>'), submit_button);
+    div.append(textarea, languages, deps_div, license, submit_button);
     return div;
 };
 
@@ -186,12 +192,12 @@ var elt = function(name, attrs) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/49/149/
+// CodeCatalog Snippet http://www.codecatalog.net/49/498/
 var label_table = function(dict) {
     var ret = elt('table');
     for (var i in dict) {
         ret.append(elt('tr', {}, 
-                       elt('td', {}).text(i),
+                       elt('td', {'width': '1', 'class': 'label'}).text(i),
                        elt('td', {}, dict[i])));
     }
     return ret;
@@ -206,8 +212,7 @@ var code_editor_with_title = function(proto, submit_callback) {
     return elt('div', {},
         label_table({
             'Title': title_input,
-            'Summary': summary_input,
-        }),
+            'Summary': summary_input}),
         code_editor(proto, function(snip) {
             snip.title = title_input.val() || "unnamed";
             snip.summary = summary_input.val();

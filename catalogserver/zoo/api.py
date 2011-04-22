@@ -201,7 +201,7 @@ def uncons_set(s):
     return (x, frozenset(clone))
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/148/413/
+# CodeCatalog Snippet http://www.codecatalog.net/148/414/
 def dependency_search(members, type):
     def children(elem):
         (typ, rest) = uncons_set(elem)
@@ -523,11 +523,11 @@ def user_events_mark_viewed(request):
     
     return ""
 
-# CodeCatalog Snippet http://codecatalog.net/91/253/
+# CodeCatalog Snippet http://www.codecatalog.net/91/253/
 import random
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/179/472/
+# CodeCatalog Snippet http://www.codecatalog.net/179/472/
 def random_hex_string(length):
     return ''.join("0123456789abcdef"[random.randint(0,15)] for i in range(length))
 # End CodeCatalog Snippet
