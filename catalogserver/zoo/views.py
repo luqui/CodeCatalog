@@ -38,6 +38,7 @@ def version(request, versionptr, version):
 
 def render_spec(request, spec):
     snippets = api.specs_snippets_active(request, spec['versionptr'])
+    snippets.sort(key=lambda x: -x['votes'])
     return render(request, 'zoo/spec.html', {'spec': spec, 'snippets': snippets})
 
 def render_snippet(request, snippet):
