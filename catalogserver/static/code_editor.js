@@ -23,7 +23,7 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/556/
+// CodeCatalog Snippet http://www.codecatalog.net/30/567/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
@@ -31,6 +31,7 @@ var language_to_line_comment_map = {
     c: '//',
     csharp: '//',
     java: '//', 
+    ruby: '#',
 };
 // End CodeCatalog Snippet
 
