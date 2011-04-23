@@ -27,7 +27,6 @@ div.activity {
   <tr>
    <td>Name</td>
    <td>Summary</td>
-   <td>User</td>
   </tr>
  </thead>
  <tbody>
@@ -35,7 +34,6 @@ div.activity {
   <tr>
    <td><tt><a href="/{{spec.version.versionptr.id}}/">{{spec.name}}</a></tt></td>
    <td>{{spec.summary}}</td>
-   <td>{{spec.version.user|default_if_none:"Anonymous"}}</td>
   </tr>
 {% endfor %}
  </tbody>

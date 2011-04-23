@@ -60,7 +60,7 @@ new = template('zoo/new.html')
 
 def home(request):
     latest = Spec.objects.filter(version__active=True).order_by('-version__timestamp')
-    return render(request, 'zoo/home.html', {'specs': latest[0:10]})
+    return render(request, 'zoo/home.html', {'specs': latest[0:20]})
 
 faq = template('zoo/faq.html')
 
