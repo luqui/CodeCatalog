@@ -59,7 +59,6 @@
         text-transform: capitalize; 
     }
 
-
     /* Bugs box */
     .bugs { margin-left: 1in }
     .bugs .open { color: #f66 }
@@ -132,16 +131,17 @@
     };
     // End CodeCatalog Snippet
 
-    var savespec = function(cont) {
+    var savespec = function(cont, comment) {
         post('/api/new/spec/', { 
             'versionptr': {{spec.versionptr}}, 
             'name': $('#name').text(),
             'summary': $('#summary').text(),
             'spec': $('#spec').val(),
-            'status': $('#spec_status').val()},
-        function(r) {
-            if (cont) cont();
-        });
+            'status': $('#spec_status').val(),
+            'comment': comment},
+        	function(r) {
+            	if (cont) cont();
+        	});
     };
 
     // CodeCatalog Snippet http://www.codecatalog.net/16/119/
@@ -578,14 +578,13 @@
     };
 
     $(function() {
-        e = editable({ 
-            onedit: function() { savespec(); },
-            custom_on_click: editbutton});
-
-        e.installEditButtons();
+        editable({ 
+                onedit: function() { savespec(); },
+                custom_on_click: editbutton})
+            .installEditButtons();
         
-        makeMarkdownArea($('#spec'), 'spec', function(text) { 
-            savespec();
+        makeMarkdownArea($('#spec'), 'spec', function(text, comment) { 
+            savespec(null, comment);
         }, editbutton);
 
         $('#spec_history').click(function () {

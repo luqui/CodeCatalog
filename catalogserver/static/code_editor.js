@@ -56,6 +56,18 @@ var horizontal = function() {
 };
 // End CodeCatalog Snippet
 
+//CodeCatalog Snippet http://codecatalog.net/244/673/
+var edit_description_field = function()
+{
+	var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
+	var edit_description = horizontal(elt('span').text("Edit summary"), edit_comment_input);
+	edit_description.val = function(foo) {
+		return edit_comment_input.val.apply(edit_comment_input, arguments);
+	};
+	return edit_description;
+};
+// End CodeCatalog Snippet
+
 var language_selector = function() {
     var div = $('<div></div>');
     var languages = keys(language_to_line_comment_map);
@@ -151,8 +163,7 @@ var code_editor = function(proto, submit_callback) {
                         elt('b').text('Dependencies'),
                         deps_table, add_button);
 
-    var change_desc_input = elt('input', { 'type': 'text', 'style': 'width:700px'});
-    var change_desc = horizontal(elt('span').text("Edit summary"), change_desc_input); 
+    var edit_description = edit_description_field();
 
     var license = $('<p>By clicking the <i>Submit</i> button, you irrevocably agree to release your contribution under the '
                   + 'terms of the <a href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a> '
@@ -168,7 +179,7 @@ var code_editor = function(proto, submit_callback) {
                                     .sort()
                                     .join(','),
             language: languages.find('option:selected').val(),
-            comment: change_desc_input.val()});
+            comment: edit_description.val()});
         submit_callback(sub);
     });
 
@@ -189,7 +200,7 @@ var code_editor = function(proto, submit_callback) {
         add_dep();
     }
     
-    div.append(textarea, languages, deps_div, change_desc, license, submit_button);
+    div.append(textarea, languages, deps_div, edit_description, license, submit_button);
     return div;
 };
 
