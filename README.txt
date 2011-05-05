@@ -39,6 +39,7 @@ Then
 % python manage.py syncdb
 (creates a local sqlite database -- will ask you some questions)
 % python manage.py migrate
+
 (prepares database schema (we're doing this to make it easy to migrate schemas later))
 % python manage.py runserver
 
@@ -79,3 +80,9 @@ If you changed the database schema:
 % ./manage.py migrate
 
 % sudo service apache2 reload
+
+or
+
+% ./update_latest.sh
+
+This script does everything above automatically.
