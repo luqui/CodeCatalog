@@ -56,7 +56,7 @@ var horizontal = function() {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://codecatalog.net/244/673/
+//CodeCatalog Snippet http://codecatalog.net/244/675/
 var edit_description_field = function()
 {
 	var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});

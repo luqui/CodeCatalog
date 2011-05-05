@@ -13,12 +13,14 @@ var elt = function(name, attrs) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://codecatalog.net/244/673/
+//CodeCatalog Snippet http://codecatalog.net/244/675/
 var edit_description_field = function()
 {
 	var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
 	var edit_description = horizontal(elt('span').text("Edit summary"), edit_comment_input);
-	edit_description.val = edit_comment_input.val;
+	edit_description.val = function(foo) {
+		return edit_comment_input.val.apply(edit_comment_input, arguments);
+	};
 	return edit_description;
 };
 // End CodeCatalog Snippet
