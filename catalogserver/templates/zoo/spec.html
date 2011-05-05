@@ -322,7 +322,7 @@
                 else {
                     comment = elt('span').text("<No comment>");
                 }
-                var d = vertical(display_snip_version(snip)(info), elt('span', {}, comment, elt('span').text("-- by " + snip.user)));
+                var d = vertical(display_snip_version(snip)(info), elt('span', {}, comment, elt('span').text(" -- by " + snip.user)));
                 table.append(elt('tr', {}, elt('td', {}, d)));
             })();
         }

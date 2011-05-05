@@ -45,6 +45,17 @@ var keys = function(obj) {
 };
 // End CodeCatalog Snippet
 
+// CodeCatalog Snippet http://codecatalog.net/39/669/
+var horizontal = function() {
+    var row = elt('tr');
+    for (var i = 0; i < arguments.length; ++i) {
+        var cell = elt('td', {}, arguments[i]);
+        row.append(cell);
+    }
+    return elt('table', {}, row);
+};
+// End CodeCatalog Snippet
+
 var language_selector = function() {
     var div = $('<div></div>');
     var languages = keys(language_to_line_comment_map);
@@ -140,6 +151,9 @@ var code_editor = function(proto, submit_callback) {
                         elt('b').text('Dependencies'),
                         deps_table, add_button);
 
+    var change_desc_input = elt('input', { 'type': 'text', 'style': 'width:700px'});
+    var change_desc = horizontal(elt('span').text("Edit summary"), change_desc_input); 
+
     var license = $('<p>By clicking the <i>Submit</i> button, you irrevocably agree to release your contribution under the '
                   + 'terms of the <a href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a> '
                   + 'license.</p>');
@@ -153,7 +167,8 @@ var code_editor = function(proto, submit_callback) {
                                     .toArray()
                                     .sort()
                                     .join(','),
-            language: languages.find('option:selected').val()});
+            language: languages.find('option:selected').val(),
+            comment: change_desc_input.val()});
         submit_callback(sub);
     });
 
@@ -174,7 +189,7 @@ var code_editor = function(proto, submit_callback) {
         add_dep();
     }
     
-    div.append(textarea, languages, deps_div, license, submit_button);
+    div.append(textarea, languages, deps_div, change_desc, license, submit_button);
     return div;
 };
 
