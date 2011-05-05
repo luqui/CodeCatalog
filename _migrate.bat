@@ -1,3 +1,3 @@
-cd catalog
+cd catalogserver
 python manage.py migrate
 pause > nul
