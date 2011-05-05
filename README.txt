@@ -61,3 +61,21 @@ After you have some snippets,
 to build the search index, then search by browsing to:
 
 http://localhost:8000/search/
+
+
+
+
+To update the server to the most recent version of CodeCatalog from the repo:
+
+Log into codecatalog.net through PuTTY/SSH
+User: ubuntu
+
+% cd CodeCatalog
+% hg fetch
+
+If you changed the database schema:
+
+% cd catalogserver
+% ./manage.py migrate
+
+% sudo service apache2 reload
