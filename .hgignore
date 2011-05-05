@@ -9,3 +9,5 @@ codecatalog/build/*
 *.project
 *.pydevproject
 *~
+*.pem
+*.ppk
