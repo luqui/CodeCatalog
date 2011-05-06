@@ -9,6 +9,16 @@
   <script type="text/javascript" src="/static/editable_markdown.js"></script>
   <script type="text/javascript" src="/static/code_editor.js"></script>
 
+  <link rel="stylesheet" type="text/css" href="/static/syntaxhighlighter/styles/shCore.css" />
+  <link href="/static/syntaxhighlighter/styles/shThemeDefault.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="/static/syntaxhighlighter/scripts/shCore.js"></script>
+  <script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+
+  <script type="text/javascript">
+    SyntaxHighlighter.defaults['gutter'] = false;
+    SyntaxHighlighter.defaults['class-name'] = 'cc_code';
+  </script>
+
   <style>
     .hidden { display: none; visibility: hidden; width: 10px }
     .data { display: none; visibility: hidden; width: 10px }
@@ -256,11 +266,36 @@
         return str;
     };
 
+    // CodeCatalog Snippet http://codecatalog.net/235/632/
+    function selectText(element) {
+        var text = element[0]; 
+        if ($.browser.msie) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(text);
+            range.select();
+        } else if ($.browser.mozilla || $.browser.opera || $.browser.chrome) {
+            var selection = window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents(text);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        } else if ($.browser.safari) {
+            var selection = window.getSelection();
+            selection.setBaseAndExtent(text, 0, text, 1);
+        }
+    }
+    // End CodeCatalog Snippet
+
     var display_snip_version = function(snip) {
-        var textarea = elt('textarea', { rows:30, readonly: 'readonly', 'class': 'cc_code', wrap: 'off' });
-        textarea.val(snip.code);
-        textarea.attr('rows', linecount(snip.code));
-        select_on_click(textarea, annotator(snip));
+        var textarea = elt('pre', { 'class': 'brush: jscript' });
+        textarea.text(snip.code);
+        //textarea.attr('rows', linecount(snip.code));
+
+        textarea.click(function() {
+            SyntaxHighlighter.highlight(textarea);
+            return false;
+        });
+        //select_on_click(textarea, annotator(snip));
         
         var deps_area = dependencies_area(snip, function() {
             var expand_deps_button = elt('button', {}).text("Expand All");
