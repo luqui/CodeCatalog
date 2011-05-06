@@ -10,7 +10,7 @@ pre.sh_sourceCode .sh_type { color: darkgreen; }                            /* b
 pre.sh_sourceCode .sh_usertype { color: teal; }                             /* user defined types */
 pre.sh_sourceCode .sh_string { color: red; font-family: monospace; }        /* strings and chars */
 pre.sh_sourceCode .sh_regexp { color: orange; font-family: monospace; }     /* regular expressions */
-pre.sh_sourceCode .sh_specialchar { color: pink; font-family: monospace; }  /* e.g., \n, \t, \\ */
+pre.sh_sourceCode .sh_specialchar { color: brown; font-family: monospace; }  /* e.g., \n, \t, \\ */
 pre.sh_sourceCode .sh_comment { color: brown; font-style: italic; }         /* comments */
 pre.sh_sourceCode .sh_number { color: purple; }                             /* literal numbers */
 pre.sh_sourceCode .sh_preproc { color: darkblue; font-weight: bold; }       /* e.g., #include, import */

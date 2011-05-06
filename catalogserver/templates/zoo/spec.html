@@ -9,13 +9,12 @@
   <script type="text/javascript" src="/static/editable_markdown.js"></script>
   <script type="text/javascript" src="/static/code_editor.js"></script>
   <script type="text/javascript" src="/static/shjs/sh_main.js"></script>
-  <script type="text/javascript" src="/static/shjs/lang/sh_javascript.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/shjs/sh_style.css" />
 
   <style>
     .hidden { display: none; visibility: hidden; width: 10px }
     .data { display: none; visibility: hidden; width: 10px }
-    .cc_code { width: 750px }
+    .cc_code { width: 750px; background: white }
     .cc_history { width: 650px }
 
     /* Alert */
@@ -281,12 +280,26 @@
     }
     // End CodeCatalog Snippet
 
+    var lazy_highlight_element = function(element, language) {
+        if (language in sh_languages) {
+            if (sh_languages[language]) {
+                sh_highlightElement(element, sh_languages[language]);
+            }
+        }
+        else {
+            $.get('/static/shjs/lang/sh_' + language + '.min.js', function(reply) {
+                eval(reply);
+                sh_highlightElement(element, sh_languages[language]);
+            }).error(function() {
+                sh_languages[language] = null;
+            });
+        }
+    };
+
     var highlighted_code_pre = function(code, tagged_code, language) {
         var div = elt('div');
         var pre = elt('pre', {'class': 'cc_code'}).text(code);
-        if (language in sh_languages) {
-            sh_highlightElement(pre[0], sh_languages[language]);
-        }
+        lazy_highlight_element(pre[0], language);
 
         var textarea = elt('textarea', {
             'rows': linecount(tagged_code), 
