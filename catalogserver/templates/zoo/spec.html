@@ -8,6 +8,9 @@
   <script type="text/javascript" src="/static/showdown.js"></script>
   <script type="text/javascript" src="/static/editable_markdown.js"></script>
   <script type="text/javascript" src="/static/code_editor.js"></script>
+  <script type="text/javascript" src="/static/shjs/sh_main.js"></script>
+  <script type="text/javascript" src="/static/shjs/lang/sh_javascript.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/shjs/sh_style.css" />
 
   <style>
     .hidden { display: none; visibility: hidden; width: 10px }
@@ -257,10 +260,9 @@
     };
 
     var display_snip_version = function(snip) {
-        var textarea = elt('textarea', { rows:30, readonly: 'readonly', 'class': 'cc_code', wrap: 'off' });
-        textarea.val(snip.code);
-        textarea.attr('rows', linecount(snip.code));
-        select_on_click(textarea, annotator(snip));
+        var textarea = elt('pre', { 'class': 'cc_code' });
+        textarea.text(snip.code);
+        sh_highlightElement(textarea[0], sh_languages[snip.language]);
         
         var deps_area = dependencies_area(snip, function() {
             var expand_deps_button = elt('button', {}).text("Expand All");
@@ -666,7 +668,7 @@
 {% block impls %}
 {% for snip in snippets %}
 <div class="snippet">
- <textarea class="code" readonly="readonly">{{snip.code}}</textarea>
+ <pre class="code" readonly="readonly">{{snip.code}}</pre>
  <textarea class="data hidden" readonly="readonly">{{snip|json}}</textarea>
 </div>
 {% endfor %}
