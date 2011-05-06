@@ -258,11 +258,59 @@
         }
         return str;
     };
+    
+    // CodeCatalog Snippet http://codecatalog.net/235/637/
+    function selectText(element) {
+        var text = element[0];
+        if ($.browser.msie) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(text);
+            range.select();
+        } 
+        else if ($.browser.safari) {
+            var selection = window.getSelection();
+            selection.setBaseAndExtent(text, 0, text, 1);
+        } 
+        else { // mozilla, opera, chrome
+            var selection = window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents(text);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+    // End CodeCatalog Snippet
+
+    var highlighted_code_pre = function(code, tagged_code, language) {
+        var div = elt('div');
+        var pre = elt('pre', {'class': 'cc_code'}).text(code);
+        if (language in sh_languages) {
+            sh_highlightElement(pre[0], sh_languages[language]);
+        }
+
+        var textarea = elt('textarea', {
+            'rows': linecount(tagged_code), 
+            'class': 'cc_code hidden', 
+            'readonly': 'readonly', 
+            'wrap': 'off'
+        }).val(tagged_code);
+
+        pre.click(function() {
+            pre.addClass('hidden');
+            textarea.removeClass('hidden');
+            textarea.focus();
+            textarea.select();
+        });
+        textarea.blur(function() {
+            pre.removeClass('hidden');
+            textarea.addClass('hidden');
+        });
+        div.append(pre, textarea);
+        return div;
+    };
 
     var display_snip_version = function(snip) {
-        var textarea = elt('pre', { 'class': 'cc_code' });
-        textarea.text(snip.code);
-        sh_highlightElement(textarea[0], sh_languages[snip.language]);
+        var textarea = highlighted_code_pre(snip.code, annotator(snip)(snip.code), snip.language);
         
         var deps_area = dependencies_area(snip, function() {
             var expand_deps_button = elt('button', {}).text("Expand All");
@@ -275,11 +323,8 @@
                     }
                     var code = assemble(snips);
                     var code_tagged = assemble_and_tag(snips);
-                    var newtextarea = elt('textarea', { rows: 30, readonly: 'readonly', 'class': 'cc_code', wrap: 'off'});
+                    var newtextarea = highlighted_code_pre(code, code_tagged, 'javascript');
                     // TODO evilness  (undo it I mean)
-                    newtextarea.attr('rows', linecount(code));
-                    newtextarea.val(code);
-                    select_on_click(newtextarea, function() { return code_tagged; });
                     textarea.replaceWith(newtextarea);
                     textarea = newtextarea;
                     expand_deps_button.remove();  // TODO toggle instead
