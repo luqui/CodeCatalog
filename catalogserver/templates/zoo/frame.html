@@ -7,8 +7,10 @@
   {% endblock %}
 
   <style>
-   .site { width: 900px; margin: auto }
-   .centered { width: 480px; margin: auto }
+   body { text-align: center }
+   .site { width: 900px; margin: 0 auto; text-align: left }
+   .centered { width: 480px; margin: 0 auto; text-align: left }
+   .iecentered { text-align: center }
    a.new_events { background: #c00; color: white }
    a { text-decoration: none }
    a:hover { text-decoration: underline }
@@ -149,8 +151,10 @@
      </tr>
     </table>
    </div>
-   <div class="centered">
-    <a href="/"><img src="/static/banner.png" /></a>
+   <div class="iecentered">
+    <div class="centered">
+     <a href="/"><img src="/static/banner.png" /></a>
+    </div>
    </div>
    {% block content %}
    {% endblock %}

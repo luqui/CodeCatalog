@@ -31,7 +31,7 @@ var language_to_line_comment_map = {
     c: '//',
     csharp: '//',
     java: '//', 
-    ruby: '#',
+    ruby: '#'
 };
 // End CodeCatalog Snippet
 
@@ -93,7 +93,7 @@ var language_selector = function() {
 
 var embedded_search_tr = function() {
     var tr = elt('tr');
-    var select = elt('select');
+    var select = elt('select', {'style': 'width: 400px'});
     
     var inp = realtime_input(250, function(value) {
         if (value) {

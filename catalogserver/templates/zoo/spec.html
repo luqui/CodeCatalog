@@ -113,7 +113,7 @@
         c: '//',
         csharp: '//',
         java: '//', 
-        ruby: '#',
+        ruby: '#'
     };
     // End CodeCatalog Snippet
 
@@ -316,9 +316,20 @@
         }
     };
 
+    var escape_html = function(html) {
+        return html.split('&').join('&amp;')
+                   .split('<').join('&lt;')
+                   .split('>').join('&gt;');
+    };
+
     var highlighted_code_pre = function(code, tagged_code, language) {
         var div = elt('div');
-        var pre = elt('pre', {'class': 'cc_code'}).text(code);
+        if ($.browser.msie) {
+            var pre = $('<pre class="cc_code">' + escape_html(code) + '</pre>');
+        }
+        else {
+            var pre = elt('pre', {'class': 'cc_code'}).text(code);
+        }
         lazy_highlight_element(pre[0], language);
 
         var textarea = elt('textarea', {
@@ -528,7 +539,8 @@
 
         var edit = function() {
             if (!editbutton()) return;
-            div.replaceWith(code_editor(snip, function(newsnip) {
+            infoarea.remove();
+            version_display.replaceWith(code_editor(snip, function(newsnip) {
                 $.post('/api/new/snippet/', newsnip, reload);
             }));
         };
@@ -544,11 +556,12 @@
             votes = elt('span',{}, votesbox);
         }
 
+        var version_display = display_snip_version(snip);
         var infoarea = elt('div', { 'class': 'infoarea' }, 
                             votes,
                             button("edit", edit));
 
-        return infoarea.add(display_snip_version(snip));
+        return infoarea.add(version_display);
     };
 
     var render_bug = function(bug) {
