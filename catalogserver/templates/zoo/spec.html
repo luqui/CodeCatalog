@@ -518,8 +518,7 @@
     var display_snip_container = function(snip) {
         return tabs([
             { label: 'Active', content: function() { return display_snip_versionptr(snip) } },
-            { label: 'History', content: function() { return display_snip_history(snip) } },
-            { label: 'FouxBarre', content: function() { return $([]) } }
+            { label: 'History', content: function() { return display_snip_history(snip) } }
             ]).addClass('snippet_box');
     };
 
