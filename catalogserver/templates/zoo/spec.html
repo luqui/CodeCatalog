@@ -17,6 +17,9 @@
     .cc_code { width: 750px; background: white }
     .cc_history { width: 650px }
 
+    .snip_code { }
+    .deps_area { display: block; }
+
     /* Alert */
     .alert { background: #fd9 }
 
@@ -43,22 +46,39 @@
     .tabs .tabstrip { border-spacing: 0; border-collapse: collapse; }
     .tabs .tab { 
         background: #ab8;
-        padding-bottom: 0px;
         padding-right: 1cm;
-        border: none;
+        border-left: solid 2px #bc9;
+        border-top: solid 2px #bc9;
+        border-right: solid 2px #9a7;
+        border-bottom: solid 1px #9a7;
         cursor: pointer;
+        display: inline-block;
     }
-    .tabs .selected {
+    .tabs .tab.selected {
+        border-left: solid 2px #deb;
+        border-top: solid 2px #deb;
+        border-bottom: solid 1px #cda;
         background: #cda;
     }
     .tabs .content {
         background: #cda;
-        /* border-left: 1px solid black;  */
+        padding: 4px;
     }
     .language { 
         font-weight: bold; 
         font-style: italic;
         text-transform: capitalize; 
+        float: right;
+        padding-right: 10px;
+        padding-top: 5px;
+        display: block;
+        clear: right;
+    }
+    .infoarea {
+        float: right;
+    }
+    .edit_comment {
+        font-style: italic;
     }
 
     /* Bugs box */
@@ -323,7 +343,7 @@
     };
 
     var display_snip_version = function(snip) {
-        var textarea = highlighted_code_pre(snip.code, annotator(snip)(snip.code), snip.language);
+        var textarea = highlighted_code_pre(snip.code, annotator(snip)(snip.code), snip.language).addClass('snip_code');
         
         var deps_area = dependencies_area(snip, function() {
             var expand_deps_button = elt('button', {}).text("Expand All");
@@ -344,27 +364,21 @@
                 });
             });
             return expand_deps_button;
-        });
-        
-        return function(info) {
-            return horizontal(
-                     vertical(
-                       textarea,
-                       deps_area).addClass("snippet"),
-                     vertical(
-                       elt('span', {'class': 'language'}).text(snip.language),
-                       info));
-        };
+        }).addClass('deps_area');
+
+        return elt('span', {'class': 'language'}).text(snip.language)
+                 .add(textarea)
+                 .add(deps_area);
     };
 
     var display_snips_history = function(snips) {
-        var table = elt('table');
+        var table = elt('div');
         for (var i in snips) {
             (function() {
                 var snip = snips[i];
                 var info;
                 if (snip.active || !logged_in) {
-                    info = $('');
+                    info = $([]);
                 }
                 else {
                     info = dynamic_link('Revert to this version', function() {
@@ -373,7 +387,7 @@
                         newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.version;
                         delete newsnip.version;
                         $.post('/api/new/snippet/', newsnip, reload);
-                    });
+                    }).addClass('infoarea');
                 }
                 var comment;
                 if (snip.comment) {
@@ -382,8 +396,8 @@
                 else {
                     comment = elt('span').text("<No comment>");
                 }
-                var d = vertical(display_snip_version(snip)(info), elt('span', {}, comment, elt('span').text(" -- by " + snip.user)));
-                table.append(elt('tr', {}, elt('td', {}, d)));
+                var d = elt('div', {}, info.add(display_snip_version(snip)).add(elt('span', { 'class': 'edit_comment' }, comment, elt('span').text(" -- by " + snip.user))));
+                table.append(d);
             })();
         }
         return table;
@@ -464,8 +478,7 @@
 
     // CodeCatalog Snippet http://www.codecatalog.net/181/475/
     var tabs = function(ts) {
-        var tablabels = elt('tr');
-        var tabtable = elt('table', { 'class': 'tabstrip' }, tablabels);
+        var tabtable = elt('div', { 'class': 'tabstrip' });
         var content = elt('div', { 'class': 'content' });
         var container = elt('div', { 'class': 'tabs' }, tabtable, content); 
         var cur;
@@ -491,9 +504,9 @@
                     t.contentCache.removeClass('hidden');
                     t.tab.addClass('selected');
                 };
-                t.tab = elt('td', { 'class': 'tab' }).text(t.label);
+                t.tab = elt('span', { 'class': 'tab' }).text(t.label);
                 t.tab.click(cb);
-                tablabels.append(t.tab);
+                tabtable.append(t.tab);
                 if (i == 0) cb();
             })();
         }
@@ -505,12 +518,11 @@
     var display_snip_container = function(snip) {
         return tabs([
             { label: 'Active', content: function() { return display_snip_versionptr(snip) } },
-            { label: 'History', content: function() { return display_snip_history(snip) } } ]).addClass('snippet_box');
+            { label: 'History', content: function() { return display_snip_history(snip) } }
+            ]).addClass('snippet_box');
     };
 
     var display_snip_versionptr = function(snip) {
-        var div = elt('div');
-
         var votesbox = elt('span');
         votesbox.text(snip.votes);
 
@@ -532,13 +544,11 @@
             votes = elt('span',{}, votesbox);
         }
 
-        var infoarea = 
-            vertical(
-                votes,
-                button("edit", edit));
+        var infoarea = elt('div', { 'class': 'infoarea' }, 
+                            votes,
+                            button("edit", edit));
 
-        div.append(display_snip_version(snip)(infoarea));
-        return div;
+        return infoarea.add(display_snip_version(snip));
     };
 
     var render_bug = function(bug) {
