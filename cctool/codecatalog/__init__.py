@@ -476,7 +476,7 @@ class Client:
         
         snip_info = self._connection.post('/api/new/snippet/', q)
         if 'error' in snip_info:
-            raise RuntimeError(snip_info.error)
+            raise RuntimeError(snip_info['error'])
         
         return self._snip_info_to_snippet(merge(q,snip_info))
 
