@@ -23,7 +23,7 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/567/
+// CodeCatalog Snippet http://www.codecatalog.net/30/686/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
@@ -56,15 +56,49 @@ var horizontal = function() {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://codecatalog.net/244/675/
+// CodeCatalog Snippet http://codecatalog.net/246/683/
+var delegate_method = function(obj, method) {
+    if (typeof method == 'string') {
+        method = obj[method];
+    }
+    return function() { return method.apply(obj, arguments) }
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/244/684/
 var edit_description_field = function()
 {
-	var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
-	var edit_description = horizontal(elt('span').text("Edit summary"), edit_comment_input);
-	edit_description.val = function(foo) {
-		return edit_comment_input.val.apply(edit_comment_input, arguments);
-	};
-	return edit_description;
+    var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
+    var edit_description = horizontal(elt('span').text("Edit summary"), edit_comment_input);
+    edit_description.val = delegate_method(edit_comment_input, 'val');
+    return edit_description;
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/16/119/
+var elt = function(name, attrs) {
+    var r = $(document.createElement(name));
+    if (attrs) {
+        for (var i in attrs) {
+            r.attr(i, attrs[i]);
+        }
+    }
+    for (var i = 2; i < arguments.length; ++i) {
+        r.append(arguments[i]);
+    }
+    return r;
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/49/498/
+var label_table = function(dict) {
+    var ret = elt('table');
+    for (var i in dict) {
+        ret.append(elt('tr', {}, 
+                       elt('td', {'width': '1', 'class': 'label'}).text(i),
+                       elt('td', {}, dict[i])));
+    }
+    return ret;
 };
 // End CodeCatalog Snippet
 
@@ -203,33 +237,6 @@ var code_editor = function(proto, submit_callback) {
     div.append(textarea, languages, deps_div, edit_description, license, submit_button);
     return div;
 };
-
-// CodeCatalog Snippet http://www.codecatalog.net/16/119/
-var elt = function(name, attrs) {
-    var r = $(document.createElement(name));
-    if (attrs) {
-        for (var i in attrs) {
-            r.attr(i, attrs[i]);
-        }
-    }
-    for (var i = 2; i < arguments.length; ++i) {
-        r.append(arguments[i]);
-    }
-    return r;
-};
-// End CodeCatalog Snippet
-
-// CodeCatalog Snippet http://www.codecatalog.net/49/498/
-var label_table = function(dict) {
-    var ret = elt('table');
-    for (var i in dict) {
-        ret.append(elt('tr', {}, 
-                       elt('td', {'width': '1', 'class': 'label'}).text(i),
-                       elt('td', {}, dict[i])));
-    }
-    return ret;
-};
-// End CodeCatalog Snippet
 
 var code_editor_with_title = function(proto, submit_callback) {
     var title_input = elt('input', { type:'text' });

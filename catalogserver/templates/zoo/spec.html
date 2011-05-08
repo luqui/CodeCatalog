@@ -1,6 +1,10 @@
 {% extends "zoo/frame.html" %}
 {% load json_dump %}
 
+{% block pagetitle %}
+{{spec.name}} - CodeCatalog
+{% endblock %}
+
 {% block header %}
   
   <script type="text/javascript" src="/static/editable.js"></script>
@@ -94,18 +98,11 @@
 {% block scripting %}
 
   <script type="text/javascript">
-
-    var logged_in = '{{user.is_authenticated}}' == 'True';
-
     // CodeCatalog Snippet http://www.codecatalog.net/18/45/
     var reload = function() { document.location.reload(); };
     // End CodeCatalog Snippet
-    var post = function(url, dict, callback) {
-        dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
-        $.post(url, dict, callback);
-    };
-
-    // CodeCatalog Snippet http://www.codecatalog.net/30/567/
+    
+    // CodeCatalog Snippet http://www.codecatalog.net/30/686/
     var language_to_line_comment_map = {
         python: '#',
         javascript: '//',
@@ -116,55 +113,6 @@
         ruby: '#'
     };
     // End CodeCatalog Snippet
-
-    var annotator = function (snip) { 
-        return function (text) {
-            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
-                 + text
-                 + language_to_line_comment_map[snip.language] + " End CodeCatalog Snippet\n";
-        };
-    };
-
-    var votedown_snip = function (versionptr) {
-        post('/api/vote/', { versionptr: versionptr, value: -1 }, reload);
-    };
-
-    var voteup_snip = function (versionptr) {
-        post('/api/vote/', { versionptr: versionptr, value: 1 }, reload);
-    };
-
-    // CodeCatalog Snippet http://www.codecatalog.net/32/85/
-    var max = function() {
-        var r = arguments[0];
-        for (var i = 1; i < arguments.length; ++i) {
-            if (arguments[i] > r) r = arguments[i];
-        }
-        return r;
-    };
-    // End CodeCatalog Snippet
-
-    // CodeCatalog Snippet http://www.codecatalog.net/35/96/
-    var min = function() {
-        var r = arguments[0];
-        for (var i = 1; i < arguments.length; ++i) {
-            if (arguments[i] < r) r = arguments[i];
-        }
-        return r;
-    };
-    // End CodeCatalog Snippet
-
-    var savespec = function(cont, comment) {
-        post('/api/new/spec/', { 
-            'versionptr': {{spec.versionptr}}, 
-            'name': $('#name').text(),
-            'summary': $('#summary').text(),
-            'spec': $('#spec').val(),
-            'status': $('#spec_status').val(),
-            'comment': comment},
-        	function(r) {
-            	if (cont) cont();
-        	});
-    };
 
     // CodeCatalog Snippet http://www.codecatalog.net/16/119/
     var elt = function(name, attrs) {
@@ -198,7 +146,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/39/416/
+    // CodeCatalog Snippet http://www.codecatalog.net/39/669/
     var horizontal = function() {
         var row = elt('tr');
         for (var i = 0; i < arguments.length; ++i) {
@@ -231,7 +179,8 @@
         return ret;
     };
     // End CodeCatalog Snippet
-
+    
+    // CodeCatalog Snippet http://www.codecatalog.net/248/692/
     var simple_select = function(options) {
         var ret = elt('select', {});
         for (var i in options) {
@@ -239,28 +188,132 @@
         }
         return ret;
     };
+    // End CodeCatalog Snippet
     
-    var dependencies_area = function(snip, replacement) {
-        if (snip.dependencies.length == 0) {
-            return $('');
+    // CodeCatalog Snippet http://www.codecatalog.net/250/697/
+    var lazy_highlight_element = function(prefix, suffix, element, language) {
+        if (language in sh_languages) {
+            if (sh_languages[language]) {
+                sh_highlightElement(element, sh_languages[language]);
+            }
+        }
+        else {
+            $.get(prefix + 'sh_' + language + suffix, function(reply) {
+                eval(reply);
+                sh_highlightElement(element, sh_languages[language]);
+            }).error(function() {
+                sh_languages[language] = null;
+            });
+        }
+    };
+    // End CodeCatalog Snippet
+
+    // CodeCatalog Snippet http://www.codecatalog.net/252/704/
+    var escape_html = function(html) {
+        return html.split('&').join('&amp;')
+                   .split('<').join('&lt;')
+                   .split('>').join('&gt;');
+    };
+    // End CodeCatalog Snippet
+
+    // CodeCatalog Snippet http://www.codecatalog.net/181/718/
+    var tabs = function(ts) {
+        var tabtable = elt('div', { 'class': 'tabstrip' });
+        var content = elt('div', { 'class': 'content' });
+        var container = elt('div', { 'class': 'tabs' }, tabtable, content); 
+        var cur;
+    
+        for (var i in ts) {
+            (function() {
+                var t = ts[i];
+                var cb = function() {
+                    if (!t.contentCache) {
+                        if (typeof t.content == "function") {
+                            t.contentCache = t.content();
+                        }
+                        else {
+                            t.contentCache = t.content;
+                        }
+                        content.append(t.contentCache);
+                    }
+                    if (cur) { 
+                        cur.contentCache.hide();
+                        cur.tab.show();
+                        cur.tab.removeClass('selected');
+                    }
+                    cur = t;
+                    t.contentCache.show();
+                    t.tab.addClass('selected');
+                };
+                t.tab = elt('span', { 'class': 'tab' }).text(t.label);
+                t.tab.click(cb);
+                tabtable.append(t.tab);
+                if (i == 0) cb();
+            })();
         }
         
-        var b = button('Dependencies', function() {
-            var table = elt('table');
-            snip.dependencies.forEach(function (dep) {
-                $.get('/api/specs/' + dep + '/active/', function (result) {
-                    table.append(
-                        elt('tr', {}, 
-                            elt('td', {},
-                                elt('a', { href: '/' + result.versionptr + '/' },
-                                    elt('tt').text(result.name))),
-                            elt('td', {}).text(result.summary)));
-                });
+        return container;
+    };
+    // End CodeCatalog Snippet
+
+    // CodeCatalog Snippet http://www.codecatalog.net/254/713/
+    var table_row = function() {
+        var tr = elt('tr');
+        for (var i in arguments) {
+            tr.append(elt('td', {}, arguments[i]));
+        }
+        return tr;
+    };
+    // End CodeCatalog Snippet
+
+    // CodeCatalog Snippet http://www.codecatalog.net/256/715/
+    var text_node = function(text) { return document.createTextNode(text) };
+    // End CodeCatalog Snippet
+
+    var logged_in = '{{user.is_authenticated}}' == 'True';
+
+    var post = function(url, dict, callback) {
+        dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
+        $.post(url, dict, callback);
+    };
+
+    var annotator = function (snip) { 
+        return function (text) {
+            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
+                 + text
+                 + language_to_line_comment_map[snip.language] + " End CodeCatalog Snippet\n";
+        };
+    };
+
+    var savespec = function(cont, comment) {
+        post('/api/new/spec/', { 
+            'versionptr': {{spec.versionptr}}, 
+            'name': $('#name').text(),
+            'summary': $('#summary').text(),
+            'spec': $('#spec').val(),
+            'status': $('#spec_status').val(),
+            'comment': comment},
+        	function(r) {
+            	if (cont) cont();
+        	});
+    };
+
+    
+    var dependencies_area = function(snip) {
+        if (snip.dependencies.length == 0) {
+            return $([]);
+        }
+        
+        var table = elt('table');
+        snip.dependencies.forEach(function (dep) {
+            $.get('/api/specs/' + dep + '/active/', function (result) {
+                table.append(
+                    table_row(
+                        elt('a', { href: '/' + result.versionptr + '/' }, text_node(result.name)),
+                        text_node(result.summary)));
             });
-            table.append(replacement());
-            b.replaceWith(table);
         });
-        return b;
+        return table;
     };
 
     var assemble = function(snips) {
@@ -277,50 +330,6 @@
         }
         return str;
     };
-    
-    // CodeCatalog Snippet http://codecatalog.net/235/637/
-    function selectText(element) {
-        var text = element[0];
-        if ($.browser.msie) {
-            var range = document.body.createTextRange();
-            range.moveToElementText(text);
-            range.select();
-        } 
-        else if ($.browser.safari) {
-            var selection = window.getSelection();
-            selection.setBaseAndExtent(text, 0, text, 1);
-        } 
-        else { // mozilla, opera, chrome
-            var selection = window.getSelection();
-            var range = document.createRange();
-            range.selectNodeContents(text);
-            selection.removeAllRanges();
-            selection.addRange(range);
-        }
-    }
-    // End CodeCatalog Snippet
-
-    var lazy_highlight_element = function(element, language) {
-        if (language in sh_languages) {
-            if (sh_languages[language]) {
-                sh_highlightElement(element, sh_languages[language]);
-            }
-        }
-        else {
-            $.get('/static/shjs/lang/sh_' + language + '.min.js', function(reply) {
-                eval(reply);
-                sh_highlightElement(element, sh_languages[language]);
-            }).error(function() {
-                sh_languages[language] = null;
-            });
-        }
-    };
-
-    var escape_html = function(html) {
-        return html.split('&').join('&amp;')
-                   .split('<').join('&lt;')
-                   .split('>').join('&gt;');
-    };
 
     var highlighted_code_pre = function(code, tagged_code, language) {
         var div = elt('div');
@@ -330,24 +339,25 @@
         else {
             var pre = elt('pre', {'class': 'cc_code'}).text(code);
         }
-        lazy_highlight_element(pre[0], language);
+        lazy_highlight_element('/static/shjs/lang/', '.min.js', pre[0], language);
 
         var textarea = elt('textarea', {
             'rows': linecount(tagged_code), 
-            'class': 'cc_code hidden', 
+            'class': 'cc_code', 
             'readonly': 'readonly', 
             'wrap': 'off'
         }).val(tagged_code);
+        textarea.hide();
 
         pre.click(function() {
-            pre.addClass('hidden');
-            textarea.removeClass('hidden');
+            pre.hide();
+            textarea.show();
             textarea.focus();
             textarea.select();
         });
         textarea.blur(function() {
-            pre.removeClass('hidden');
-            textarea.addClass('hidden');
+            pre.show();
+            textarea.hide();
         });
         div.append(pre, textarea);
         return div;
@@ -356,26 +366,24 @@
     var display_snip_version = function(snip) {
         var textarea = highlighted_code_pre(snip.code, annotator(snip)(snip.code), snip.language).addClass('snip_code');
         
-        var deps_area = dependencies_area(snip, function() {
-            var expand_deps_button = elt('button', {}).text("Expand All");
-            expand_deps_button.click(function() {
-                $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
-                    if (!snips) {
-                        alert("Couldn't expand dependencies.  Possibly because of a circular " +
-                              "dependency, or dependency on a spec with no implementations in " + snip.language);
-                        return;
-                    }
-                    var code = assemble(snips);
-                    var code_tagged = assemble_and_tag(snips);
-                    var newtextarea = highlighted_code_pre(code, code_tagged, 'javascript');
-                    // TODO evilness  (undo it I mean)
-                    textarea.replaceWith(newtextarea);
-                    textarea = newtextarea;
-                    expand_deps_button.remove();  // TODO toggle instead
-                });
+        var expand_deps_button = button("Expand All Dependencies", function () {
+            $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
+                if (!snips) {
+                    alert("Couldn't expand dependencies.  Possibly because of a circular " +
+                          "dependency, or dependency on a spec with no implementations in " + snip.language);
+                    return;
+                }
+                var code = assemble(snips);
+                var code_tagged = assemble_and_tag(snips);
+                var newtextarea = highlighted_code_pre(code, code_tagged, 'javascript');
+                // TODO evilness  (undo it I mean)
+                textarea.replaceWith(newtextarea);
+                textarea = newtextarea;
+                expand_deps_button.remove();  // TODO toggle instead
             });
-            return expand_deps_button;
-        }).addClass('deps_area');
+        });
+
+        var deps_area = expand_deps_button.add(dependencies_area(snip)).addClass('deps_area');
 
         return elt('span', {'class': 'language'}).text(snip.language)
                  .add(textarea)
@@ -487,45 +495,6 @@
         return div;
     };
 
-    // CodeCatalog Snippet http://www.codecatalog.net/181/475/
-    var tabs = function(ts) {
-        var tabtable = elt('div', { 'class': 'tabstrip' });
-        var content = elt('div', { 'class': 'content' });
-        var container = elt('div', { 'class': 'tabs' }, tabtable, content); 
-        var cur;
-    
-        for (var i in ts) {
-            (function() {
-                var t = ts[i];
-                var cb = function() {
-                    if (!t.contentCache) {
-                        if (typeof t.content == "function") {
-                            t.contentCache = t.content();
-                        }
-                        else {
-                            t.contentCache = t.content;
-                        }
-                        content.append(t.contentCache);
-                    }
-                    if (cur) { 
-                        cur.contentCache.addClass('hidden'); 
-                        cur.tab.removeClass('selected');
-                    }
-                    cur = t;
-                    t.contentCache.removeClass('hidden');
-                    t.tab.addClass('selected');
-                };
-                t.tab = elt('span', { 'class': 'tab' }).text(t.label);
-                t.tab.click(cb);
-                tabtable.append(t.tab);
-                if (i == 0) cb();
-            })();
-        }
-        
-        return container;
-    };
-    // End CodeCatalog Snippet
-
     var display_snip_container = function(snip) {
         return tabs([
             { label: 'Active', content: function() { return display_snip_versionptr(snip) } },
@@ -534,9 +503,6 @@
     };
 
     var display_snip_versionptr = function(snip) {
-        var votesbox = elt('span');
-        votesbox.text(snip.votes);
-
         var edit = function() {
             if (!editbutton()) return;
             infoarea.remove();
@@ -545,20 +511,8 @@
             }));
         };
 
-        var votes;
-        if (logged_in) {
-            votes = horizontal(
-                        button('-', function() { votedown_snip(snip.versionptr) }),
-                        votesbox,
-                        button('+', function() { voteup_snip(snip.versionptr) }));
-        }
-        else {
-            votes = elt('span',{}, votesbox);
-        }
-
         var version_display = display_snip_version(snip);
         var infoarea = elt('div', { 'class': 'infoarea' }, 
-                            votes,
                             button("edit", edit));
 
         return infoarea.add(version_display);
