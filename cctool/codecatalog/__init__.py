@@ -340,7 +340,7 @@ def confirmation_formatter(client):
         print "Fast Forward from {0} to {1}".format(orig.version, new.version);
         print "The code didn't change, but the version did."
         print
-        print orig.code
+        print new.code
         print
         print "OK to tag this snippet with the latest version number?"
         answer = None
