@@ -75,6 +75,33 @@ var edit_description_field = function()
 };
 // End CodeCatalog Snippet
 
+// CodeCatalog Snippet http://www.codecatalog.net/16/119/
+var elt = function(name, attrs) {
+    var r = $(document.createElement(name));
+    if (attrs) {
+        for (var i in attrs) {
+            r.attr(i, attrs[i]);
+        }
+    }
+    for (var i = 2; i < arguments.length; ++i) {
+        r.append(arguments[i]);
+    }
+    return r;
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/49/498/
+var label_table = function(dict) {
+    var ret = elt('table');
+    for (var i in dict) {
+        ret.append(elt('tr', {}, 
+                       elt('td', {'width': '1', 'class': 'label'}).text(i),
+                       elt('td', {}, dict[i])));
+    }
+    return ret;
+};
+// End CodeCatalog Snippet
+
 var language_selector = function() {
     var div = $('<div></div>');
     var languages = keys(language_to_line_comment_map);
@@ -210,33 +237,6 @@ var code_editor = function(proto, submit_callback) {
     div.append(textarea, languages, deps_div, edit_description, license, submit_button);
     return div;
 };
-
-// CodeCatalog Snippet http://www.codecatalog.net/16/119/
-var elt = function(name, attrs) {
-    var r = $(document.createElement(name));
-    if (attrs) {
-        for (var i in attrs) {
-            r.attr(i, attrs[i]);
-        }
-    }
-    for (var i = 2; i < arguments.length; ++i) {
-        r.append(arguments[i]);
-    }
-    return r;
-};
-// End CodeCatalog Snippet
-
-// CodeCatalog Snippet http://www.codecatalog.net/49/498/
-var label_table = function(dict) {
-    var ret = elt('table');
-    for (var i in dict) {
-        ret.append(elt('tr', {}, 
-                       elt('td', {'width': '1', 'class': 'label'}).text(i),
-                       elt('td', {}, dict[i])));
-    }
-    return ret;
-};
-// End CodeCatalog Snippet
 
 var code_editor_with_title = function(proto, submit_callback) {
     var title_input = elt('input', { type:'text' });

@@ -321,27 +321,23 @@
         	});
     };
     
-    var dependencies_area = function(snip, replacement) {
+    var dependencies_area = function(snip) {
         if (snip.dependencies.length == 0) {
-            return $('');
+            return $([]);
         }
         
-        var b = button('Dependencies', function() {
-            var table = elt('table');
-            snip.dependencies.forEach(function (dep) {
-                $.get('/api/specs/' + dep + '/active/', function (result) {
-                    table.append(
-                        elt('tr', {}, 
-                            elt('td', {},
-                                elt('a', { href: '/' + result.versionptr + '/' },
-                                    elt('tt').text(result.name))),
-                            elt('td', {}).text(result.summary)));
-                });
+        var table = elt('table');
+        snip.dependencies.forEach(function (dep) {
+            $.get('/api/specs/' + dep + '/active/', function (result) {
+                table.append(
+                    elt('tr', {}, 
+                        elt('td', {},
+                            elt('a', { href: '/' + result.versionptr + '/' },
+                                elt('tt').text(result.name))),
+                        elt('td', {}).text(result.summary)));
             });
-            table.append(replacement());
-            b.replaceWith(table);
         });
-        return b;
+        return table;
     };
 
     var assemble = function(snips) {
@@ -393,26 +389,24 @@
     var display_snip_version = function(snip) {
         var textarea = highlighted_code_pre(snip.code, annotator(snip)(snip.code), snip.language).addClass('snip_code');
         
-        var deps_area = dependencies_area(snip, function() {
-            var expand_deps_button = elt('button', {}).text("Expand All");
-            expand_deps_button.click(function() {
-                $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
-                    if (!snips) {
-                        alert("Couldn't expand dependencies.  Possibly because of a circular " +
-                              "dependency, or dependency on a spec with no implementations in " + snip.language);
-                        return;
-                    }
-                    var code = assemble(snips);
-                    var code_tagged = assemble_and_tag(snips);
-                    var newtextarea = highlighted_code_pre(code, code_tagged, 'javascript');
-                    // TODO evilness  (undo it I mean)
-                    textarea.replaceWith(newtextarea);
-                    textarea = newtextarea;
-                    expand_deps_button.remove();  // TODO toggle instead
-                });
+        var expand_deps_button = button("Expand All Dependencies", function () {
+            $.get('/api/snippet/' + snip.version + '/assemble/', function(snips) {
+                if (!snips) {
+                    alert("Couldn't expand dependencies.  Possibly because of a circular " +
+                          "dependency, or dependency on a spec with no implementations in " + snip.language);
+                    return;
+                }
+                var code = assemble(snips);
+                var code_tagged = assemble_and_tag(snips);
+                var newtextarea = highlighted_code_pre(code, code_tagged, 'javascript');
+                // TODO evilness  (undo it I mean)
+                textarea.replaceWith(newtextarea);
+                textarea = newtextarea;
+                expand_deps_button.remove();  // TODO toggle instead
             });
-            return expand_deps_button;
-        }).addClass('deps_area');
+        });
+
+        var deps_area = expand_deps_button.add(dependencies_area(snip)).addClass('deps_area');
 
         return elt('span', {'class': 'language'}).text(snip.language)
                  .add(textarea)
