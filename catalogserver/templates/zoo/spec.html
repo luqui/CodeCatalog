@@ -125,14 +125,6 @@
         };
     };
 
-    var votedown_snip = function (versionptr) {
-        post('/api/vote/', { versionptr: versionptr, value: -1 }, reload);
-    };
-
-    var voteup_snip = function (versionptr) {
-        post('/api/vote/', { versionptr: versionptr, value: 1 }, reload);
-    };
-
     // CodeCatalog Snippet http://www.codecatalog.net/32/85/
     var max = function() {
         var r = arguments[0];
@@ -534,9 +526,6 @@
     };
 
     var display_snip_versionptr = function(snip) {
-        var votesbox = elt('span');
-        votesbox.text(snip.votes);
-
         var edit = function() {
             if (!editbutton()) return;
             infoarea.remove();
@@ -545,20 +534,8 @@
             }));
         };
 
-        var votes;
-        if (logged_in) {
-            votes = horizontal(
-                        button('-', function() { votedown_snip(snip.versionptr) }),
-                        votesbox,
-                        button('+', function() { voteup_snip(snip.versionptr) }));
-        }
-        else {
-            votes = elt('span',{}, votesbox);
-        }
-
         var version_display = display_snip_version(snip);
         var infoarea = elt('div', { 'class': 'infoarea' }, 
-                            votes,
                             button("edit", edit));
 
         return infoarea.add(version_display);

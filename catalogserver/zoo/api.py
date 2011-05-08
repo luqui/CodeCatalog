@@ -96,15 +96,6 @@ def get_events_date_range(versionptr, startdate, enddate):
             'timestamp': v.timestamp.isoformat(),
             'name': name,
         })
-    for v in Vote.objects.filter(versionptr=versionptr, timestamp__gt=startdate, timestamp__lt=enddate):
-        events.append({
-            'type': 'vote',
-            'versionptr': versionptr.id,
-            'versionptr_type': versionptr_type,
-            'timestamp': v.timestamp.isoformat(),
-            'value': v.value,
-            'name': name,
-        })
     for bug in BugReport.objects.filter(target_versionptr=versionptr, version__timestamp__gt=startdate, version__timestamp__lt=enddate):
         events.append({
             'type': 'bug',
@@ -128,7 +119,6 @@ def dump_spec(spec):
         'name': spec.name,
         'summary': spec.summary,
         'spec': spec.spec,
-        'votes': spec.version.versionptr.votes,
         'timestamp': spec.version.timestamp.isoformat(),
         'comment': spec.version.comment,
         'user': spec.version.user and spec.version.user.username,
@@ -146,7 +136,6 @@ def dump_snippet(snippet):
         'spec_versionptr': snippet.spec_versionptr.id,
         'language': snippet.language,
         'code': snippet.code,
-        'votes': snippet.version.versionptr.votes,
         'timestamp': snippet.version.timestamp.isoformat(),
         'comment': snippet.version.comment,
         'user': snippet.version.user and snippet.version.user.username,
@@ -223,7 +212,7 @@ def specs_assemble(request, versionptr):
     def members(vptr):
         for o in Snippet.objects.filter(spec_versionptr=vptr, version__active=True):
             yield AnnotatedMember(
-                    weight=-o.version.versionptr.votes+1, 
+                    weight=0,
                     deps=snippet_dependencies(o),
                     object=o)
     return map(dump_snippet, dependency_search(members, versionptr) or ()) or None
@@ -240,7 +229,7 @@ def snippet_assemble(request, version):
                     version__active=True,
                     language=snippet.language):
             yield AnnotatedMember(
-                    weight=-o.version.versionptr.votes+1,
+                    weight=0,
                     deps=snippet_dependencies(o),
                     object=o)
     def members(vptr):
@@ -418,35 +407,6 @@ def new_bug(request):
         'versionptr': versionptr.id,
         'version': version.id,
     }
-
-@login_required
-def vote(request):
-    """POST /api/vote/ : Votes on a versionptr.  Cancels out any previous vote.
-
-        versionptr: the versionptr to vote on
-        value: -1, 0, or 1"""
-
-    # TODO Proper error handling anyone?
-    if not request.user.is_authenticated: return ""
-    
-    # TODO race condition
-    versionptr = VersionPtr.objects.get(id=request.POST['versionptr'])
-    value = int(request.POST['value'])
-    
-    pvotes = Vote.objects.filter(user=request.user, versionptr=versionptr)
-    for pvote in pvotes:
-        versionptr.votes -= pvote.value
-    pvotes.delete()
-    
-    if value != 0:
-        vote = Vote(user=request.user, versionptr=versionptr, value=value, timestamp=datetime.now())
-        versionptr.votes += value
-        vote.save()
-    versionptr.save()
-
-    notify_followers(request.user, versionptr)
-
-    return ""
 
 def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""

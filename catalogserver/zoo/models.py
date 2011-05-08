@@ -21,7 +21,6 @@ class VersionPtr(models.Model):
         2: 'BugReport',
     }
     PTRTYPE_TO_ID = dict_inverse(ID_TO_PTRTYPE)
-    votes = models.IntegerField(default=0)
     type = models.IntegerField(choices=ID_TO_PTRTYPE.items())
 
     def active_version(self):
@@ -64,13 +63,6 @@ class Snippet(models.Model):
 class Dependency(models.Model):
     snippet = models.ForeignKey(Snippet)
     target  = models.ForeignKey(VersionPtr)  # points to a spec versionptr
-
-class Vote(models.Model):
-    user       = models.ForeignKey(User)
-    versionptr = models.ForeignKey(VersionPtr)
-    value      = models.IntegerField()  # 1 or -1
-    timestamp  = models.DateTimeField()
-
 
 class BugReport(models.Model):
     ID_TO_STATUS = { 
