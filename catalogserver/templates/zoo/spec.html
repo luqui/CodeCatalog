@@ -17,7 +17,15 @@
   <style>
     .hidden { display: none; visibility: hidden; width: 10px }
     .data { display: none; visibility: hidden; width: 10px }
-    .cc_code, .cc_code textarea { width: 750px; background: white }
+    .cc_code, .cc_code textarea { 
+    	width: 750px; 
+    	background: white; 
+    }
+    
+    .cc_code pre {
+    	overflow: auto;
+    }
+    
     .cc_history { width: 650px }
 
     .deps_area { display: block; }
@@ -45,25 +53,34 @@
         margin-top: 1cm;
     }
     
-    .tabs .tabstrip { border-spacing: 0; border-collapse: collapse; }
-    .tabs .tab { 
-        background: #ab8;
+    .tabs .tabstrip { 
+    	text-align: right;
+    	border-spacing: 0; 
+    	border-collapse: collapse; 
+    	display: block; 
+    }
+    .tabs .tab {
+    	color: #777;
+        background: white;
         padding-right: 1cm;
-        border-left: solid 2px #bc9;
-        border-top: solid 2px #bc9;
-        border-right: solid 2px #9a7;
-        border-bottom: solid 1px #9a7;
+        border: dotted 1px black;
+        border-bottom: none;
         cursor: pointer;
         display: inline-block;
     }
     .tabs .tab.selected {
-        border-left: solid 2px #deb;
-        border-top: solid 2px #deb;
-        border-bottom: solid 1px #cda;
-        background: #cda;
+    	background: white;
+    	color: black;
+    	border: solid 1px black;
+        border-bottom: solid 1px white;
+        margin-bottom: -1px;
     }
     .tabs .content {
-        background: #cda;
+        background: white;
+        border-top: 1px solid black;
+        border-left: 1px solid lightgray;
+        border-right: 1px solid lightgray;
+        border-bottom: 1px solid lightgray;
         padding: 4px;
     }
     .language { 
@@ -87,18 +104,24 @@
     	text-align: right;
     }
     
+    .dynamic_link_after_text {
+    	margin-left: 1em;
+    }
     .dynamic_link, .markdown_edit_div a {
     	color: gray;
     	font-family: serif;
     	font-size: 10pt;
     	font-weight: normal;
-    	margin-left: 1em;
     	border: 1px solid lightgray;
     }
     .dynamic_link:hover, .markdown_edit_div a:hover {
     	background: gray;
     	color: white;
     	text-decoration: none;
+    }
+    
+    .history {
+    	border-bottom: 1px solid black;
     }
 
     /* Bugs box */
@@ -490,7 +513,7 @@
                 else {
                     comment = elt('span').text("<No comment>");
                 }
-                var d = elt('div', {}, info.add(display_snip_version(snip)).add(elt('span', { 'class': 'edit_comment' }, comment, elt('span').text(" -- by " + snip.user))));
+                var d = elt('div', {'class':'history'}, info.add(display_snip_version(snip)).add(elt('span', { 'class': 'edit_comment' }, comment, elt('span').text(" -- by " + snip.user))));
                 table.append(d);
             })();
         }
