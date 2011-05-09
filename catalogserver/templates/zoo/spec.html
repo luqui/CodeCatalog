@@ -12,6 +12,7 @@
   <script type="text/javascript" src="/static/editable_markdown.js"></script>
   <script type="text/javascript" src="/static/code_editor.js"></script>
   <script type="text/javascript" src="/static/shjs/sh_main.js"></script>
+  <script type="text/javascript" src="/static/diff_match_patch.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/shjs/sh_style.css" />
 
   <style>
@@ -488,35 +489,98 @@
                  .add(deps_area);
     };
 
+    var diff_to_pretty_html = function(diffs, language) 
+    {
+    	  var html = [];
+    	  var i = 0;
+    	  var pattern_amp = /&/g;
+    	  var pattern_lt = /</g;
+    	  var pattern_gt = />/g;
+    	  for (var x = 0; x < diffs.length; x++) {
+    	    var op = diffs[x][0];    // Operation (insert, delete, equal)
+    	    var data = diffs[x][1];  // Text of change.
+    	    var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
+    	        .replace(pattern_gt, '&gt;');
+    	    switch (op) {
+    	      case DIFF_INSERT:
+    	        html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
+    	        break;
+    	      case DIFF_DELETE:
+    	        html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
+    	        break;
+    	      case DIFF_EQUAL:
+    	        html[x] = '<span>' + truncate_unchanged_from_diff(3, text, language) + '</span>';
+    	        break;
+    	    }
+    	    if (op !== DIFF_DELETE) {
+    	      i += data.length;
+    	    }
+    	  }
+    	  return html.join('');
+    	};
+    	
+    var truncate_unchanged_from_diff = function(context_lines, str, language) {
+    	var lines = str.split("\n");
+    	console.log("Got a " + lines.length + "-line chunk");
+    	if (lines.length > 2*context_lines+2) {
+    		console.log("Splitting");
+    		var line_comment = language in language_to_line_comment_map 
+    								? language_to_line_comment_map[language]
+    								: '';
+    							
+    		return lines.slice(0,context_lines).concat(
+    				["\n" + line_comment + " ---- " + (lines.length - 2*context_lines) + " lines omitted ----\n"],
+    				lines.slice(lines.length-context_lines, lines.length))
+    			.join("\n");
+    	}
+    	else {
+    		return str;
+    	}
+    };
+    
+    // CodeCatalog Snippet http://codecatalog.net/267/751/
+   	var iterate_adjacent = function(array, deflt, func) {
+   	    for (var i = 0; i < array.length; ++i) {
+   		var current = array[i];
+   	    	var next = i + 1 < array.length ? array[i+1] : deflt;
+   	    	func(current, next);
+   	    }
+   	};
+   	// End CodeCatalog Snippet
+    
     var display_snips_history = function(snips) {
         var table = elt('div');
-        for (var i in snips) {
-            (function() {
-                var snip = snips[i];
-                var info;
-                if (snip.active || !logged_in) {
-                    info = $([]);
-                }
-                else {
-                    info = dynamic_link('Revert to this version', function() {
-                        var newsnip = $.extend({}, snip);
-                        newsnip.dependencies = snip.dependencies.join(',');
-                        newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.version;
-                        delete newsnip.version;
-                        $.post('/api/new/snippet/', newsnip, reload);
-                    }).addClass('infoarea');
-                }
-                var comment;
-                if (snip.comment) {
-                    comment = elt('span').text(snip.comment);
-                }
-                else {
-                    comment = elt('span').text("<No comment>");
-                }
-                var d = elt('div', {'class':'history'}, info.add(display_snip_version(snip)).add(elt('span', { 'class': 'edit_comment' }, comment, elt('span').text(" -- by " + snip.user))));
-                table.append(d);
-            })();
-        }
+        var dmp = new diff_match_patch();
+        iterate_adjacent(snips, {'code':''}, function(snip, prev_snip) {
+            var info;
+            if (snip.active || !logged_in) {
+                info = $([]);
+            }
+            else {
+                info = dynamic_link('Revert to this version', function() {
+                    var newsnip = $.extend({}, snip);
+                    newsnip.dependencies = snip.dependencies.join(',');
+                    newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.version;
+                    delete newsnip.version;
+                    $.post('/api/new/snippet/', newsnip, reload);
+                }).addClass('infoarea');
+            }
+            var comment;
+            if (snip.comment) {
+                comment = elt('span').text(snip.comment);
+            }
+            else {
+                comment = elt('span').text("<No comment>");
+            }
+            
+            var diffs = dmp.diff_main(prev_snip.code, snip.code);
+            dmp.diff_cleanupSemantic(diffs);
+            var diff_html = elt('pre', {}, diff_to_pretty_html(diffs, snip.language));
+            
+            lazy_highlight_element('/static/shjs/lang/', '.min.js', diff_html[0], snip.language);
+            var d = elt('div', {'class':'history'}, info.add(diff_html).add(elt('span', { 'class': 'edit_comment' }, comment, elt('span').text(" -- by " + snip.user))));
+            table.append(d);
+        });
         return table;
     };
 
@@ -531,54 +595,64 @@
         return div;
     };
 
-    var display_spec_version = function(spec) {
-        return function (info) {
-            if (spec.status == 'Deprecated') {
-                info = vertical(elt('b').text('DEPRECATED'), info);
-            }
-            return horizontal(
-                elt('table', { 'class': 'spec_history_table' },
+    var display_spec_version = function(title, summary, spec) {
+        return elt('table', { 'class': 'spec_history_table' },
                     elt('tr', {},
                         elt('td').text("Title"),
-                        elt('td').text(spec.name)),
+                        elt('td', {}, title)),
                     elt('tr', {},
                         elt('td').text("Summary"),
-                        elt('td').text(spec.summary)),
+                        elt('td', {}, summary)),
                     elt('tr', {},
                         elt('td').text("Description"),
-                        elt('td', {}, elt('textarea', { 'readonly': 'readonly', 'class': 'cc_history', 'rows': 10 }).val(spec.spec)))),
-                info);
-        };
+                        elt('td', {},
+                        	elt('pre', {}, spec))));
     };
 
+    var render_diff = function(dmp, text_a, text_b, language) {
+    	var diffs = dmp.diff_main(text_a, text_b);
+        dmp.diff_cleanupSemantic(diffs);
+        return diff_to_pretty_html(diffs, language);
+    };
+    
     var display_specs_history = function(specs) {
         var table = elt('table');
-        for (var i in specs) {
-            (function() {
-                var spec = specs[i];
-                var info;
-                if (spec.active || !logged_in) {
-                    info = $('');
-                }
-                else {
-                    info = dynamic_link('Revert to this version', function() {
-                        var newspec = $.extend({}, spec);
-                        newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.version;
-                        delete newspec.version;
-                        $.post('/api/new/spec/', newspec, reload);
-                    });
-                }
-                var comment;
-                if (spec.comment) {
-                    comment = elt('span').text(spec.comment);
-                }
-                else {
-                    comment = elt('span').text("<No comment>");
-                }
-                var d = vertical(display_spec_version(spec)(info), elt('span', {}, comment, elt('span').text('-- by ' + spec.user)));
-                table.append(elt('tr', {}, elt('td', {}, d)));
-            })();
-        }
+        var dmp = new diff_match_patch();
+        iterate_adjacent(specs, {'name': '', 'summary': '', 'spec': ''}, function(spec, prev_spec) {
+	        var info;
+	        if (spec.active || !logged_in) {
+	            info = $('');
+	        }
+        	else {
+            	info = dynamic_link('Revert to this version', function() {
+                	var newspec = $.extend({}, spec);
+                	newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.version;
+                	delete newspec.version;
+                	$.post('/api/new/spec/', newspec, reload);
+            	});
+        	}
+	        if (spec.status == 'Deprecated') {
+                info = vertical(elt('b').text('DEPRECATED'), info);
+            }
+	        
+	        var comment;
+	        if (spec.comment) {
+	            comment = elt('span').text(spec.comment);
+	        }
+	        else {
+	            comment = elt('span').text("<No comment>");
+	        }
+	        
+	        var diff_title = render_diff(dmp, prev_spec.name, spec.name, null);
+	        var diff_summary = render_diff(dmp, prev_spec.summary, spec.summary, null);
+	        var diff_spec = render_diff(dmp, prev_spec.spec, spec.spec, 'markdown');
+        	var spec_display = display_spec_version(diff_title, diff_summary, diff_spec);
+        	var display = horizontal(spec_display, info);
+        	
+	        var d = vertical(display, elt('span', {}, comment, elt('span').text('-- by ' + spec.user)));
+	        table.append(elt('tr', {}, elt('td', {}, d)));
+	    });
+	    
         return table;
     };
 
