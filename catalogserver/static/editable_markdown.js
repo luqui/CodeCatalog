@@ -32,7 +32,8 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
     var markup = textarea.val();
     var converter = new Showdown.converter();
 
-    var editlink = $('<a href="#">edit</a>');
+    var editlink = elt('a', {'href':'#'}).text('edit');
+    var editdiv = elt('span', {'class':'markdown_edit_div'}, editlink);
     var update = function() { div.html(converter.makeHtml(textarea.val())); };
 
     // TODO keydown instead to make it more responsive.  Make sure it isn't lagging
@@ -69,9 +70,9 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
         return false;
     });
     container.append(div);
-    container.append(editlink);
     update();
 
     textarea.before(container);
+    textarea.before(editdiv);
     textarea.hide();
 };

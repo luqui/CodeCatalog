@@ -82,9 +82,27 @@
     .edit_comment {
         font-style: italic;
     }
+    
+    .markdown_edit_div {
+    	text-align: right;
+    }
+    
+    .dynamic_link, .markdown_edit_div a {
+    	color: gray;
+    	font-family: serif;
+    	font-size: 10pt;
+    	font-weight: normal;
+    	margin-left: 1em;
+    	border: 1px solid lightgray;
+    }
+    .dynamic_link:hover, .markdown_edit_div a:hover {
+    	background: gray;
+    	color: white;
+    	text-decoration: none;
+    }
 
     /* Bugs box */
-    .bugs { margin-left: 1in }
+    .bugs { }
     .bugs .open { color: #f66 }
     .bugs .resolved { color: #6a6 }
     .bugs .closed { color: #666 }
@@ -561,18 +579,17 @@
 
     var display_snip_versionptr = function(snip) {
         var edit = function() {
-            if (!editbutton()) return;
-            infoarea.remove();
+            if (!try_login()) return;
+            editlink.remove();
             version_display.replaceWith(code_editor(snip, function(newsnip) {
                 $.post('/api/new/snippet/', newsnip, reload);
             }));
         };
 
         var version_display = display_snip_version(snip);
-        var infoarea = elt('div', { 'class': 'infoarea' }, 
-                            button("edit", edit));
+        var editlink = dynamic_link("edit", edit).addClass('dynamic_link');
 
-        return infoarea.add(version_display);
+        return version_display.add(editlink);
     };
 
     var render_bug = function(bug) {
@@ -645,7 +662,7 @@
     var bugs_box = function(versionptr) {
         var div = elt('div', { 'class': 'bugs' });
 
-        var newbug = elt('a', { href: '#' }).text("Report Bug");
+        var newbug = elt('a', { 'href': '#', 'class': 'dynamic_link' }).text("report bug");
         newbug.click(function() {
             newbug.before(bug_edit_box(versionptr, {}, render_bug));
             return false;
@@ -660,7 +677,7 @@
         return div;
     };
 
-    var editbutton = function() {
+    var try_login = function() {
         if (logged_in) {
             return true;
         }
@@ -674,12 +691,12 @@
     $(function() {
         editable({ 
                 onedit: function() { savespec(); },
-                custom_on_click: editbutton})
+                custom_on_click: try_login})
             .installEditButtons();
         
         makeMarkdownArea($('#spec'), 'spec', function(text, comment) { 
             savespec(null, comment);
-        }, editbutton);
+        }, try_login);
 
         $('#spec_history').click(function () {
             $('#spec_region').replaceWith(display_spec_history(JSON.parse($('#spec_data').val())));
