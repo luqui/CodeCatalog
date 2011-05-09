@@ -24,11 +24,9 @@
     }
     
     .cc_code pre {
+    	width: 750px;
     	overflow: auto;
     }
-    
-    .cc_history { width: 650px }
-
     .deps_area { display: block; }
 
     /* Alert */
@@ -37,10 +35,18 @@
     /* Documentation */
     .spec_name { font-family: monospace; margin-bottom: 0px }
     .summary { margin-left: 1cm; font-style: italic }
-    .spec { background: #eee; margin-top: 1cm }
+    .spec { 
+    	background: #eee; 
+    	margin-top: 1cm;
+    }
     .spec h1 { font-size: 16pt; text-decoration: underline }
     .spec h2 { font-size: 14pt }
     .spec pre { padding-left: 1cm; background: #ccc }
+
+	.spec_literal {
+		white-space: pre-wrap;
+		word-wrap: break-word;
+	}
 
     .spec_controls { float: right }
     .spec_history_table { border: 1px solid black; background: #ddf }
@@ -112,7 +118,7 @@
     .dynamic_link, .markdown_edit_div a {
     	color: gray;
     	font-family: serif;
-    	font-size: 10pt;
+    	font-size: 12pt;
     	font-weight: normal;
     	border: 1px solid lightgray;
     }
@@ -496,37 +502,37 @@
 
     var diff_to_pretty_html = function(diffs, language) 
     {
-    	  var html = [];
-    	  var i = 0;
-    	  var pattern_amp = /&/g;
-    	  var pattern_lt = /</g;
-    	  var pattern_gt = />/g;
-    	  for (var x = 0; x < diffs.length; x++) {
-    	    var op = diffs[x][0];    // Operation (insert, delete, equal)
-    	    var data = diffs[x][1];  // Text of change.
-    	    var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
-    	        .replace(pattern_gt, '&gt;');
-    	    switch (op) {
-    	      case DIFF_INSERT:
-    	        html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
-    	        break;
-    	      case DIFF_DELETE:
-    	        html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
-    	        break;
-    	      case DIFF_EQUAL:
-    	        html[x] = '<span>' + truncate_unchanged_from_diff(3, text, language) + '</span>';
-    	        break;
-    	    }
-    	    if (op !== DIFF_DELETE) {
-    	      i += data.length;
-    	    }
-    	  }
-    	  return html.join('');
-    	};
+		var html = [];
+		var i = 0;
+		var pattern_amp = /&/g;
+		var pattern_lt = /</g;
+		var pattern_gt = />/g;
+		for (var x = 0; x < diffs.length; x++) {
+		var op = diffs[x][0];    // Operation (insert, delete, equal)
+			var data = diffs[x][1];  // Text of change.
+			var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
+			    .replace(pattern_gt, '&gt;');
+			switch (op) {
+				case DIFF_INSERT:
+				  html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
+				  break;
+				case DIFF_DELETE:
+				  html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
+				  break;
+				case DIFF_EQUAL:
+				  html[x] = '<span>' + truncate_unchanged_from_diff(3, text, language) + '</span>';
+				  break;
+			}
+			if (op !== DIFF_DELETE) {
+				i += data.length;
+			}
+  	  	}
+  		return html.join('');
+  	};
     	
     var truncate_unchanged_from_diff = function(context_lines, str, language) {
     	var lines = str.split("\n");
-    	if (lines.length > 2*context_lines+2) {
+    	if (lines.length > 2*context_lines+4) {
     		var line_comment = language in language_to_line_comment_map 
     								? language_to_line_comment_map[language]
     								: '';
@@ -556,7 +562,14 @@
         dmp.diff_cleanupSemantic(diffs);
         return diff_to_pretty_html(diffs, language);
     };
-   	
+    
+    var wrap_in_pre = function(element) {
+    	if ($.browser.msie)
+    		return $('<pre>' + element + '</pre>');
+    	else
+    		return elt('pre', {}, element);
+    };
+    
     var display_snips_history = function(snips) {
         var table = elt('div');
         var dmp = new diff_match_patch();
@@ -572,7 +585,7 @@
                     newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.version;
                     delete newsnip.version;
                     $.post('/api/new/snippet/', newsnip, reload);
-                }).addClass('infoarea');
+                });
             }
             var comment;
             if (snip.comment) {
@@ -582,9 +595,12 @@
                 comment = elt('span').text("<No comment>");
             }
             
-            var diff_html = elt('pre', {}, render_diff(dmp, prev_snip.code, snip.code, snip.language));
+            var diff_html = $(wrap_in_pre(render_diff(dmp, prev_snip.code, snip.code, snip.language)));
             lazy_highlight_element('/static/shjs/lang/', '.min.js', diff_html[0], snip.language);
-            var d = elt('div', {'class':'history'}, info.add(diff_html).add(elt('span', { 'class': 'edit_comment' }, comment, elt('span').text(" -- by " + snip.user))));
+            var d = elt('div', { 'class': 'history cc_code'}, 
+            			diff_html.add(elt('span', { 'class': 'edit_comment' }, 
+            							comment, elt('span').text(" -- by " + snip.user)))
+            					 .add(info));
             table.append(d);
         });
         return table;
@@ -605,7 +621,7 @@
     	return $([])
        		.add(elt('h1', {'class': 'spec_name'}, title))
    			.add(elt('span', {'class':'summary'}, summary))
-    		.add(elt('pre', {'class': 'spec'}, spec));
+    		.add(wrap_in_pre(spec).addClass('spec').addClass('spec_literal'));
     };
     
     var display_specs_history = function(specs) {
@@ -846,7 +862,7 @@
  <h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
  <div class="spec_controls">
    <div>
-    <a id="spec_history" name="spec_history" href="#">History</a>
+    <a id="spec_history" name="spec_history" class="dynamic_link" href="#">history</a>
    </div>
    {% if user.is_authenticated %}
    <div>
@@ -872,6 +888,10 @@
 </div>
 {% endfor %}
 
-<button name="addsnippet" id="addsnippet">Add Snippet</button>
+<div class="iecentered">
+  <div style="margin: auto">
+	<a href='#' name="addsnippet" class="dynamic_link" id="addsnippet">add snippet</a>
+  </div>
+</div>
 {% endblock impls %}
 {% endblock content %}
