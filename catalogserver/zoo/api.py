@@ -40,7 +40,6 @@ def new_version(user, versionptr, comment=""):
     return Version(
         timestamp = datetime.now(),
         user = user_or_none(user),
-        approved = True,
         active = True,
         versionptr = versionptr,
         comment = comment)
@@ -56,7 +55,7 @@ def get_or_new_versionptr(typ, versionptr_id):
 def update_active(versionptr):
     objs = Version.objects.filter(versionptr=versionptr)
     objs.update(active=False)
-    activeobjs = objs.filter(approved=True).order_by('-timestamp')
+    activeobjs = objs.order_by('-timestamp')
     if activeobjs.exists():
         activeobj = activeobjs[0]
         activeobj.active=True
@@ -115,7 +114,6 @@ def dump_spec(spec):
     return {
         'versionptr': spec.version.versionptr.id,
         'version': spec.version.id,
-        'approved': spec.version.approved,
         'active': spec.version.active,
         'name': spec.name,
         'summary': spec.summary,
@@ -131,7 +129,6 @@ def dump_snippet(snippet):
     return {
         'versionptr': snippet.version.versionptr.id,
         'version': snippet.version.id,
-        'approved': snippet.version.approved,
         'active': snippet.version.active,
         'dependencies': tuple(snippet.dependency_set.all().values_list('target', flat=True)),
         'spec_versionptr': snippet.spec_versionptr.id,

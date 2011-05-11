@@ -36,7 +36,6 @@ class VersionPtr(models.Model):
 class Version(models.Model):
     timestamp  = models.DateTimeField()
     user       = models.ForeignKey(User, null=True)
-    approved   = models.BooleanField()
     active     = models.BooleanField()    # cache field that always marks the latest approved version
     versionptr = models.ForeignKey(VersionPtr)
     comment    = models.TextField()
