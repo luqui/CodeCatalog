@@ -37,6 +37,7 @@ apipatterns = patterns('',
     (r'^user/events/new/$', jsonwrap(api.user_events_new)),
     (r'^user/events/mark_viewed/$', jsonwrap(api.user_events_mark_viewed)),
     (r'^user/make_api_key/$', jsonwrap(api.user_make_api_key)),
+    (r'^orm/$', jsonwrap(api.orm)),
 )
 
 urlpatterns = patterns('',

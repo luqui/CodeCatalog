@@ -3,6 +3,7 @@ from datetime import datetime
 from haystack.query import SearchQuerySet
 from django.db.models import Q
 from django.contrib.auth import authenticate
+import json
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -239,6 +240,55 @@ def snippet_assemble(request, version):
         return filter(filt, lang_members(vptr))
     
     return map(dump_snippet, dependency_search(members, snippet.spec_versionptr) or ()) or None
+
+# JSON ORM queries:
+#   query ::= { 'type': 'or',  'values': [ query1, query2, ... ] }
+#           | { 'type': 'and', 'values': [ query1, query2, ... ] }
+#           | { 'type': 'not', 'value': query }
+#           | { 'type': 'relation', 'field': field, 'relation': relation, 'value': value }
+#   
+#   field ::= [ name1, name2, ... ]
+#
+#   relation ::= 'exact'
+
+def json_orm_query(query):
+    import operator
+    if query['type'] == 'or':
+        return reduce(operator.or_, map(json_orm_query, query['values']), Q())
+    elif query['type'] == 'and':
+        return reduce(operator.and_, map(json_orm_query, query['values']), Q())
+    elif query['type'] == 'not':
+        return ~json_orm_query(query['value'])
+    elif query['type'] == 'relation':
+        fieldname = '__'.join(query['field']) + '__' + query['relation']
+        kwargs = { fieldname: query['value'] }
+        return Q(**kwargs)
+    else:
+        raise TypeError(str(query['type']) + " is not a valid JSON ORM query type")
+
+# JSON ORM requests:
+#   request ::= { 'model': model, 'query': query, 'count': count }
+
+#   Model spec:
+#     { model_name: { 'model': model, 'dump': dump function }, ... }
+
+def json_orm_request(request, models):
+    modelname = request['model']
+    model = models[modelname]
+    return map(model['dump'], 
+            model['model'].objects.filter(json_orm_query(request['query']))
+                [0:int(request['count'])])
+
+def orm(request):
+    print request.GET['request']
+    r = json.loads(request.GET['request'])
+    return  json_orm_request(r, {
+                'Spec':      { 'model': Spec, 'dump': dump_spec },
+                'Snippet':   { 'model': Snippet, 'dump': dump_snippet },
+                'BugReport': { 'model': BugReport, 'dump': dump_bug },
+            })
+    
+    
     
 def specs_active(request, versionptr):
     """GET /api/specs/<ptr>/active/ : Get the latest active spec with versionptr <ptr>."""
