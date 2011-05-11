@@ -113,6 +113,10 @@
             window.location.href = $('#loginoutbutton').attr('href') + "?next=" + escape(path);
             return false;
         });
+
+        if (window.location.host != 'www.codecatalog.net') {
+            $('#banner').css('border', '4px solid red');
+        }
     });
   </script>
   <script type="text/javascript">
@@ -154,7 +158,7 @@
    </div>
    <div class="iecentered">
     <div class="centered">
-     <a href="/"><img src="/static/banner.png" /></a>
+     <a href="/"><img id="banner" name="banner" src="/static/banner.png" /></a>
     </div>
    </div>
    {% block content %}
