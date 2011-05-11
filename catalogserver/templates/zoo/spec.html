@@ -16,6 +16,10 @@
   <link rel="stylesheet" type="text/css" href="/static/shjs/sh_style.css" />
 
   <style>
+    h2 {
+        font-size: 14pt;
+        display: inline;
+    }
     .hidden { display: none; visibility: hidden; width: 10px }
     .data { display: none; visibility: hidden; width: 10px }
     .cc_code, .cc_code textarea { 
@@ -27,7 +31,37 @@
     	width: 750px;
     	overflow: auto;
     }
-    .deps_area { display: block; }
+    
+    .deps_area { 
+        display: block; 
+        margin: auto;
+        padding-left: 100px;
+        padding-right: 100px;
+    }
+    
+    .deps_area table {
+        border-style: hidden;
+        border-collapse: collapse;
+        border-spacing: 0px;
+        border-width: 0px;
+    }
+    
+    .deps_area td {
+        border-color: lightgray;
+        border-width: 1px;
+        border-style: inset;
+        padding: 10px 16px;
+    }
+    
+    .deps_header h2 {
+        font-size: 12pt;
+        margin-right: 1em;
+        font-weight: bold;
+    } 
+    .deps_header {
+        margin: auto;
+        text-align: center;
+    }
 
     /* Alert */
     .alert { background: #fd9 }
@@ -515,14 +549,15 @@
         if (snip.dependencies.length == 0) {
             var area = pre;
             var btn = $([]);
+            var deps_area = btn;
         }
         else {
         	var d_link_element = dynamic_link_element();
         	d_link_element.addClass('dynamic_link');
             var toggle = toggle_element(
             		        d_link_element,
-                            "Expand Dependencies", 
-                            "Collapse Dependencies",
+                            "expand all", 
+                            "collapse",
                             pre,
                             function() {
                                 var snips;
@@ -543,9 +578,15 @@
                             });
             var area = toggle[0];
             var btn = toggle[1];
+            var deps_header = 
+            	elt('div', { 'class': 'deps_header' }, 
+            		elt('span', {},
+            		  elt('h2', { 'class': 'deps_header' }).text("Dependencies"),
+            		  btn));
+            var deps_area = elt('hr')
+                    .add(deps_header)
+                    .add(elt('div', {}, dependencies_area(snip)).addClass('deps_area'));
         }
-        
-        var deps_area = btn.add(dependencies_area(snip)).addClass('deps_area');
 
         return elt('span', {'class': 'language'}).text(snip.language)
                  .add(area)
