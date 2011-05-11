@@ -189,13 +189,20 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/167/451/
-    var dynamic_link = function(text, click) {
-        var r = elt('a', {'href': '#'}).text(text);
-        r.click(function() { click(); return false; });
-        return r;
-    };
-    // End CodeCatalog Snippet
+    // CodeCatalog Snippet http://codecatalog.net/270/759/
+	var dynamic_link_element = function() {
+    	return elt('a', { href: '#'});
+	}
+	// End CodeCatalog Snippet
+    
+    // CodeCatalog Snippet http://codecatalog.net/167/761/
+	var dynamic_link = function(text, click) {
+	    var link_element = dynamic_link_element();
+	    var d_link = link_element.text(text);
+	    d_link.click(function() { click(); return false; });
+	    return d_link;
+	};
+	// End CodeCatalog Snippet
 
     // CodeCatalog Snippet http://www.codecatalog.net/39/669/
     var horizontal = function() {
@@ -363,35 +370,71 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/265/746/
-    var toggle_button = function(text, text_alt, element, element_alt) {
+    // CodeCatalog Snippet http://codecatalog.net/274/771/
+	var screen_offset = function(element) {
+	    var element_offset = element.offset();
+	    var offset_x = element_offset.left - window.pageXOffset;
+	    var offset_y = element_offset.top - window.pageYOffset; 
+	    return { "left": offset_x, "top": offset_y };
+	};
+	// End CodeCatalog Snippet
+    
+    // CodeCatalog Snippet http://codecatalog.net/276/773/
+    var preserving_screen_position = function(element, mods) {
+        var old_offset = screen_offset(element);
+        mods();
+        var new_offset = screen_offset(element);
+            
+        window.scrollBy(new_offset.left - old_offset.left, new_offset.top - old_offset.top);
+    };
+    // End CodeCatalog Snippet
+    
+    // CodeCatalog Snippet http://codecatalog.net/272/764/
+    var toggle_element = function(click_widget, text, text_alt, element, element_alt) {
         var div = elt('div', {}, element);
         if (typeof(element_alt) !== 'function') {
             div.append(element_alt);
+            element_alt.hide();
         }
         
         var state = 'normal';
-        var btn = button(text, function() {
+        click_widget.text(text);
+        click_widget.click(function() {
             if (state == 'normal') {
-                if (typeof(element_alt) === 'function') {
+            	if (typeof(element_alt) === 'function') {
                     element_alt = element_alt();
                     div.append(element_alt);
+                    element_alt.hide();
                 }
-                element.hide();
-                element_alt.show();
-                btn.text(text_alt);
+                
+            	preserving_screen_position(click_widget, function() {
+	                element_alt.show();
+	                element.hide();
+	                click_widget.text(text_alt);
+            	});
+
                 state = 'alternate';
             }
             else {
-                element_alt.hide();
-                element.show();
-                btn.text(text);
+            	preserving_screen_position(click_widget, function() {
+	            	element.show();
+	                element_alt.hide();
+	                click_widget.text(text);
+            	});
+            
                 state = 'normal';
             }
+            return false;
         });
-        return [div, btn];
+        return [div, click_widget];
     };
     // End CodeCatalog Snippet
+    
+	// CodeCatalog Snippet http://codecatalog.net/265/766/
+	var toggle_button = function(text, text_alt, element, element_alt) {
+	    return toggle_element(elt('button'), text, text_alt, element, element_alt);
+	};
+	// End CodeCatalog Snippet
 
     var logged_in = '{{user.is_authenticated}}' == 'True';
 
@@ -421,13 +464,19 @@
         	});
     };
 
+    var foreach = function(array, body) {
+        for (var i = 0; i < array.length; ++i) {
+            body(array[i]);
+        }
+    };
+    
     var dependencies_area = function(snip) {
         if (snip.dependencies.length == 0) {
             return $([]);
         }
         
         var table = elt('table');
-        snip.dependencies.forEach(function (dep) {
+        foreach(snip.dependencies, function (dep) {
             $.get('/api/specs/' + dep + '/active/', function (result) {
                 table.append(
                     table_row(
@@ -468,7 +517,10 @@
             var btn = $([]);
         }
         else {
-            var toggle = toggle_button(
+        	var d_link_element = dynamic_link_element();
+        	d_link_element.addClass('dynamic_link');
+            var toggle = toggle_element(
+            		        d_link_element,
                             "Expand Dependencies", 
                             "Collapse Dependencies",
                             pre,
