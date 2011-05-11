@@ -889,6 +889,8 @@
     };
 
     $(function() {
+        console.log("Loading");
+        
         editable({ 
                 onedit: function() { savespec(); },
                 custom_on_click: try_login})
@@ -907,7 +909,7 @@
 
         $('.snippet').each(function (i,e) {
             e = $(e);
-            var data = JSON.parse(e.find('.data').val());
+            var data = JSON.parse(e.find('.data').text());
             var snip = display_snip_container(data);
             e.replaceWith(snip);
             snip.after(bugs_box(data.versionptr));
@@ -978,7 +980,7 @@
 {% for snip in snippets %}
 <div class="snippet">
  <pre class="code" readonly="readonly">{{snip.code}}</pre>
- <textarea class="data hidden" readonly="readonly">{{snip|json}}</textarea>
+ <pre class="data hidden" readonly="readonly">{{snip|json}}</pre>
 </div>
 {% endfor %}
 
