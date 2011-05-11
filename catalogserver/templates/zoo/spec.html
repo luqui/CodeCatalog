@@ -473,6 +473,10 @@
 
     var logged_in = '{{user.is_authenticated}}' == 'True';
 
+    var orm_request = function(req, cb) {
+        return $.get('/api/orm/', {request: JSON.stringify(req)}, cb);
+    };
+
     var post = function(url, dict, callback) {
         dict['csrfmiddlewaretoken'] = '{{csrf_token}}';
         $.post(url, dict, callback);
@@ -512,11 +516,31 @@
         
         var table = elt('table');
         foreach(snip.dependencies, function (dep) {
-            $.get('/api/specs/' + dep + '/active/', function (result) {
+            orm_request({ 
+                model: 'Spec', 
+                query: { 
+                    type: 'and', values: [
+                        { 
+                            type: 'relation', 
+                            field: [ 'version', 'versionptr', 'id' ], 
+                            relation: 'exact',
+                            value: dep 
+                        }, { 
+                            type: 'relation',
+                            field: [ 'version', 'active' ],
+                            relation: 'exact',
+                            value: true 
+                        }
+                    ]
+                },
+                count: 1
+            }, function(results) {
+                var result = results[0];
                 table.append(
                     table_row(
                         elt('a', { href: '/' + result.versionptr + '/' }, text_node(result.name)),
                         text_node(result.summary)));
+
             });
         });
         return table;
@@ -702,7 +726,15 @@
 
     var display_snip_history = function(snip) {
         var div = elt('div');
-        $.get('/api/snippets/' + snip.versionptr + '/all/', function(snips) {
+        orm_request({
+            model: 'Snippet',
+            query: {
+                type: 'relation',
+                field: [ 'version', 'versionptr', 'id' ],
+                relation: 'exact',
+                value: snip.versionptr
+            }
+        }, function(snips) {
             snips.sort(function(a,b) {
                 return a.timestamp < b.timestamp ? 1 : -1;
             });
@@ -761,7 +793,15 @@
 
     var display_spec_history = function(spec) {
         var div = elt('div');
-        $.get('/api/specs/' + spec.versionptr + '/all/', function (specs) {
+        orm_request({
+            model: 'Spec',
+            query: {
+                type: 'relation',
+                field: [ 'version', 'versionptr', 'id' ],
+                relation: 'exact',
+                value: spec.versionptr,
+            }
+        }, function(specs) {
             specs.sort(function(a,b) {
                 return a.timestamp < b.timestamp ? 1 : -1;
             });
@@ -812,7 +852,15 @@
 
     var render_bug_details = function(bug) {
         var div = elt('div').addClass("details");
-        $.get('/api/bugs/' + bug.versionptr + '/all/', function(bugs) {
+        orm_request({
+            model: 'BugReport',
+            query: {
+                type: 'relation',
+                field: [ 'version', 'versionptr', 'id' ],
+                relation: 'exact',
+                value: bug.versionptr
+            }
+        }, function(bugs) {
             for (var i in bugs) {
                 div.append(render_bug_version(bugs[i]));
             }
@@ -869,7 +917,26 @@
         });
         div.append(newbug);
         
-        $.get('/api/specs/' + versionptr + '/bugs/active/', function(bugs) {
+        orm_request({
+            model: 'BugReport',
+            query: {
+                type: 'and',
+                values: [
+                    {
+                        type: 'relation',
+                        field: ['target_versionptr', 'id'],
+                        relation: 'exact',
+                        value: versionptr
+                    },
+                    {
+                        type: 'relation',
+                        field: ['version', 'active'],
+                        relation: 'exact',
+                        value: true
+                    }
+                ]
+            }
+        }, function(bugs) {
             for (var i in bugs) {
                 div.prepend(render_bug(bugs[i]));
             }

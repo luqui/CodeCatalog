@@ -272,9 +272,11 @@ def json_orm_query(query):
 def json_orm_request(request, models):
     modelname = request['model']
     model = models[modelname]
-    return map(model['dump'], 
-            model['model'].objects.filter(json_orm_query(request['query']))
-                [0:int(request['count'])])
+    result = model['model'].objects.filter(json_orm_query(request['query']))
+    if 'count' in request:
+        return map(model['dump'], result[0:int(request['count'])])
+    else:
+        return map(model['dump'], result.all())
 
 def orm(request):
     print request.GET['request']
