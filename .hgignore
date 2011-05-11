@@ -5,9 +5,11 @@ syntax: glob
 catalogserver/catalog-index/*
 catalogserver/database.sqlite
 catalogserver/dev_settings.py
-codecatalog/build/*
+codecatalog/*
 *.project
 *.pydevproject
 *~
 *.pem
 *.ppk
+_build_schema.bat
+solr/*

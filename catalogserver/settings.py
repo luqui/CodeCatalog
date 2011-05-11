@@ -9,8 +9,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-import dev_settings
-DATABASES = dev_settings.DATABASES
+from dev_settings import DATABASES
+from dev_settings import HAYSTACK_SOLR_URL
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -77,7 +77,6 @@ SOUTH_AUTO_FREEZE_APP = True
 
 HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = 'http://localhost:8179/solr'
 HAYSTACK_WHOOSH_PATH = 'catalog-index'
 
 INSTALLED_APPS = (
