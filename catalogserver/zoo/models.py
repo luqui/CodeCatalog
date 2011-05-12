@@ -38,7 +38,11 @@ class Version(models.Model):
     user       = models.ForeignKey(User, null=True)
     active     = models.BooleanField()    # cache field that always marks the latest approved version
     versionptr = models.ForeignKey(VersionPtr)
+    serial     = models.IntegerField()
     comment    = models.TextField()
+
+    class Meta:
+        unique_together = (('versionptr', 'serial'),)
 
 class Spec(models.Model):
     ID_TO_STATUS = {

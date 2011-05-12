@@ -484,7 +484,7 @@
 
     var annotator = function (snip) { 
         return function (text) {
-            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.version + "/\n" 
+            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.serial + "/\n" 
                  + text
                  + language_to_line_comment_map[snip.language] + " End CodeCatalog Snippet\n";
         };
@@ -700,8 +700,9 @@
                 info = dynamic_link('Revert to this version', function() {
                     var newsnip = $.extend({}, snip);
                     newsnip.dependencies = snip.dependencies.join(',');
-                    newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.version;
+                    newsnip.comment = "Revert to version " + snip.versionptr + "/" + snip.serial;
                     delete newsnip.version;
+                    delete newsnip.serial;
                     $.post('/api/new/snippet/', newsnip, reload);
                 });
             }
@@ -761,8 +762,9 @@
         	else {
             	info = dynamic_link('Revert to this version', function() {
                 	var newspec = $.extend({}, spec);
-                	newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.version;
+                	newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.serial;
                 	delete newspec.version;
+                    delete newspec.serial;
                 	$.post('/api/new/spec/', newspec, reload);
             	});
         	}
@@ -893,6 +895,7 @@
             
             post('/api/new/bug/', newbug, function(r) {
                 newbug.version = r.version;
+                newbug.serial = r.serial;
                 newbug.versionptr = r.versionptr;
             });
             

@@ -22,15 +22,16 @@ def latest(request, versionptr):
     elif typ == 'BugReport':
         raise Http404()  # TODO bug page
 
-def version(request, versionptr, version):
+def version(request, versionptr, serial):
     vptr = get_object_or_404(VersionPtr, pk=versionptr)
+    version = get_object_or_404(Version, versionptr=vptr, serial=serial)
     typ = VersionPtr.ID_TO_PTRTYPE[vptr.type]
     if typ == 'Snippet':
-        snip = api.snippet(request, version)
+        snip = api.snippet(request, version.id)
         if snip['versionptr'] != int(versionptr): raise Http404()
         return render_snippet(request, snip)
     elif typ == 'Spec':
-        spec = api.spec(request, version)
+        spec = api.spec(request, version.id)
         if spec['versionptr'] != int(versionptr): raise Http404()
         return render_spec(request, spec)
     elif typ == 'BugReport':

@@ -1,7 +1,7 @@
 from zoo.models import *
 from datetime import datetime
 from haystack.query import SearchQuerySet
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.contrib.auth import authenticate
 import json
 
@@ -37,11 +37,13 @@ def user_or_none(user):
         return user
 
 def new_version(user, versionptr, comment=""):
+    serial = Version.objects.filter(versionptr=versionptr).aggregate(max_serial=Max('serial'))
     return Version(
         timestamp = datetime.now(),
         user = user_or_none(user),
         active = True,
         versionptr = versionptr,
+        serial = serial.max_serial+1,
         comment = comment)
 
 def get_or_new_versionptr(typ, versionptr_id):
@@ -114,6 +116,7 @@ def dump_spec(spec):
     return {
         'versionptr': spec.version.versionptr.id,
         'version': spec.version.id,
+        'serial': spec.version.serial,
         'active': spec.version.active,
         'name': spec.name,
         'summary': spec.summary,
@@ -129,6 +132,7 @@ def dump_snippet(snippet):
     return {
         'versionptr': snippet.version.versionptr.id,
         'version': snippet.version.id,
+        'serial': snippet.version.serial,
         'active': snippet.version.active,
         'dependencies': tuple(snippet.dependency_set.all().values_list('target', flat=True)),
         'spec_versionptr': snippet.spec_versionptr.id,
@@ -143,6 +147,7 @@ def dump_bug(bug):
     return {
         'versionptr': bug.version.versionptr.id,
         'version': bug.version.id,
+        'serial': bug.version.serial,
         'active': bug.version.active,
         'target_versionptr': bug.target_versionptr.id,
         'title': bug.title,
