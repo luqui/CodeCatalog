@@ -15,6 +15,9 @@
   <script type="text/javascript" src="/static/diff_match_patch.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/shjs/sh_style.css" />
 
+  <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
   <style>
     h2 {
         font-size: 14pt;
@@ -503,11 +506,13 @@
         	});
     };
 
+    // CodeCatalog Snippet http://codecatalog.net/279/782/
     var foreach = function(array, body) {
         for (var i = 0; i < array.length; ++i) {
             body(array[i]);
         }
     };
+    // End CodeCatalog Snippet
     
     var dependencies_area = function(snip) {
         if (snip.dependencies.length == 0) {

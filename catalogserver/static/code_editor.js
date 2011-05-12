@@ -125,48 +125,50 @@ var language_selector = function() {
     return div;
 };
 
+//CodeCatalog Snippet http://codecatalog.net/279/782/
+var foreach = function(array, body) {
+    for (var i = 0; i < array.length; ++i) {
+        body(array[i]);
+    }
+};
+// End CodeCatalog Snippet
+
 var embedded_search_tr = function() {
     var tr = elt('tr');
-    var select = elt('select', {'style': 'width: 400px'});
-    
-    var inp = realtime_input(250, function(value) {
-        if (value) {
-            $.get('/api/search/', { q: value }, function(results) {
-                var opt;
-                select.empty();
-                for (var i in results) {
-                    opt = $('<option></option>');
-                    opt.text(results[i].name + " - " + results[i].summary);
-                    opt.val(results[i].versionptr);
-                    select.append(opt);
-                }
-            });
-        }
-        else {
-            select.empty();
-        }
+    var choice_to_versionptr = {};
+    var current_choice = null;
+    var nonsense = elt('div'); // Hack - I don't know what the right way is to do this, but this isn't it.
+    nonsense.hide();
+    var inp = elt('input').autocomplete({ 
+    	'source': function(request, response_func) {
+    		if (request) {
+    			console.log(request);
+    			$.get('/api/search/', { q: request.term }, function(results) {
+    				var results_formatted = [];
+    				foreach(results, function(result) {
+    					var choice = result.name + " - " + result.summary;
+    					results_formatted.push(choice);
+    					choice_to_versionptr[choice] = result.versionptr;
+    				});
+    				response_func(results_formatted);
+    			});
+    		}
+    	},
+    	'select': function(event, ui) {
+    		console.log(ui);
+    		var choice = ui.item.value;
+    		if (choice in choice_to_versionptr) {
+    			console.log(choice);
+    			console.log(choice_to_versionptr[choice]);
+    			current_choice = choice_to_versionptr[choice];
+    			nonsense.text(current_choice); // Hack
+    		}
+    	}
     });
+    
     var remove = elt('button').text('-');
-
-    tr.append(elt('td', {}, inp), elt('td', {}, select), elt('td', {}, remove));
-
+    tr.append(elt('td', {}, inp, nonsense), elt('td', {}, remove));
     remove.click(function() { tr.remove() });
-
-    tr.val = function(versionptr) { 
-        if (versionptr) {
-            $.get('/api/specs/' + versionptr + '/active/', function(result) {
-                select.empty();
-                var opt = $('<option></option>');
-                opt.text(result.name + " - " + result.summary);
-                opt.val(versionptr);
-                select.append(opt);
-            });
-            return tr;
-        }
-        else {
-            return select.val(); 
-        }
-    };
     
     return tr;
 };
@@ -182,7 +184,6 @@ var code_editor = function(proto, submit_callback) {
             elt('thead', {}, 
                 elt('tr', {},
                     elt('td').text("Search"),
-                    elt('td').text("Select"),
                     elt('td'))),
             deps_tbody);
     var add_dep = function() {
@@ -205,13 +206,17 @@ var code_editor = function(proto, submit_callback) {
                   
     var submit_button = $('<button>Submit</button>');
     submit_button.click(function() {
+    	
+    	var deps = [];
+    	foreach(deps_table.find('div'), function(div) {
+    		console.log(div.innerHTML);
+    		deps.push(div.innerHTML);
+    	});
+    	deps.sort().join(',');
+    	
         var sub = $.extend({}, proto_opts, {
             code: textarea.val(),
-            dependencies: deps_table.find('select')
-                                    .map(function(_,x) { return $(x).val() })
-                                    .toArray()
-                                    .sort()
-                                    .join(','),
+            dependencies: deps,
             language: languages.find('option:selected').val(),
             comment: edit_description.val()});
         submit_callback(sub);
