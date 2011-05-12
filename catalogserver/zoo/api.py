@@ -284,7 +284,6 @@ def json_orm_request(request, models):
         return map(model['dump'], result.all())
 
 def orm(request):
-    print request.GET['request']
     r = json.loads(request.GET['request'])
     return  json_orm_request(r, {
                 'Spec':      { 'model': Spec, 'dump': dump_spec },
