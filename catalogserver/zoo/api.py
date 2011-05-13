@@ -43,7 +43,7 @@ def new_version(user, versionptr, comment=""):
         user = user_or_none(user),
         active = True,
         versionptr = versionptr,
-        serial = serial['max_serial']+1,
+        serial = (serial['max_serial'] or 0) + 1,
         comment = comment)
 
 def get_or_new_versionptr(typ, versionptr_id):
