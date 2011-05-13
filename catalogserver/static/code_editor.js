@@ -139,10 +139,10 @@ var embedded_search_tr = function() {
     var current_choice = null;
     var nonsense = elt('div'); // Hack - I don't know what the right way is to do this, but this isn't it.
     nonsense.hide();
-    var inp = elt('input').autocomplete({ 
+    var inp = elt('input');
+    inp.autocomplete({ 
     	'source': function(request, response_func) {
     		if (request) {
-    			console.log(request);
     			$.get('/api/search/', { q: request.term }, function(results) {
     				var results_formatted = [];
     				foreach(results, function(result) {
@@ -155,11 +155,8 @@ var embedded_search_tr = function() {
     		}
     	},
     	'select': function(event, ui) {
-    		console.log(ui);
     		var choice = ui.item.value;
     		if (choice in choice_to_versionptr) {
-    			console.log(choice);
-    			console.log(choice_to_versionptr[choice]);
     			current_choice = choice_to_versionptr[choice];
     			nonsense.text(current_choice); // Hack
     		}
@@ -209,7 +206,6 @@ var code_editor = function(proto, submit_callback) {
     	
     	var deps = [];
     	foreach(deps_table.find('div'), function(div) {
-    		console.log(div.innerHTML);
     		deps.push(div.innerHTML);
     	});
     	deps.sort().join(',');
