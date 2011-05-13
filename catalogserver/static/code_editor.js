@@ -133,12 +133,10 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
-var embedded_search_tr = function() {
-    var tr = elt('tr');
+var embedded_search = function() {
+    var span = elt('span');
     var choice_to_versionptr = {};
     var current_choice = null;
-    var nonsense = elt('div'); // Hack - I don't know what the right way is to do this, but this isn't it.
-    nonsense.hide();
     var inp = elt('input');
     inp.autocomplete({ 
     	'source': function(request, response_func) {
@@ -158,16 +156,67 @@ var embedded_search_tr = function() {
     		var choice = ui.item.value;
     		if (choice in choice_to_versionptr) {
     			current_choice = choice_to_versionptr[choice];
-    			nonsense.text(current_choice); // Hack
+                inp.attr('disabled', 'disabled');
     		}
-    	}
+    	},
+        'autoFocus': true
     });
     
-    var remove = elt('button').text('-');
-    tr.append(elt('td', {}, inp, nonsense), elt('td', {}, remove));
-    remove.click(function() { tr.remove() });
+    span.append(inp);
+
+    span.val = function(versionptr) {
+        if (versionptr) {
+            current_choice = versionptr;
+            inp.attr('disabled', 'disabled');
+            $.get('/api/specs/' + versionptr + '/active/', function(r) {
+                inp.val(r.name + " - " + r.summary);
+            });
+            return span;
+        }
+        else {
+            return current_choice;
+        }
+    };
     
-    return tr;
+    return span;
+};
+
+var editable_list = function(widget_factory) {
+    var table = elt('table');
+    var objects = [];
+    var add_button = elt('button').text('+');
+    
+    var add = function() {
+        var thing = widget_factory();
+        var remove_button = elt('button').text('-');
+        var span = elt('span', {'class': 'thing'}, thing);
+        span.data('thing', thing);
+        var tr = elt('tr', {}, elt('td', {}, span), elt('td', {}, remove_button));
+        remove_button.click(function() {
+            tr.remove();
+        });
+        table.append(tr);
+        return thing;
+    };
+    add_button.click(function() { add() });
+
+    var div = elt('div', {}, table, add_button);
+    div.val = function(vals) {
+        if (vals) {
+            table.empty();
+            foreach(vals, function(val) { add().val(val) });
+            return div;
+        }
+        else {
+            var ret = [];
+            table.find('.thing').each(function(ix,elem) { 
+                ret.push($(elem).data('thing').val());
+            });
+            return ret;
+        }
+    };
+
+    return div;
 };
 
 var code_editor = function(proto, submit_callback) {
@@ -175,25 +224,12 @@ var code_editor = function(proto, submit_callback) {
     var textarea = $('<textarea rows="15" style="width:100%"></textarea>');
     var languages = language_selector();
     if (proto.language) { languages.val(proto.language); }
-    var deps_tbody = elt('tbody');
-    var deps_table = 
-        elt('table', {}, 
-            elt('thead', {}, 
-                elt('tr', {},
-                    elt('td').text("Search"),
-                    elt('td'))),
-            deps_tbody);
-    var add_dep = function() {
-        var dep = embedded_search_tr();
-        deps_tbody.append(dep);
-        return dep;
-    };
-    var add_button = elt('button', {}).text('+');
-    add_button.click(add_dep);
-    
+
+    var deps_table = editable_list(function() { return embedded_search() });
+
     var deps_div = elt('div', { 'class': 'deps' }, 
                         elt('b').text('Dependencies'),
-                        deps_table, add_button);
+                        deps_table);
 
     var edit_description = edit_description_field();
 
@@ -203,16 +239,12 @@ var code_editor = function(proto, submit_callback) {
                   
     var submit_button = $('<button>Submit</button>');
     submit_button.click(function() {
-    	
-    	var deps = [];
-    	foreach(deps_table.find('div'), function(div) {
-    		deps.push(div.innerHTML);
-    	});
-    	deps.sort().join(',');
+    	var deps = deps_table.val();
+        deps.sort();
     	
         var sub = $.extend({}, proto_opts, {
             code: textarea.val(),
-            dependencies: deps,
+            dependencies: deps.join(','),
             language: languages.find('option:selected').val(),
             comment: edit_description.val()});
         submit_callback(sub);
@@ -223,16 +255,9 @@ var code_editor = function(proto, submit_callback) {
         proto_opts.spec_versionptr = proto.spec_versionptr;
         proto_opts.versionptr = proto.versionptr;
 
-        var indeps = proto.dependencies;
-        for (var i in indeps) {
-            add_dep().val(indeps[i]);
-        }
-
+        deps_table.val(proto.dependencies);
         languages.val(proto.language);
         textarea.val(proto.code);
-    }
-    else {
-        add_dep();
     }
     
     div.append(textarea, languages, deps_div, edit_description, license, submit_button);
