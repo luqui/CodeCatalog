@@ -973,10 +973,27 @@
             savespec(null, comment);
         }, try_login);
 
-        $('#spec_history').click(function () {
-            $('#spec_region').replaceWith(display_spec_history(JSON.parse($('#spec_data').val())));
+        var history_handler = function () {
+            var region = $('#spec_region');
+            region.hide();
+            var history = display_spec_history(JSON.parse($('#spec_data').val()));
+            var hidebutton = elt('a', {'class':'dynamic_link', 'href':'#'}).text('hide history');
+            history.prepend(elt('div', {'class':'spec_controls'}, hidebutton));
+            region.after(history);
+
+            $('#spec_history').unbind('click', history_handler);
+            hidebutton.click(function() {
+                history.hide();
+                region.show();
+            });
+            $('#spec_history').click(function() {
+                region.hide();
+                history.show();
+            });
+
             return false;
-        });
+        };
+        $('#spec_history').click(history_handler);
 
         $('#spec_bugs').append(bugs_box({{spec.versionptr}}));
 
@@ -1028,7 +1045,6 @@
 
 {% block spec %}
 <div id="spec_region">
- <h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
  <div class="spec_controls">
    <div>
     <a id="spec_history" name="spec_history" class="dynamic_link" href="#">history</a>
@@ -1042,6 +1058,7 @@
    </div>
    {% endif %}
  </div>
+ <h1 class="spec_name"><span id="name" name="name" class="editable">{% block title %}{{spec.name}}{% endblock %}</span></h1>
  <span id="summary" name="summary" class="summary editable">{{spec.summary}}</span>
  <textarea id="spec" name="spec" rows="30" class="cc_code">{{spec.spec}}</textarea>
  <textarea id="spec_data" name="spec_data" class="hidden" readonly="readonly">{{spec|json}}</textarea>
