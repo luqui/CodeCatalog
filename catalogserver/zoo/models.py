@@ -33,6 +33,9 @@ class VersionPtr(models.Model):
         else:
             return None
 
+    def languages(self):
+        return self.snippet_set.filter(version__active=True).values('language').distinct().all()
+
 class Version(models.Model):
     timestamp  = models.DateTimeField()
     user       = models.ForeignKey(User, null=True)
