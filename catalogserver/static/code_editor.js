@@ -102,6 +102,15 @@ var label_table = function(dict) {
 };
 // End CodeCatalog Snippet
 
+//CodeCatalog Snippet http://codecatalog.net/37/2/
+var button = function(text, click) {
+    var r = elt('button');
+    r.text(text);
+    r.click(click);
+    return r;
+};
+// End CodeCatalog Snippet
+
 var language_selector = function() {
     var div = $('<div></div>');
     var languages = keys(language_to_line_comment_map);
@@ -237,8 +246,7 @@ var code_editor = function(proto, submit_callback) {
                   + 'terms of the <a href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a> '
                   + 'license.</p>');
                   
-    var submit_button = $('<button>Submit</button>');
-    submit_button.click(function() {
+    var submit_button = button("Submit", function() {
     	var deps = deps_table.val();
         deps.sort();
     	
@@ -273,6 +281,9 @@ var code_editor_with_title = function(proto, submit_callback) {
         label_table({
             'Title': title_input,
             'Summary': summary_input}),
+        button("Submit (spec only)", function() {
+        	submit_callback({'title': title_input.val(), 'summary': summary_input.val()});
+        }),
         code_editor(proto, function(snip) {
             snip.title = title_input.val() || "unnamed";
             snip.summary = summary_input.val();
