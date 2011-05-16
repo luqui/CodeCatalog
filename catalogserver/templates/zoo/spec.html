@@ -688,6 +688,10 @@
 	};
 	// End CodeCatalog Snippet
 
+	var history_annotation = function(username, timestamp) {
+        return " -- by " + username + " at " + timestamp_to_string(timestamp);
+    };
+	
    	var render_diff = function(dmp, text_a, text_b, language) {
     	var diffs = dmp.diff_main(text_a, text_b);
         dmp.diff_cleanupSemantic(diffs);
@@ -727,12 +731,11 @@
                 comment = elt('span').text("<No comment>");
             }
             
-            var history_annotation = " -- by " + snip.user + " at " + timestamp_to_string(snip.timestamp);
             var diff_html = $(wrap_in_pre(render_diff(dmp, prev_snip.code, snip.code, snip.language)));
             lazy_highlight_element('/static/shjs/lang/', '.min.js', diff_html[0], snip.language);
             var d = elt('div', { 'class': 'history cc_code'}, 
             			diff_html.add(elt('span', { 'class': 'edit_comment' }, 
-            				    comment, elt('span').text(history_annotation)))
+            				    comment, elt('span').text(history_annotation(snip.user, snip.timestamp))))
             				.add(info));
             table.append(d);
         });
@@ -757,7 +760,7 @@
         });
         return div;
     };
-
+    
     var display_spec_version = function(title, summary, spec) {
     	return $([])
        		.add(elt('h1', {'class': 'spec_name'}, title))
@@ -799,8 +802,9 @@
 	        var diff_spec = render_diff(dmp, prev_spec.spec, spec.spec, 'markdown');
         	var spec_display = display_spec_version(diff_title, diff_summary, diff_spec);
         	
-	        var d = spec_display.add(elt('span', {'class':'edit_comment'}, comment, elt('span').text('-- by ' + spec.user)))
-	                            .add(info);
+	        var d = spec_display.add(elt('span', {'class':'edit_comment'}, comment, elt('span')
+	        		        .text(history_annotation(spec.user, spec.timestamp))))
+	                    .add(info);
 	        table.append(elt('div', {'class': 'spec_history'}, d));
 	    });
 	    
