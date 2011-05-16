@@ -164,8 +164,7 @@ var make_auto_complete_kv = function(element, generate_options, key_to_val, sele
             if (choice in choice_to_val) {
                 select(choice_to_val[choice]);
             }
-        },
-        'autoFocus': true});
+        }});
     return element;
 };
 // End CodeCatalog Snippet

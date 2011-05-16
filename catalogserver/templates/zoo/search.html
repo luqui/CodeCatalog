@@ -31,8 +31,9 @@ var foreach = function(array, body) {
 // End CodeCatalog Snippet
 
 $(function() {
-	//$('#q').focus();
+	$('#q').focus();
 	var search_box = $('#q');
+	search_box.focus();
 	var select = function(choice) {
 		window.location.href = '/' + choice.versionptr + '/';
 	};
