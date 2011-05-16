@@ -1,4 +1,4 @@
-// CodeCatalog Snippet http://codecatalog.net/16/119/
+// CodeCatalog Snippet http://www.codecatalog.net/16/3/
 var elt = function(name, attrs) {
     var r = $(document.createElement(name));
     if (attrs) {
@@ -13,7 +13,7 @@ var elt = function(name, attrs) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://codecatalog.net/244/675/
+//CodeCatalog Snippet http://www.codecatalog.net/244/4/
 var edit_description_field = function()
 {
 	var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
