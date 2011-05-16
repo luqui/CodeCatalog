@@ -45,7 +45,7 @@ var keys = function(obj) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://codecatalog.net/39/669/
+// CodeCatalog Snippet http://www.codecatalog.net/39/6/
 var horizontal = function() {
     var row = elt('tr');
     for (var i = 0; i < arguments.length; ++i) {
@@ -56,7 +56,7 @@ var horizontal = function() {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://codecatalog.net/246/683/
+// CodeCatalog Snippet http://www.codecatalog.net/246/2/
 var delegate_method = function(obj, method) {
     if (typeof method == 'string') {
         method = obj[method];
@@ -134,7 +134,7 @@ var language_selector = function() {
     return div;
 };
 
-//CodeCatalog Snippet http://codecatalog.net/279/782/
+//CodeCatalog Snippet http://www.codecatalog.net/279/1/
 var foreach = function(array, body) {
     for (var i = 0; i < array.length; ++i) {
         body(array[i]);
