@@ -26,13 +26,13 @@
     .hidden { display: none; visibility: hidden; width: 10px }
     .data { display: none; visibility: hidden; width: 10px }
     .cc_code, .cc_code textarea { 
-    	width: 750px; 
-    	background: white; 
+        width: 750px; 
+        background: white; 
     }
     
     .cc_code pre {
-    	width: 750px;
-    	overflow: auto;
+        width: 750px;
+        overflow: auto;
     }
     
     .deps_area { 
@@ -74,17 +74,17 @@
     .spec_name { font-family: monospace; margin-bottom: 0px }
     .summary { margin-left: 1cm; font-style: italic }
     .spec { 
-    	background: #eee; 
-    	margin-top: 1cm;
+        background: #eee; 
+        margin-top: 1cm;
     }
     .spec h1 { font-size: 16pt; text-decoration: underline }
     .spec h2 { font-size: 14pt }
     .spec pre { padding-left: 1cm; background: #ccc }
 
-	.spec_literal {
-		white-space: pre-wrap;
-		word-wrap: break-word;
-	}
+    .spec_literal {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
 
     .spec_controls { float: right }
     .spec_history_table { border: 1px solid black; background: #ddf }
@@ -99,13 +99,13 @@
     }
     
     .tabs .tabstrip { 
-    	text-align: right;
-    	border-spacing: 0; 
-    	border-collapse: collapse; 
-    	display: block; 
+        text-align: right;
+        border-spacing: 0; 
+        border-collapse: collapse; 
+        display: block; 
     }
     .tabs .tab {
-    	color: #777;
+        color: #777;
         background: white;
         padding-right: 1cm;
         border: dotted 1px black;
@@ -114,9 +114,9 @@
         display: inline-block;
     }
     .tabs .tab.selected {
-    	background: white;
-    	color: black;
-    	border: solid 1px black;
+        background: white;
+        color: black;
+        border: solid 1px black;
         border-bottom: solid 1px white;
         margin-bottom: -1px;
     }
@@ -142,36 +142,36 @@
         float: right;
     }
     .edit_comment {
-    	display: block;
+        display: block;
         font-style: italic;
     }
     
     .markdown_edit_div {
-    	text-align: right;
+        text-align: right;
     }
     
     .dynamic_link_after_text {
-    	margin-left: 1em;
+        margin-left: 1em;
     }
     .dynamic_link, .markdown_edit_div a {
-    	color: gray;
-    	font-family: serif;
-    	font-size: 12pt;
-    	font-weight: normal;
-    	border: 1px solid lightgray;
+        color: gray;
+        font-family: serif;
+        font-size: 12pt;
+        font-weight: normal;
+        border: 1px solid lightgray;
     }
     .dynamic_link:hover, .markdown_edit_div a:hover {
-    	background: gray;
-    	color: white;
-    	text-decoration: none;
+        background: gray;
+        color: white;
+        text-decoration: none;
     }
     
     .history {
-    	border-bottom: 1px solid black;
+        border-bottom: 1px solid black;
     }
     
     .spec_history {
-    	border-bottom: 1px solid black;
+        border-bottom: 1px solid black;
     }
 
     /* Bugs box */
@@ -228,19 +228,19 @@
     // End CodeCatalog Snippet
 
     // CodeCatalog Snippet http://www.codecatalog.net/270/1/
-	var dynamic_link_element = function() {
-    	return elt('a', { href: '#'});
-	}
-	// End CodeCatalog Snippet
+    var dynamic_link_element = function() {
+        return elt('a', { href: '#'});
+    }
+    // End CodeCatalog Snippet
     
     // CodeCatalog Snippet http://www.codecatalog.net/167/6/
-	var dynamic_link = function(text, click) {
-	    var link_element = dynamic_link_element();
-	    var d_link = link_element.text(text);
-	    d_link.click(function() { click(); return false; });
-	    return d_link;
-	};
-	// End CodeCatalog Snippet
+    var dynamic_link = function(text, click) {
+        var link_element = dynamic_link_element();
+        var d_link = link_element.text(text);
+        d_link.click(function() { click(); return false; });
+        return d_link;
+    };
+    // End CodeCatalog Snippet
 
     // CodeCatalog Snippet http://www.codecatalog.net/39/6/
     var horizontal = function() {
@@ -358,11 +358,11 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/254/2/
+    // CodeCatalog Snippet http://www.codecatalog.net/254/7/
     var table_row = function() {
         var tr = elt('tr');
         foreach(arguments, function(arg) {
-        	tr.append(elt('td', {}, arg));
+            tr.append(elt('td', {}, arg));
         });
         return tr;
     };
@@ -409,13 +409,13 @@
     // End CodeCatalog Snippet
 
     // CodeCatalog Snippet http://www.codecatalog.net/274/2/
-	var screen_offset = function(element) {
-	    var element_offset = element.offset();
-	    var offset_x = element_offset.left - window.pageXOffset;
-	    var offset_y = element_offset.top - window.pageYOffset; 
-	    return { "left": offset_x, "top": offset_y };
-	};
-	// End CodeCatalog Snippet
+    var screen_offset = function(element) {
+        var element_offset = element.offset();
+        var offset_x = element_offset.left - window.pageXOffset;
+        var offset_y = element_offset.top - window.pageYOffset; 
+        return { "left": offset_x, "top": offset_y };
+    };
+    // End CodeCatalog Snippet
     
     // CodeCatalog Snippet http://www.codecatalog.net/276/3/
     var preserving_screen_position = function(element, mods) {
@@ -427,7 +427,7 @@
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/272/2/
+    // CodeCatalog Snippet http://www.codecatalog.net/272/6/
     var toggle_element = function(click_widget, text, text_alt, element, element_alt) {
         var div = elt('div', {}, element);
         if (typeof(element_alt) !== 'function') {
@@ -439,26 +439,26 @@
         click_widget.text(text);
         click_widget.click(function() {
             if (state == 'normal') {
-            	if (typeof(element_alt) === 'function') {
+                if (typeof(element_alt) === 'function') {
                     element_alt = element_alt();
                     div.append(element_alt);
                     element_alt.hide();
                 }
                 
-            	preserving_screen_position(click_widget, function() {
-	                element_alt.show();
-	                element.hide();
-	                click_widget.text(text_alt);
-            	});
-
+                preserving_screen_position(click_widget, function() {
+                    element_alt.show();
+                    element.hide();
+                    click_widget.text(text_alt);
+                });
+    
                 state = 'alternate';
             }
             else {
-            	preserving_screen_position(click_widget, function() {
-	            	element.show();
-	                element_alt.hide();
-	                click_widget.text(text);
-            	});
+                preserving_screen_position(click_widget, function() {
+                    element.show();
+                    element_alt.hide();
+                    click_widget.text(text);
+                });
             
                 state = 'normal';
             }
@@ -468,11 +468,11 @@
     };
     // End CodeCatalog Snippet
     
-	// CodeCatalog Snippet http://www.codecatalog.net/265/4/
-	var toggle_button = function(text, text_alt, element, element_alt) {
-	    return toggle_element(elt('button'), text, text_alt, element, element_alt);
-	};
-	// End CodeCatalog Snippet
+    // CodeCatalog Snippet http://www.codecatalog.net/265/5/
+    var toggle_button = function(text, text_alt, element, element_alt) {
+        return toggle_element(elt('button'), text, text_alt, element, element_alt);
+    };
+    // End CodeCatalog Snippet
 
     var logged_in = '{{user.is_authenticated}}' == 'True';
 
@@ -501,9 +501,9 @@
             'spec': $('#spec').val(),
             'status': $('#spec_status').val(),
             'comment': comment},
-        	function(r) {
-            	if (cont) cont();
-        	});
+            function(r) {
+                if (cont) cont();
+            });
     };
 
     // CodeCatalog Snippet http://www.codecatalog.net/279/1/
@@ -542,7 +542,7 @@
             }, function(results) {
                 var result = results[0];
                 table.append(
-                	table_row(
+                    table_row(
                         elt('a', { href: '/' + result.versionptr + '/' }, text_node(result.name)),
                         text_node(result.summary)));
             });
@@ -581,10 +581,10 @@
             var deps_area = btn;
         }
         else {
-        	var d_link_element = dynamic_link_element();
-        	d_link_element.addClass('dynamic_link');
+            var d_link_element = dynamic_link_element();
+            d_link_element.addClass('dynamic_link');
             var toggle = toggle_element(
-            		        d_link_element,
+                            d_link_element,
                             "expand all", 
                             "collapse",
                             pre,
@@ -608,10 +608,10 @@
             var area = toggle[0];
             var btn = toggle[1];
             var deps_header = 
-            	elt('div', { 'class': 'deps_header' }, 
-            		elt('span', {},
-            		  elt('h2', { 'class': 'deps_header' }).text("Dependencies"),
-            		  btn));
+                elt('div', { 'class': 'deps_header' }, 
+                    elt('span', {},
+                      elt('h2', { 'class': 'deps_header' }).text("Dependencies"),
+                      btn));
             var deps_area = elt('hr')
                     .add(deps_header)
                     .add(elt('div', {}, dependencies_area(snip)).addClass('deps_area'));
@@ -624,85 +624,85 @@
 
     var diff_to_pretty_html = function(diffs, language) 
     {
-		var html = [];
-		var i = 0;
-		var pattern_amp = /&/g;
-		var pattern_lt = /</g;
-		var pattern_gt = />/g;
-		for (var x = 0; x < diffs.length; x++) {
-		var op = diffs[x][0];    // Operation (insert, delete, equal)
-			var data = diffs[x][1];  // Text of change.
-			var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
-			    .replace(pattern_gt, '&gt;');
-			switch (op) {
-				case DIFF_INSERT:
-				  html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
-				  break;
-				case DIFF_DELETE:
-				  html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
-				  break;
-				case DIFF_EQUAL:
-				  html[x] = '<span>' + truncate_unchanged_from_diff(3, text, language) + '</span>';
-				  break;
-			}
-			if (op !== DIFF_DELETE) {
-				i += data.length;
-			}
-  	  	}
-  		return html.join('');
-  	};
-    	
+        var html = [];
+        var i = 0;
+        var pattern_amp = /&/g;
+        var pattern_lt = /</g;
+        var pattern_gt = />/g;
+        for (var x = 0; x < diffs.length; x++) {
+        var op = diffs[x][0];    // Operation (insert, delete, equal)
+            var data = diffs[x][1];  // Text of change.
+            var text = data.replace(pattern_amp, '&amp;').replace(pattern_lt, '&lt;')
+                .replace(pattern_gt, '&gt;');
+            switch (op) {
+                case DIFF_INSERT:
+                  html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
+                  break;
+                case DIFF_DELETE:
+                  html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
+                  break;
+                case DIFF_EQUAL:
+                  html[x] = '<span>' + truncate_unchanged_from_diff(3, text, language) + '</span>';
+                  break;
+            }
+            if (op !== DIFF_DELETE) {
+                i += data.length;
+            }
+        }
+        return html.join('');
+    };
+        
     var truncate_unchanged_from_diff = function(context_lines, str, language) {
-    	var lines = str.split("\n");
-    	if (lines.length > 2*context_lines+4) {
-    		var line_comment = language in language_to_line_comment_map 
-    								? language_to_line_comment_map[language]
-    								: '';
-    							
-    		return lines.slice(0,context_lines).concat(
-    				["\n" + line_comment + " ---- " + (lines.length - 2*context_lines) + " lines omitted ----\n"],
-    				lines.slice(lines.length-context_lines, lines.length))
-    			.join("\n");
-    	}
-    	else {
-    		return str;
-    	}
+        var lines = str.split("\n");
+        if (lines.length > 2*context_lines+4) {
+            var line_comment = language in language_to_line_comment_map 
+                                    ? language_to_line_comment_map[language]
+                                    : '';
+                                
+            return lines.slice(0,context_lines).concat(
+                    ["\n" + line_comment + " ---- " + (lines.length - 2*context_lines) + " lines omitted ----\n"],
+                    lines.slice(lines.length-context_lines, lines.length))
+                .join("\n");
+        }
+        else {
+            return str;
+        }
     };
     
-    // CodeCatalog Snippet http://www.codecatalog.net/267/1/
-   	var iterate_adjacent = function(array, deflt, func) {
-   	    for (var i = 0; i < array.length; ++i) {
-   		var current = array[i];
-   	    	var next = i + 1 < array.length ? array[i+1] : deflt;
-   	    	func(current, next);
-   	    }
-   	};
-   	// End CodeCatalog Snippet
+    # CodeCatalog Snippet http://www.codecatalog.net/267/3/
+    var iterate_adjacent = function(array, deflt, func) {
+        for (var i = 0; i < array.length; ++i) {
+        var current = array[i];
+            var next = i + 1 < array.length ? array[i+1] : deflt;
+            func(current, next);
+        }
+    };
+    # End CodeCatalog Snippet
     
-   	// CodeCatalog Snippet http://www.codecatalog.net/294/1/
-	var timestamp_to_string = function(timestamp) {
-	   var date_time = timestamp.split('T');
-	   var date = date_time[0];
-	   var time = date_time[1].split('.')[0];
-	   return time + ", " + date;
-	};
-	// End CodeCatalog Snippet
+    // CodeCatalog Snippet http://www.codecatalog.net/294/1/
+    var timestamp_to_string = function(timestamp) {
+       var date_time = timestamp.split('T');
+       var date = date_time[0];
+       var time = date_time[1].split('.')[0];
+       return time + ", " + date;
+    };
+    // End CodeCatalog Snippet
 
-	var history_annotation = function(username, timestamp) {
+    var history_annotation = function(username, timestamp) {
         return " -- by " + username + " at " + timestamp_to_string(timestamp);
     };
-	
-   	var render_diff = function(dmp, text_a, text_b, language) {
-    	var diffs = dmp.diff_main(text_a, text_b);
+    
+    var render_diff = function(dmp, text_a, text_b, language) {
+        var diffs = dmp.diff_main(text_a, text_b);
         dmp.diff_cleanupSemantic(diffs);
         return diff_to_pretty_html(diffs, language);
     };
     
     var wrap_in_pre = function(element) {
-    	if ($.browser.msie)
-    		return $('<pre>' + element + '</pre>');
-    	else
-    		return elt('pre', {}, element);
+        if ($.browser.msie)
+            return $('<pre>' + element + '</pre>');
+        else
+            return elt('pre', {}, element);
     };
     
     var display_snips_history = function(snips) {
@@ -734,9 +734,9 @@
             var diff_html = $(wrap_in_pre(render_diff(dmp, prev_snip.code, snip.code, snip.language)));
             lazy_highlight_element('/static/shjs/lang/', '.min.js', diff_html[0], snip.language);
             var d = elt('div', { 'class': 'history cc_code'}, 
-            			diff_html.add(elt('span', { 'class': 'edit_comment' }, 
-            				    comment, elt('span').text(history_annotation(snip.user, snip.timestamp))))
-            				.add(info));
+                        diff_html.add(elt('span', { 'class': 'edit_comment' }, 
+                                comment, elt('span').text(history_annotation(snip.user, snip.timestamp))))
+                            .add(info));
             table.append(d);
         });
         return table;
@@ -762,52 +762,52 @@
     };
     
     var display_spec_version = function(title, summary, spec) {
-    	return $([])
-       		.add(elt('h1', {'class': 'spec_name'}, title))
-   			.add(elt('span', {'class':'summary'}, summary))
-    		.add(wrap_in_pre(spec).addClass('spec').addClass('spec_literal'));
+        return $([])
+            .add(elt('h1', {'class': 'spec_name'}, title))
+            .add(elt('span', {'class':'summary'}, summary))
+            .add(wrap_in_pre(spec).addClass('spec').addClass('spec_literal'));
     };
     
     var display_specs_history = function(specs) {
         var table = elt('div');
         var dmp = new diff_match_patch();
         iterate_adjacent(specs, {'name': '', 'summary': '', 'spec': ''}, function(spec, prev_spec) {
-	        var info;
-	        if (spec.active || !logged_in) {
-	            info = $('');
-	        }
-        	else {
-            	info = dynamic_link('Revert to this version', function() {
-                	var newspec = $.extend({}, spec);
-                	newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.serial;
-                	delete newspec.version;
+            var info;
+            if (spec.active || !logged_in) {
+                info = $('');
+            }
+            else {
+                info = dynamic_link('Revert to this version', function() {
+                    var newspec = $.extend({}, spec);
+                    newspec.comment = "Revert to version " + spec.versionptr + "/" + spec.serial;
+                    delete newspec.version;
                     delete newspec.serial;
-                	$.post('/api/new/spec/', newspec, reload);
-            	});
-        	}
-	        if (spec.status == 'Deprecated') {
+                    $.post('/api/new/spec/', newspec, reload);
+                });
+            }
+            if (spec.status == 'Deprecated') {
                 info = vertical(elt('b').text('DEPRECATED'), info);
             }
-	        
-	        var comment;
-	        if (spec.comment) {
-	            comment = elt('span').text(spec.comment);
-	        }
-	        else {
-	            comment = elt('span').text("<No comment>");
-	        }
-	        
-	        var diff_title = render_diff(dmp, prev_spec.name, spec.name, null);
-	        var diff_summary = render_diff(dmp, prev_spec.summary, spec.summary, null);
-	        var diff_spec = render_diff(dmp, prev_spec.spec, spec.spec, 'markdown');
-        	var spec_display = display_spec_version(diff_title, diff_summary, diff_spec);
-        	
-	        var d = spec_display.add(elt('span', {'class':'edit_comment'}, comment, elt('span')
-	        		        .text(history_annotation(spec.user, spec.timestamp))))
-	                    .add(info);
-	        table.append(elt('div', {'class': 'spec_history'}, d));
-	    });
-	    
+            
+            var comment;
+            if (spec.comment) {
+                comment = elt('span').text(spec.comment);
+            }
+            else {
+                comment = elt('span').text("<No comment>");
+            }
+            
+            var diff_title = render_diff(dmp, prev_spec.name, spec.name, null);
+            var diff_summary = render_diff(dmp, prev_spec.summary, spec.summary, null);
+            var diff_spec = render_diff(dmp, prev_spec.spec, spec.spec, 'markdown');
+            var spec_display = display_spec_version(diff_title, diff_summary, diff_spec);
+            
+            var d = spec_display.add(elt('span', {'class':'edit_comment'}, comment, elt('span')
+                            .text(history_annotation(spec.user, spec.timestamp))))
+                        .add(info);
+            table.append(elt('div', {'class': 'spec_history'}, d));
+        });
+        
         return table;
     };
 
@@ -1089,7 +1089,7 @@
 
 <div class="iecentered">
   <div style="margin: auto">
-	<a href='#' name="addsnippet" class="dynamic_link" id="addsnippet">add snippet</a>
+    <a href='#' name="addsnippet" class="dynamic_link" id="addsnippet">add snippet</a>
   </div>
 </div>
 {% endblock impls %}
