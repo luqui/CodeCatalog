@@ -7,6 +7,11 @@ CodeCatalog Search
 {% block header %}
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+<script src='/static/code_editor.js'></script>
+
 {{ block.super }}
 
 <style>
@@ -17,21 +22,41 @@ CodeCatalog Search
 </style>
 
 <script>
+//CodeCatalog Snippet http://codecatalog.net/279/782/
+var foreach = function(array, body) {
+    for (var i = 0; i < array.length; ++i) {
+        body(array[i]);
+    }
+};
+// End CodeCatalog Snippet
+
 $(function() {
-  $('#q').focus();
+	//$('#q').focus();
+	var search_box = $('#q');
+	var select = function(choice) {
+		window.location.href = '/' + choice.versionptr + '/';
+	};
+	catalog_search_with_autocomplete(search_box, select);
+	
+	$('#search').click(function() {
+		var search_term = search_box.val();
+		console.log(search_term);
+		if (search_term) {
+			window.location.href = '/search/?q=' + escape(search_term);
+		}
+	});
 });
+
 </script>
 {% endblock %}
 
 {% block content %}
 
 <div class="searchbox">
-<form action="/search/" method="get">
  <div class='center-aligned'>
   <input type='text' name='q' id='q' />
-  <input type='submit' value='Search' />
+  <button name='search' id='search'>Submit</button>
  </div>
-</form>
 </div>
 
 {% endblock content %}

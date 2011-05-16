@@ -142,34 +142,60 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
+//CodeCatalog Snippet http://www.codecatalog.net/303/1/
+var make_auto_complete_kv = function(element, generate_options, key_to_val, select) {
+    var choice_to_val = {};
+    element.autocomplete({
+    	'source': function(request, response_func) {
+            if (request) {
+            	generate_options(request.term, function(results) {
+                    var results_formatted = [];
+                    foreach(results, function(result) {
+                        var choice = key_to_val(result);
+                        results_formatted.push(choice);
+                        choice_to_val[choice] = result;
+                    });
+                    response_func(results_formatted);
+                });
+            }
+        },
+        'select': function(event, ui) {
+            var choice = ui.item.value;
+            if (choice in choice_to_val) {
+                select(choice_to_val[choice]);
+            }
+        },
+        'autoFocus': true});
+    return element;
+};
+// End CodeCatalog Snippet
+
+var spec_to_search_result = function(spec) {
+    var result = spec.name;
+    if (spec.summary) {
+        result += " - " + spec.summary;
+    }
+    return result;
+};
+
+var catalog_search_with_autocomplete = function(element, select) {
+    return make_auto_complete_kv(element, function(term, response) { 
+    	   $.get('/api/search/', { q: term }, response);
+        },
+        spec_to_search_result,
+        select);
+};
+
 var embedded_search = function() {
     var span = elt('span');
     var choice_to_versionptr = {};
     var current_choice = null;
     var inp = elt('input');
-    inp.autocomplete({ 
-    	'source': function(request, response_func) {
-    		if (request) {
-    			$.get('/api/search/', { q: request.term }, function(results) {
-    				var results_formatted = [];
-    				foreach(results, function(result) {
-    					var choice = result.name + " - " + result.summary;
-    					results_formatted.push(choice);
-    					choice_to_versionptr[choice] = result.versionptr;
-    				});
-    				response_func(results_formatted);
-    			});
-    		}
-    	},
-    	'select': function(event, ui) {
-    		var choice = ui.item.value;
-    		if (choice in choice_to_versionptr) {
-    			current_choice = choice_to_versionptr[choice];
-                inp.attr('disabled', 'disabled');
-    		}
-    	},
-        'autoFocus': true
-    });
+    
+    var select = function(choice) {
+    	inp.attr('disabled', 'disabled');
+    };
+    catalog_search_with_autocomplete(inp, select);
     
     span.append(inp);
 
