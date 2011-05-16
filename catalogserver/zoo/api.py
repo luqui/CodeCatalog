@@ -157,7 +157,7 @@ def dump_bug(bug):
         'user': bug.version.user and bug.version.user.username,
     }
 
-# CodeCatalog Snippet http://www.codecatalog.net/10/20/
+# CodeCatalog Snippet http://www.codecatalog.net/10/1/
 def traverse_cons_list(conslist):
     while conslist is not ():
         (x,xs) = conslist
@@ -165,11 +165,11 @@ def traverse_cons_list(conslist):
         conslist = xs
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/12/186/
+# CodeCatalog Snippet http://www.codecatalog.net/12/3/
 import heapq
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/14/32/
+# CodeCatalog Snippet http://www.codecatalog.net/14/2/
 def shortest_path(children, success, init):
     seen = {}
     q = [(0, init, ())]
@@ -186,14 +186,14 @@ def shortest_path(children, success, init):
     return None
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/146/390/
+# CodeCatalog Snippet http://www.codecatalog.net/146/1/
 def uncons_set(s):
     clone = set(s)
     x = clone.pop()
     return (x, frozenset(clone))
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/148/414/
+# CodeCatalog Snippet http://www.codecatalog.net/148/5/
 def dependency_search(members, type):
     def children(elem):
         (typ, rest) = uncons_set(elem)
@@ -537,11 +537,11 @@ def user_events_mark_viewed(request):
     
     return ""
 
-# CodeCatalog Snippet http://www.codecatalog.net/91/253/
+# CodeCatalog Snippet http://www.codecatalog.net/91/1/
 import random
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/179/472/
+# CodeCatalog Snippet http://www.codecatalog.net/179/1/
 def random_hex_string(length):
     return ''.join("0123456789abcdef"[random.randint(0,15)] for i in range(length))
 # End CodeCatalog Snippet

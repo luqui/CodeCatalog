@@ -187,11 +187,11 @@
 {% block scripting %}
 
   <script type="text/javascript">
-    // CodeCatalog Snippet http://www.codecatalog.net/18/45/
+    // CodeCatalog Snippet http://www.codecatalog.net/18/2/
     var reload = function() { document.location.reload(); };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/30/686/
+    // CodeCatalog Snippet http://www.codecatalog.net/30/9/
     var language_to_line_comment_map = {
         python: '#',
         javascript: '//',
@@ -203,7 +203,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/16/119/
+    // CodeCatalog Snippet http://www.codecatalog.net/16/3/
     var elt = function(name, attrs) {
         var r = $(document.createElement(name));
         if (attrs) {
@@ -218,7 +218,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/37/99/
+    // CodeCatalog Snippet http://www.codecatalog.net/37/2/
     var button = function(text, click) {
         var r = elt('button');
         r.text(text);
@@ -242,7 +242,7 @@
 	};
 	// End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/39/669/
+    // CodeCatalog Snippet http://www.codecatalog.net/39/6/
     var horizontal = function() {
         var row = elt('tr');
         for (var i = 0; i < arguments.length; ++i) {
@@ -253,7 +253,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/41/121/
+    // CodeCatalog Snippet http://www.codecatalog.net/41/3/
     var vertical = function() {
         var r = elt('table');
         for (var i = 0; i < arguments.length; ++i) {
@@ -264,13 +264,13 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/260/729/
+    // CodeCatalog Snippet http://www.codecatalog.net/260/1/
     var count_lines = function(text) {
         return text.split(/\n/).length;
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/49/498/
+    // CodeCatalog Snippet http://www.codecatalog.net/49/5/
     var label_table = function(dict) {
         var ret = elt('table');
         for (var i in dict) {
@@ -282,7 +282,7 @@
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/248/692/
+    // CodeCatalog Snippet http://www.codecatalog.net/248/2/
     var simple_select = function(options) {
         var ret = elt('select', {});
         for (var i in options) {
@@ -292,7 +292,7 @@
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/250/697/
+    // CodeCatalog Snippet http://www.codecatalog.net/250/1/
     var lazy_highlight_element = function(prefix, suffix, element, language) {
         if (language in sh_languages) {
             if (sh_languages[language]) {
@@ -310,7 +310,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/252/704/
+    // CodeCatalog Snippet http://www.codecatalog.net/252/1/
     var escape_html = function(html) {
         return html.split('&').join('&amp;')
                    .split('<').join('&lt;')
@@ -318,7 +318,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/181/718/
+    // CodeCatalog Snippet http://www.codecatalog.net/181/4/
     var tabs = function(ts) {
         var tabtable = elt('div', { 'class': 'tabstrip' });
         var content = elt('div', { 'class': 'content' });
@@ -358,7 +358,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/254/713/
+    // CodeCatalog Snippet http://www.codecatalog.net/254/2/
     var table_row = function() {
         var tr = elt('tr');
         foreach(arguments, function(arg) {
@@ -368,11 +368,11 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/256/715/
+    // CodeCatalog Snippet http://www.codecatalog.net/256/1/
     var text_node = function(text) { return document.createTextNode(text) };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/258/733/
+    // CodeCatalog Snippet http://www.codecatalog.net/258/3/
     var please_copy_me_on_click = function(element, text) {
         var textarea = elt('textarea', {
             'rows': count_lines(text),
@@ -397,7 +397,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://www.codecatalog.net/263/740/
+    // CodeCatalog Snippet http://www.codecatalog.net/263/2/
     var make_pre = function(text) {
         if ($.browser.msie) {
             return $('<pre>' + escape_html(text) + '</pre>');
