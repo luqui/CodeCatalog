@@ -220,11 +220,11 @@ def specs_assemble(request, versionptr):
                     object=o)
     return map(dump_snippet, dependency_search(members, versionptr) or ()) or None
 
-def snippet_assemble(request, version):
-    """GET /api/snippet/<version>/assemble/ : Get a list of snippets which transitively assemble,
+def snippet_assemble(request, versionptr, serial):
+    """GET /api/snippet/<versionptr>/<serial>/assemble/ : Get a list of snippets which transitively assemble,
        a spec, where the top level is a specific snippet.
     """
-    snippet = Snippet.objects.get(version=int(version))
+    snippet = Snippet.objects.get(version__versionptr=int(version), version__serial=int(serial))
     
     def lang_members(vptr):
         for o in Snippet.objects.filter(
@@ -311,9 +311,9 @@ def specs_snippets_active(request, versionptr):
     objs = Snippet.objects.filter(spec_versionptr=versionptr, version__active=True)
     return map(dump_snippet, objs)
 
-def spec(request, version):
-    """GET /api/spec/<ver>/ : Get the spec at version <ver>."""
-    return dump_spec(Spec.objects.get(version=version))
+def spec(request, versionptr, serial):
+    """GET /api/spec/<vptr>/<ser>/ : Get the spec at version <ver>."""
+    return dump_spec(Spec.objects.get(version__versionptr=int(versionptr), version__serial=int(serial)))
 
 def snippets_active(request, versionptr):
     """GET /api/snippets/<ptr>/active/ : Gets the current active snippet associated with snippet versionptr <ptr>."""
@@ -323,9 +323,9 @@ def snippets_all(request, versionptr):
     """GET /api/snippets/<ptr>/all/ : Gets all versions of snippets associated with snippet versionptr <ptr>."""
     return map(dump_snippet, Snippet.objects.filter(version__versionptr=versionptr))
 
-def snippet(request, version):
-    """GET /api/snippet/<ver>/ : Gets the snippet at version <ver>."""
-    return dump_snippet(Snippet.objects.get(version=version))
+def snippet(request, versionptr, serial):
+    """GET /api/snippet/<vptr>/<ser>/ : Gets the snippet at version <ver>."""
+    return dump_snippet(Snippet.objects.get(version__versionptr=int(versionptr), version__serial=int(serial)))
 
 def bugs(request, versionptr):
     """GET /api/specs/<ptr>/bugs/active/
@@ -341,9 +341,9 @@ def bugs_all(request, versionptr):
     """GET /api/bugs/<ptr>/all/: gets all versions of bugs associated with bug versionptr <ptr>"""
     return map(dump_bug, BugReport.objects.filter(version__versionptr=versionptr).order_by('version__timestamp'))
 
-def bug(request, version):
-    """GET /api/bug/<ver>/: get a specific bug version"""
-    return dump_bug(BugReport.objects.get(version=version))
+def bug(request, versionptr, serial):
+    """GET /api/bug/<vptr>/<ser>/: get a specific bug version"""
+    return dump_bug(BugReport.objects.get(version__versionptr=int(versionptr), version__serial=int(serial)))
 
 def maybe(value, defined, undefined=None):
     if value is None:
