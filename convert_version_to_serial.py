@@ -1,12 +1,12 @@
-# CodeCatalog Snippet http://www.codecatalog.net/112/312/
+# CodeCatalog Snippet http://www.codecatalog.net/112/1/
 import urllib
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/114/317/
+# CodeCatalog Snippet http://www.codecatalog.net/114/1/
 import httplib
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/110/323/
+# CodeCatalog Snippet http://www.codecatalog.net/110/2/
 class JSONClient:
     def __init__(self, host):
         self._host = host
@@ -59,12 +59,15 @@ def subber(match):
         return "http://www.codecatalog.net/" + match.group(1) + "/" + str(resp[0]['serial']) + "/"
     else:
         url = "http://www.codecatalog.net/" + match.group(1) + "/" + match.group(2) + "/"
-        sys.stderr.write("Couldn't find serial id for " + url)
+        sys.stderr.write("Couldn't find serial id for " + url + "\n")
         return url
 
 for filename in sys.argv[1:]:
-    sys.stderr.write("Processing " + filename)
-    fh = open(filename, 'r')
+    sys.stderr.write("Processing " + filename + "\n")
+    try:
+        fh = open(filename, 'r')
+    except:
+        continue
     contents = fh.read()
     fh.close()
 
