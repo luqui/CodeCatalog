@@ -361,9 +361,9 @@
     // CodeCatalog Snippet http://www.codecatalog.net/254/713/
     var table_row = function() {
         var tr = elt('tr');
-        for (var i in arguments) {
-            tr.append(elt('td', {}, arguments[i]));
-        }
+        foreach(arguments, function(arg) {
+        	tr.append(elt('td', {}, arg));
+        });
         return tr;
     };
     // End CodeCatalog Snippet
@@ -542,10 +542,9 @@
             }, function(results) {
                 var result = results[0];
                 table.append(
-                    table_row(
+                	table_row(
                         elt('a', { href: '/' + result.versionptr + '/' }, text_node(result.name)),
                         text_node(result.summary)));
-
             });
         });
         return table;
