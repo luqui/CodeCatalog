@@ -413,7 +413,6 @@ def new_snippet(request):
     snippet.save()
 
     deps = request.POST.get('dependencies')
-    print "deps = ", deps
     if deps:
         for dep in deps.split(','):
             Dependency(snippet=snippet, target=VersionPtr.objects.get(id=int(dep))).save()
