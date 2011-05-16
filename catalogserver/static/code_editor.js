@@ -1,4 +1,4 @@
-// CodeCatalog Snippet http://www.codecatalog.net/175/460/
+// CodeCatalog Snippet http://www.codecatalog.net/175/1/
 var rate_limited_callback = function(rate, cb) {
     var timeout = null;
 
@@ -9,7 +9,7 @@ var rate_limited_callback = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/177/469/
+// CodeCatalog Snippet http://www.codecatalog.net/177/2/
 var realtime_input = function(rate, cb) {
     var input = elt('input', {'type':'text'});
     var pvalue = null;
@@ -23,7 +23,7 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/686/
+// CodeCatalog Snippet http://www.codecatalog.net/30/9/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
@@ -35,7 +35,7 @@ var language_to_line_comment_map = {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/183/491/
+// CodeCatalog Snippet http://www.codecatalog.net/183/1/
 var keys = function(obj) {
     var r = [];
     for (var key in obj) {
@@ -65,7 +65,7 @@ var delegate_method = function(obj, method) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/244/684/
+// CodeCatalog Snippet http://www.codecatalog.net/244/6/
 var edit_description_field = function()
 {
     var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
@@ -75,7 +75,7 @@ var edit_description_field = function()
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/16/119/
+// CodeCatalog Snippet http://www.codecatalog.net/16/3/
 var elt = function(name, attrs) {
     var r = $(document.createElement(name));
     if (attrs) {
@@ -90,7 +90,7 @@ var elt = function(name, attrs) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/49/498/
+// CodeCatalog Snippet http://www.codecatalog.net/49/5/
 var label_table = function(dict) {
     var ret = elt('table');
     for (var i in dict) {
