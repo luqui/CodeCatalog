@@ -227,13 +227,13 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/270/759/
+    // CodeCatalog Snippet http://www.codecatalog.net/270/1/
 	var dynamic_link_element = function() {
     	return elt('a', { href: '#'});
 	}
 	// End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://codecatalog.net/167/761/
+    // CodeCatalog Snippet http://www.codecatalog.net/167/6/
 	var dynamic_link = function(text, click) {
 	    var link_element = dynamic_link_element();
 	    var d_link = link_element.text(text);
@@ -408,7 +408,7 @@
     };
     // End CodeCatalog Snippet
 
-    // CodeCatalog Snippet http://codecatalog.net/274/771/
+    // CodeCatalog Snippet http://www.codecatalog.net/274/2/
 	var screen_offset = function(element) {
 	    var element_offset = element.offset();
 	    var offset_x = element_offset.left - window.pageXOffset;
@@ -417,7 +417,7 @@
 	};
 	// End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://codecatalog.net/276/773/
+    // CodeCatalog Snippet http://www.codecatalog.net/276/3/
     var preserving_screen_position = function(element, mods) {
         var old_offset = screen_offset(element);
         mods();
@@ -427,7 +427,7 @@
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://codecatalog.net/272/764/
+    // CodeCatalog Snippet http://www.codecatalog.net/272/2/
     var toggle_element = function(click_widget, text, text_alt, element, element_alt) {
         var div = elt('div', {}, element);
         if (typeof(element_alt) !== 'function') {
@@ -468,7 +468,7 @@
     };
     // End CodeCatalog Snippet
     
-	// CodeCatalog Snippet http://codecatalog.net/265/766/
+	// CodeCatalog Snippet http://www.codecatalog.net/265/4/
 	var toggle_button = function(text, text_alt, element, element_alt) {
 	    return toggle_element(elt('button'), text, text_alt, element, element_alt);
 	};
@@ -487,7 +487,7 @@
 
     var annotator = function (snip) { 
         return function (text) {
-            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://codecatalog.net/" + snip.versionptr + "/" + snip.serial + "/\n" 
+            return language_to_line_comment_map[snip.language] + " CodeCatalog Snippet http://www.codecatalog.net/" + snip.versionptr + "/" + snip.serial + "/\n" 
                  + text
                  + language_to_line_comment_map[snip.language] + " End CodeCatalog Snippet\n";
         };
@@ -506,7 +506,7 @@
         	});
     };
 
-    // CodeCatalog Snippet http://codecatalog.net/279/782/
+    // CodeCatalog Snippet http://www.codecatalog.net/279/1/
     var foreach = function(array, body) {
         for (var i = 0; i < array.length; ++i) {
             body(array[i]);
@@ -669,7 +669,7 @@
     	}
     };
     
-    // CodeCatalog Snippet http://codecatalog.net/267/751/
+    // CodeCatalog Snippet http://www.codecatalog.net/267/1/
    	var iterate_adjacent = function(array, deflt, func) {
    	    for (var i = 0; i < array.length; ++i) {
    		var current = array[i];
@@ -679,7 +679,7 @@
    	};
    	// End CodeCatalog Snippet
     
-   	// CodeCatalog Snippet http://codecatalog.net/294/1/
+   	// CodeCatalog Snippet http://www.codecatalog.net/294/1/
 	var timestamp_to_string = function(timestamp) {
 	   var date_time = timestamp.split('T');
 	   var date = date_time[0];

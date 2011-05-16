@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# CodeCatalog Snippet http://codecatalog.net/45/134/
+# CodeCatalog Snippet http://www.codecatalog.net/45/2/
 def dict_inverse(dictionary):
     r = {}
     for k,v in dictionary.items():
