@@ -102,7 +102,7 @@ var label_table = function(dict) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://codecatalog.net/37/2/
+//CodeCatalog Snippet http://www.codecatalog.net/37/2/
 var button = function(text, click) {
     var r = elt('button');
     r.text(text);
