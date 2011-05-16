@@ -39,7 +39,12 @@ $(function() {
         else {
             $.post('/api/new/spec/', { name: obj.title, summary: obj.summary }, function (spec) {
                 obj.spec_versionptr = spec.versionptr;
-                regsnip(obj);
+                if (obj.code) {
+                    regsnip(obj);
+                }
+                else {
+                	window.location.href = '/' + spec.versionptr + '/';
+                }
             });
         }
     }));
