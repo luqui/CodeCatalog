@@ -102,7 +102,7 @@ var label_table = function(dict) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://www.codecatalog.net/37/2/
+// CodeCatalog Snippet http://www.codecatalog.net/37/2/
 var button = function(text, click) {
     var r = elt('button');
     r.text(text);
@@ -134,7 +134,7 @@ var language_selector = function() {
     return div;
 };
 
-//CodeCatalog Snippet http://www.codecatalog.net/279/1/
+// CodeCatalog Snippet http://www.codecatalog.net/279/1/
 var foreach = function(array, body) {
     for (var i = 0; i < array.length; ++i) {
         body(array[i]);

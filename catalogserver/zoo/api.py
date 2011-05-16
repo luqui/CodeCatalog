@@ -383,6 +383,7 @@ def new_spec(request):
     return {
         'versionptr': versionptr.id,
         'version': version.id,
+        'serial': version.serial,
     }
 
 @login_required
@@ -424,6 +425,7 @@ def new_snippet(request):
     return {
         'versionptr': versionptr.id,
         'version': version.id,
+        'serial': version.serial,
     }
 
 def new_bug(request):
