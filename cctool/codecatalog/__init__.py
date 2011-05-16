@@ -86,12 +86,12 @@ class Version:
     """
     The version of a snippet in the form versionptr/version.
     """
-    def __init__(self, versionptr, version):
+    def __init__(self, versionptr, serial):
         self.versionptr = versionptr
-        self.version = version
+        self.serial = serial
     
     def __str__(self):
-        return "{0}/{1}".format(self.versionptr, self.version)
+        return "{0}/{1}".format(self.versionptr, self.serial)
 # End CodeCatalog Snippet
 
 from collections import namedtuple
@@ -187,8 +187,7 @@ def partition_snippet(text):
     if opendelim[1] is not None:
         version = Version(opendelim[0], opendelim[1])
     else:
-        # old style
-        version = Version(None, opendelim[0])
+        raise Exception("Old style snippets not supported anymore")
 
     snippet = Snippet(version  = version,
                       code     = code_norm,
@@ -208,7 +207,7 @@ def check_changes(client, snippet):
     orig = client.get_snippet(snippet.version)
     new = client.get_snippet(Version(orig.version.versionptr, None))
     
-    if orig.version.version == new.version.version:
+    if orig.version == new.version:
         # we're at latest, see if we have changes
         if orig.code == snippet.code:
             # no changes
@@ -418,13 +417,13 @@ class Client:
         self.api_key = api_key
 
     def _spec_info_to_spec(self, spec_info):
-        return Spec(version     = Version(spec_info['versionptr'], spec_info['version']),
+        return Spec(version     = Version(spec_info['versionptr'], spec_info['serial']),
                     name        = spec_info['name'],
                     summary     = spec_info['summary'],
                     description = spec_info['description'])
 
     def _snip_info_to_snippet(self, snip_info):
-        return Snippet(version = Version(snip_info['versionptr'], snip_info['version']),
+        return Snippet(version = Version(snip_info['versionptr'], snip_info['serial']),
                        code            = snip_info['code'],
                        language        = snip_info['language'],
                        dependencies    = snip_info['dependencies'],
@@ -454,8 +453,8 @@ class Client:
         return self._spec_info_to_spec(merge(q,spec_info))
 
     def get_spec(self, version):
-        if version.version is not None:
-            spec_info = self._connection.get('/api/spec/' + str(version.version) + '/')
+        if version.serial is not None:
+            spec_info = self._connection.get('/api/spec/' + str(version.versionptr) + '/' + str(version.serial) + '/')
         else:
             spec_info = self._connection.get('/api/specs/' + str(version.versionptr) + '/active/')
 
@@ -481,8 +480,8 @@ class Client:
         return self._snip_info_to_snippet(merge(q,snip_info))
 
     def get_snippet(self, version):
-        if version.version is not None:
-            snip_info = self._connection.get('/api/snippet/' + str(version.version) + '/')
+        if version.serial is not None:
+            snip_info = self._connection.get('/api/snippet/' + str(version.versionptr) + '/' + str(version.serial) + '/')
         else:
             snip_info = self._connection.get('/api/snippets/' + str(version.versionptr) + '/active/')
         
