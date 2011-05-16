@@ -679,6 +679,15 @@
    	};
    	// End CodeCatalog Snippet
     
+   	// CodeCatalog Snippet http://codecatalog.net/294/1/
+	var timestamp_to_string = function(timestamp) {
+	   var date_time = timestamp.split('T');
+	   var date = date_time[0];
+	   var time = date_time[1].split('.')[0];
+	   return time + ", " + date;
+	};
+	// End CodeCatalog Snippet
+
    	var render_diff = function(dmp, text_a, text_b, language) {
     	var diffs = dmp.diff_main(text_a, text_b);
         dmp.diff_cleanupSemantic(diffs);
@@ -718,12 +727,13 @@
                 comment = elt('span').text("<No comment>");
             }
             
+            var history_annotation = " -- by " + snip.user + " at " + timestamp_to_string(snip.timestamp);
             var diff_html = $(wrap_in_pre(render_diff(dmp, prev_snip.code, snip.code, snip.language)));
             lazy_highlight_element('/static/shjs/lang/', '.min.js', diff_html[0], snip.language);
             var d = elt('div', { 'class': 'history cc_code'}, 
             			diff_html.add(elt('span', { 'class': 'edit_comment' }, 
-            							comment, elt('span').text(" -- by " + snip.user)))
-            					 .add(info));
+            				    comment, elt('span').text(history_annotation)))
+            				.add(info));
             table.append(d);
         });
         return table;
