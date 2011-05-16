@@ -466,10 +466,7 @@ def new_bug(request):
 def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""
     search_term = request.GET['q']
-    print search_term
-    search_query = search_term#"{0} OR *{0}*".format(search_term)
-    print search_query
-    results = SearchQuerySet().auto_query(search_query)[0:10]
+    results = SearchQuerySet().auto_query(search_term)[0:10]
     return [ { 'name': r.name,
                'summary': r.summary,
                'versionptr': r.versionptrid } 
