@@ -40,7 +40,6 @@ $(function() {
 	
 	$('#search').click(function() {
 		var search_term = search_box.val();
-		console.log(search_term);
 		if (search_term) {
 			window.location.href = '/search/?q=' + escape(search_term);
 		}
