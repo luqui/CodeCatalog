@@ -8,17 +8,17 @@ import re
 import ConfigParser
 import os
 
-# CodeCatalog Snippet http://codecatalog.net/89/248/
+# CodeCatalog Snippet http://www.codecatalog.net/89/1/
 import inspect
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/95/266/
+# CodeCatalog Snippet http://www.codecatalog.net/95/1/
 def instance_methods(obj):
     return dict([ (m,getattr(obj,m)) for m in dir(obj) 
                                      if inspect.ismethod(getattr(obj,m)) ])
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://codecatalog.net/99/300/
+# CodeCatalog Snippet http://www.codecatalog.net/99/3/
 def command_interface(obj):
     def help():
         sys.stderr.write(name + ": " + (obj.__doc__ or "") + "\n")

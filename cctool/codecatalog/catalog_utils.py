@@ -1,6 +1,6 @@
 import re
 
-# CodeCatalog Snippet http://www.codecatalog.net/20/47/
+# CodeCatalog Snippet http://www.codecatalog.net/20/1/
 def maximum_by(measure, xs):
     maxx = xs[0]
     maxm = measure(maxx)
@@ -12,7 +12,7 @@ def maximum_by(measure, xs):
     return maxx
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/43/127/
+# CodeCatalog Snippet http://www.codecatalog.net/43/2/
 def wrap_fields(wrapper, dictionary):
     ret = {}
     for (k,v) in dictionary.items():
@@ -23,12 +23,12 @@ def wrap_fields(wrapper, dictionary):
     return ret
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/24/61/
+# CodeCatalog Snippet http://www.codecatalog.net/24/2/
 def initial_whitespace(line):
     return re.search(r'^\s*', line).group(0)
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/26/443/
+# CodeCatalog Snippet http://www.codecatalog.net/26/10/
 def strip_indent(text):
     lines = text.splitlines()
     all_ws = re.compile('^\s*$')
@@ -40,12 +40,12 @@ def strip_indent(text):
     return ret
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/28/71/
+# CodeCatalog Snippet http://www.codecatalog.net/28/1/
 def indent_by(indent, text):
     return '\n'.join(map(lambda s: indent + s, text.splitlines())) + '\n'
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/63/155/
+# CodeCatalog Snippet http://www.codecatalog.net/63/2/
 def normalize_code(code):
     (s,indent) = strip_indent(code)
     return (s.strip() + "\n", indent)

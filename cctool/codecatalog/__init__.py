@@ -1,15 +1,15 @@
 import sys
 import os
 from os import path
-# CodeCatalog Snippet http://www.codecatalog.net/112/312/
+# CodeCatalog Snippet http://www.codecatalog.net/112/1/
 import urllib
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/114/317/
+# CodeCatalog Snippet http://www.codecatalog.net/114/1/
 import httplib
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/108/306/
+# CodeCatalog Snippet http://www.codecatalog.net/108/1/
 import json
 # End CodeCatalog Snippet
 
@@ -17,7 +17,7 @@ import catalog_utils
 import re
 import difflib
 
-# CodeCatalog Snippet http://www.codecatalog.net/110/323/
+# CodeCatalog Snippet http://www.codecatalog.net/110/2/
 class JSONClient:
     def __init__(self, host):
         self._host = host
@@ -48,7 +48,7 @@ class JSONClient:
         return json.loads(jsonstr)
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/33/483/
+# CodeCatalog Snippet http://www.codecatalog.net/33/7/
 language_to_line_comment_map = {
     'python': '#',
     'javascript': '//',
@@ -56,7 +56,7 @@ language_to_line_comment_map = {
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/69/485/
+# CodeCatalog Snippet http://www.codecatalog.net/69/3/
 language_to_file_extension_map = {
     "python": "py",
     "javascript": "js",
@@ -64,11 +64,11 @@ language_to_file_extension_map = {
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/102/496/
+# CodeCatalog Snippet http://www.codecatalog.net/102/4/
 language_list = [ k for k in language_to_line_comment_map.keys() if k in language_to_file_extension_map ]
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/104/297/
+# CodeCatalog Snippet http://www.codecatalog.net/104/2/
 def filename_to_language(filename):
     """
     Given a filename, use the extension to determine
@@ -81,7 +81,7 @@ def filename_to_language(filename):
     return None
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/106/341/
+# CodeCatalog Snippet http://www.codecatalog.net/106/2/
 class Version:
     """
     The version of a snippet in the form versionptr/version.
@@ -99,7 +99,7 @@ from collections import namedtuple
 Spec = namedtuple('Spec', ('version', 'name', 'summary', 'description'))
 Snippet = namedtuple('Snippet', ('version', 'code', 'language', 'dependencies', 'spec_versionptr'))
 
-# CodeCatalog Snippet http://www.codecatalog.net/134/351/
+# CodeCatalog Snippet http://www.codecatalog.net/134/1/
 def maximum_by(f, lst):
     (bestx,xs) = (lst[0],lst[1:])
     bestf = f(bestx)
@@ -110,7 +110,7 @@ def maximum_by(f, lst):
     return bestx
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/136/362/
+# CodeCatalog Snippet http://www.codecatalog.net/136/2/
 def detect_by_pattern(text, patterns):
     scores = {}
     for k,pats in patterns.items():
@@ -122,7 +122,7 @@ def detect_by_pattern(text, patterns):
 # End CodeCatalog Snippet
 
 
-# CodeCatalog Snippet http://www.codecatalog.net/138/481/
+# CodeCatalog Snippet http://www.codecatalog.net/138/3/
 language_patterns = {
     'python': [
         re.compile(r'def\s+\w+\s*\(.*:\s*$', re.MULTILINE),
@@ -143,7 +143,7 @@ language_patterns = {
 }
 # End CodeCatalog Snippet
 
-# CodeCatalog Snippet http://www.codecatalog.net/140/373/
+# CodeCatalog Snippet http://www.codecatalog.net/140/2/
 def detect_language(text):
     return detect_by_pattern(text, language_patterns)
 # End CodeCatalog Snippet
@@ -156,7 +156,7 @@ def format_snippet(snippet, indent=""):
            snippet.code + \
            "{0} End CodeCatalog Snippet\n".format(leader);
 
-# CodeCatalog Snippet http://www.codecatalog.net/142/418/
+# CodeCatalog Snippet http://www.codecatalog.net/142/2/
 def partition(pattern, text):
     m = re.search(pattern, text)
     if m:
@@ -198,7 +198,7 @@ def partition_snippet(text):
 
     return (before, (snippet, indent), after)
 
-# CodeCatalog Snippet http://www.codecatalog.net/144/381/
+# CodeCatalog Snippet http://www.codecatalog.net/144/1/
 def case(proj, value, cases):
     return cases[proj(value)](value)
 # End CodeCatalog Snippet
@@ -402,7 +402,7 @@ def update_project_interactive(directory="."):
     formatter = confirmation_formatter(Client())
     update_project(formatter, directory)
 
-# CodeCatalog Snippet http://www.codecatalog.net/154/423/
+# CodeCatalog Snippet http://www.codecatalog.net/154/1/
 def merge(dict1, dict2):
     return dict(dict1, **dict2)
 # End CodeCatalog Snippet
