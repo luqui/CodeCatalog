@@ -386,12 +386,19 @@
         var div = elt('div', {}, element, textarea);    
         textarea.hide();
     
+        var notification_id = null;
+        
         div.click(function() {
             element.hide();
             textarea.show();
             textarea.focus();
             textarea.select();
-            $.gritter.add({
+            if (notification_id) {
+                $.gritter.remove(notification_id, { 
+                    fade: false,
+                });
+            }
+            notification_id = $.gritter.add({
                 title: 'What are those weird comments in the code?',
                 text: 'CodeCatalog wraps each snippet in tags so they can be tracked and updated when a new version is posted.'
             });
