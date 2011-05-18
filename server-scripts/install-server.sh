@@ -39,7 +39,7 @@ sudo /etc/init.d/postgresql* restart
 
 sudo apt-get -y install solr-tomcat
 sudo cp server-scripts/server.xml /etc/tomcat6/server.xml
-
+sudo cp server-scripts/schema.xml /etc/solr/conf/schema.xml
 
 cd catalogserver
 cp settings/dev_settings.py.postgres dev_settings.py
@@ -47,7 +47,6 @@ cp settings/dev_settings.py.postgres dev_settings.py
 ./manage.py migrate
 sudo chown :www-data .
 sudo chmod g+w .
-./manage.py build_solr_schema | sudo tee /etc/solr/conf/schema.xml
 sudo /etc/init.d/tomcat6 restart
 ./manage.py rebuild_index --noinput
 
