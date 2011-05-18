@@ -190,7 +190,7 @@ var spec_to_search_result = function(spec) {
 var catalog_search_with_autocomplete = function(select, stylize) {
     return make_auto_complete({
     	'generate_options': function(term, response) {
-    	    if (term.length > 1) {
+    	    if (term.length > 2) {
     	        $.get('/api/search/', { q: term }, response);
     	    }
     	    else {
