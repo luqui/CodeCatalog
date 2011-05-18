@@ -18,6 +18,11 @@
   <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
+  <link rel="stylesheet" type="text/css" href="/static/jquery.gritter.css" />
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">google.load('jquery', '1.5');</script>
+  <script type="text/javascript" src="/static/jquery.gritter.js"></script>
+
   <style>
     h2 {
         font-size: 14pt;
@@ -388,6 +393,10 @@
             textarea.show();
             textarea.focus();
             textarea.select();
+            $.gritter.add({
+                title: 'What are those weird comments in the code?',
+                text: 'Codecatalog wraps each snippet in tags so they can be tracked and updated when a new version is posted.'
+            });
         });
         textarea.blur(function() {
             element.show();
