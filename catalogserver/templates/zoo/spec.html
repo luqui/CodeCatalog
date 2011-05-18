@@ -592,7 +592,7 @@
                                 var snips;
                                 // TODO make async
                                 $.ajax({
-                                    url: '/api/snippet/' + snip.version + '/assemble/',
+                                    url: '/api/snippet/' + snip.versionptr + '/' + snip.serial + '/assemble/',
                                     async: false,
                                     success: function(result) { snips = result }
                                 });

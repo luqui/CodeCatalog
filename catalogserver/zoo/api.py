@@ -224,7 +224,7 @@ def snippet_assemble(request, versionptr, serial):
     """GET /api/snippet/<versionptr>/<serial>/assemble/ : Get a list of snippets which transitively assemble,
        a spec, where the top level is a specific snippet.
     """
-    snippet = Snippet.objects.get(version__versionptr=int(version), version__serial=int(serial))
+    snippet = Snippet.objects.get(version__versionptr=int(versionptr), version__serial=int(serial))
     
     def lang_members(vptr):
         for o in Snippet.objects.filter(
