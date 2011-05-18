@@ -18,10 +18,11 @@ CodeCatalog Search
  .searchbox { padding-top: 1cm }
  .searchbox .center-aligned { text-align: center }
  .searchbox input { height: 30px; font-size: large }
- .searchbox #q { min-width: 300px }
+ .searchbox #q { width: 600px }
 </style>
 
 <script>
+
 //CodeCatalog Snippet http://codecatalog.net/279/782/
 var foreach = function(array, body) {
     for (var i = 0; i < array.length; ++i) {
@@ -30,21 +31,36 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
+// CodeCatalog Snippet http://www.codecatalog.net/309/1/
+var on_enter = function(element, callback) {
+    return element.keypress(function(e){
+        if(e.which == 13) {
+            callback();
+        }
+    });
+};
+// End CodeCatalog Snippet
+
 $(function() {
-	$('#q').focus();
-	var search_box = $('#q');
-	search_box.focus();
-	var select = function(choice) {
-		window.location.href = '/' + choice.versionptr + '/';
-	};
-	catalog_search_with_autocomplete(search_box, select);
-	
-	$('#search').click(function() {
-		var search_term = search_box.val();
-		if (search_term) {
-			window.location.href = '/search/?q=' + escape(search_term);
-		}
-	});
+    var select = function(choice) {
+        window.location.href = '/' + choice.versionptr + '/';
+    };
+    
+    var search_box = catalog_search_with_autocomplete(select, null);
+    $('#q').replaceWith(search_box);
+    search_box.attr('id', 'q').attr('name','q');
+    search_box.focus();
+    
+    var search_func = function() {
+        var search_term = search_box.val();
+        if (search_term) {
+            window.location.href = '/search/?q=' + escape(search_term);
+        }
+    };
+    
+    on_enter(search_box, search_func);
+    
+    $('#search').click(search_func);
 });
 
 </script>

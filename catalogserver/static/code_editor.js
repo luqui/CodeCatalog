@@ -142,16 +142,22 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://www.codecatalog.net/303/1/
-var make_auto_complete_kv = function(element, generate_options, key_to_val, select) {
+//CodeCatalog Snippet http://www.codecatalog.net/303/2/
+var make_auto_complete = function(options) {
+    var generate_options = options['generate_options'];
+    var format = options['format'] || function(x) { return x };
+    var select = options['select'] || function() { };
+    var stylize = options['stylize'] || function(uimenu) { uimenu.width(element.width()); };
+	
     var choice_to_val = {};
-    element.autocomplete({
+    var span = elt('span');
+    var element = elt('input').autocomplete({
     	'source': function(request, response_func) {
             if (request) {
             	generate_options(request.term, function(results) {
                     var results_formatted = [];
                     foreach(results, function(result) {
-                        var choice = key_to_val(result);
+                        var choice = format(result);
                         results_formatted.push(choice);
                         choice_to_val[choice] = result;
                     });
@@ -164,8 +170,12 @@ var make_auto_complete_kv = function(element, generate_options, key_to_val, sele
             if (choice in choice_to_val) {
                 select(choice_to_val[choice]);
             }
+        },
+        'appendTo': span,
+        'open': function() {
+        	stylize(span.find('.ui-menu'));
         }});
-    return element;
+    return element.add(span);
 };
 // End CodeCatalog Snippet
 
@@ -177,24 +187,27 @@ var spec_to_search_result = function(spec) {
     return result;
 };
 
-var catalog_search_with_autocomplete = function(element, select) {
-    return make_auto_complete_kv(element, function(term, response) { 
+var catalog_search_with_autocomplete = function(select, stylize) {
+    return make_auto_complete({
+    	'generate_options': function(term, response) { 
     	   $.get('/api/search/', { q: term }, response);
         },
-        spec_to_search_result,
-        select);
+        'format': spec_to_search_result,
+        'select': select,
+        'stylize': stylize});
 };
 
 var embedded_search = function() {
     var span = elt('span');
     var choice_to_versionptr = {};
     var current_choice = null;
-    var inp = elt('input');
     
     var select = function(choice) {
+        current_choice = choice.versionptr;
     	inp.attr('disabled', 'disabled');
     };
-    catalog_search_with_autocomplete(inp, select);
+    
+    var inp = catalog_search_with_autocomplete(select, null);
     
     span.append(inp);
 
@@ -210,6 +223,10 @@ var embedded_search = function() {
         else {
             return current_choice;
         }
+    };
+    
+    span.focus = function() {
+        inp.focus();
     };
     
     return span;
@@ -230,9 +247,10 @@ var editable_list = function(widget_factory) {
             tr.remove();
         });
         table.append(tr);
+        if ('focus' in thing) { thing.focus(); }
         return thing;
     };
-    add_button.click(function() { add() });
+    add_button.click(add);
 
     var div = elt('div', {}, table, add_button);
     div.val = function(vals) {
@@ -259,7 +277,7 @@ var code_editor = function(proto, submit_callback) {
     var languages = language_selector();
     if (proto.language) { languages.val(proto.language); }
 
-    var deps_table = editable_list(function() { return embedded_search() });
+    var deps_table = editable_list(embedded_search);
 
     var deps_div = elt('div', { 'class': 'deps' }, 
                         elt('b').text('Dependencies'),
