@@ -64,8 +64,7 @@ to build the search index, then search by browsing to:
 http://localhost:8000/search/
 
 
-
-
+========================================================================
 To update the server to the most recent version of CodeCatalog from the repo:
 
 Log into codecatalog.net through PuTTY/SSH
@@ -86,3 +85,14 @@ or
 % ./update_latest.sh
 
 This script does everything above automatically.
+
+=========================================================
+To update the schema.xml:
+
+% cd CodeCatalog/server-scripts
+% sudo cp schema.xml /etc/solr/conf
+
+% sudo service tomcat6 restart
+
+% cd CodeCatalog/codecatalog
+% python manage.py rebuild_index
