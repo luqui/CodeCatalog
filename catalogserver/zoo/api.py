@@ -483,11 +483,9 @@ def search(request):
     words = clean_query.split(' ')
     if words:
         results_text = SearchQuerySet().all()
-        for word in words:
-            results_text = results_text.filter(text="*{}*".format(word))
-        
         results_alltext = SearchQuerySet().all()
         for word in words:
+            results_text = results_text.filter(text="*{}*".format(word))
             results_alltext = results_alltext.filter(alltext="*{}*".format(word))
     else:
         results_text = []
