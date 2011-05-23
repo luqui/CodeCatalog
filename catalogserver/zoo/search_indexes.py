@@ -5,8 +5,11 @@ from zoo.models import Spec, VersionPtr
 class SpecIndex(RealTimeSearchIndex):
     name = CharField()
     summary = CharField()
+    spec = CharField()
     versionptrid = IntegerField()
-    text = CharField(document=True, use_template=True)
+    text_gram = CharField(document=True, use_template=True)
+    text = CharField(use_template=True)
+    alltext = CharField(use_template=True)
 
     def get_queryset(self):
         return VersionPtr.objects.filter(
@@ -30,6 +33,10 @@ class SpecIndex(RealTimeSearchIndex):
     def prepare_summary(self, obj):
         active = obj.active_spec()
         return active and active.summary
+    
+    def prepare_spec(self, obj):
+        active = obj.active_spec()
+        return active and active.spec
 
     def prepare_versionptrid(self, obj):
         return obj.id

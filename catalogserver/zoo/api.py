@@ -4,6 +4,7 @@ from haystack.query import SearchQuerySet
 from django.db.models import Q, Max
 from django.contrib.auth import authenticate
 import json
+import collections
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -465,12 +466,80 @@ def new_bug(request):
 
 def search(request):
     """GET /api/search/?q=text : Search for specs matching the given text."""
-    search_term = request.GET['q']
-    results = SearchQuerySet().auto_query(search_term)[0:10]
+    user_query = request.GET['q']
+    
+    # Clean user-provided data.
+    clean_query = SearchQuerySet().query.clean(user_query)
+    
+    # First, try an edge-gram autocomplete on the spec name.
+    results_name = SearchQuerySet().autocomplete(name=clean_query)
+    
+    # Next, try an edge-gram autocomplete on the text (name + summary + language).
+    results_textgram = SearchQuerySet().autocomplete(text_gram=clean_query)
+    
+    # Finally, do word-based leading and trailing wildcard filters on both
+    # the text (name + summary + language) and the complete text (name + summary
+    # + spec (documentation) + language).
+    words = clean_query.split(' ')
+    if words:
+        results_text = SearchQuerySet().all()
+        for word in words:
+            results_text = results_text.filter(text="*{}*".format(word))
+        
+        results_alltext = SearchQuerySet().all()
+        for word in words:
+            results_alltext = results_alltext.filter(alltext="*{}*".format(word))
+    else:
+        results_text = []
+        results_alltext = []
+    
+    def _log():
+        """
+        Debug logging that displays the results of the various search methods.
+        """
+        print "**************"
+        print clean_query
+        print "************************************"
+        print "name (edgegram autocomplete) results:"
+        for r in results_name:
+            print r
+        print "------------------------------------"
+        print "textgram (edgegram auto query) results:"
+        for r in results_textgram:
+            print r
+        print "------------------------------------"
+        print "text (word-based wildcard) results:"
+        for r in results_text:
+            print r
+        print "------------------------------------"  
+        print "alltext (word-based wildcard) results:"
+        for r in results_alltext:
+            print r
+        print "------------------------------------"
+        print "************************************"
+    
+    #_log()
+    
+    # Collect the top 10 unique entries from the various results
+    # in the order of method confidence.  Spec-name-based auto-complete
+    # is the most important, etc.
+    max_results = 10
+    i = 0
+    results = collections.OrderedDict()
+    for r in [rn for rn in results_name] \
+    + [rt for rt in results_textgram] \
+    + [ra for ra in results_text] \
+    + [rs for rs in results_alltext]:
+        if not r.object in results:
+            results[r.object] = r
+            i += 1
+            if i > max_results:
+                break
+    
     return [ { 'name': r.name,
                'summary': r.summary,
                'versionptr': r.versionptrid } 
-                        for r in results ]
+                        for r in results.values() ]
 
 @login_required
 def user_update(request):
