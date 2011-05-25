@@ -94,5 +94,5 @@ To update the schema.xml:
 
 % sudo service tomcat6 restart
 
-% cd CodeCatalog/codecatalog
+% cd CodeCatalog/catalogserver
 % python manage.py rebuild_index
