@@ -41,26 +41,95 @@ var on_enter = function(element, callback) {
 };
 // End CodeCatalog Snippet
 
-$(function() {
-    var select = function(choice) {
-        window.location.href = '/' + choice.versionptr + '/';
+// CodeCatalog Snippet http://www.codecatalog.net/175/1/
+var rate_limited_callback = function(rate, cb) {
+    var timeout = null;
+
+    return function() {
+        if (timeout) { clearTimeout(timeout); timeout = null; }
+        timeout = setTimeout(cb, rate);
     };
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/16/3/
+var elt = function(name, attrs) {
+    var r = $(document.createElement(name));
+    if (attrs) {
+        for (var i in attrs) {
+            r.attr(i, attrs[i]);
+        }
+    }
+    for (var i = 2; i < arguments.length; ++i) {
+        r.append(arguments[i]);
+    }
+    return r;
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/254/7/
+var table_row = function() {
+    var tr = elt('tr');
+    foreach(arguments, function(arg) {
+        tr.append(elt('td', {}, arg));
+    });
+    return tr;
+};
+// End CodeCatalog Snippet
+
+// CodeCatalog Snippet http://www.codecatalog.net/256/1/
+var text_node = function(text) { return document.createTextNode(text) };
+// End CodeCatalog Snippet
+
+var spec_to_address = function(spec) {
+    return '/' + spec.versionptr + '/'
+};
+
+$(function() {
     
-    var search_box = catalog_search_with_autocomplete(select, null);
-    $('#q').replaceWith(search_box);
-    search_box.attr('id', 'q').attr('name','q');
-    search_box.focus();
+    var top_result = null;
     
-    var search_func = function() {
-        var search_term = search_box.val();
-        if (search_term) {
-            window.location.href = '/search/?q=' + escape(search_term);
+    var search_box = $('#q');
+    
+    var do_search = function() {
+        // do a search for the text
+        var query = search_box.val();
+        if (query.length < 3) {
+            return
+        }
+            
+        $.get('/api/search/', { q: query }, function(results) {
+            // in the callback, populate the search_results div with the results
+            var results_table = elt('table');
+            top_result = null;
+            foreach(results, function(result) {
+                if (top_result == null) {
+                    top_result = result;
+                }
+                var result_row = elt('tr', {'name': result.versionptr, 'id': result.versionptr}, 
+                        elt('td', {}, elt('a', {'href': spec_to_address(result)}).text(result.name)), 
+                        elt('td').text(result.summary));
+                results_table.append(result_row);
+            });
+            var results_div = elt('div', {'name': 'search_results', 'id': 'search_results'});
+            $('#search_results').replaceWith(results_div);
+            results_div.append(results_table);
+        });
+    }
+    
+    search_box.keypress(rate_limited_callback(500, do_search));
+    
+    // Call do_search immediately in-case there was a reload of the page with text in the input box.
+    do_search();
+    
+    var go_func = function() {
+        if (top_result != null) {
+            window.location.href = spec_to_address(top_result);
         }
     };
     
-    on_enter(search_box, search_func);
-    
-    $('#search').click(search_func);
+    on_enter(search_box, go_func);
+    $('#search').click(go_func);
 });
 
 </script>
@@ -71,8 +140,12 @@ $(function() {
 <div class="searchbox">
  <div class='center-aligned'>
   <input type='text' name='q' id='q' />
-  <button name='search' id='search'>Search</button>
+  <button name='search' id='search'>Go</button>
  </div>
 </div>
+
+<div><center><a href="/new" >Add Code</a></center></div>
+
+<div name='search_results' id='search_results'></div>
 
 {% endblock content %}

@@ -2,11 +2,27 @@
 
 {% block header %}
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="/static/code_editor.js"></script>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+<style>
+ .searchresults table {
+    width: 100%;
+    border: 1px solid black;
+ }
+ .searchresults thead {
+    font-weight: bold;
+ }
+ #newsnippet {
+    margin-top: 1cm;
+ }
+</style>
+
 <script>
 $(function() {
-    $('#editor').append(code_editor(null, function(obj) { 
+    {% if user.is_authenticated %}
+    $('#newsnippet').append(code_editor_with_title({ title: "{{query}}" }, function(obj) {
         var regsnip = function (snip) {
             $.post('/api/new/snippet/', snip, function (reply) {
                 window.location.href = '/' + reply.versionptr + '/';
@@ -16,19 +32,34 @@ $(function() {
             regsnip(obj);
         }
         else {
-            $.post('/api/new/spec/', {}, function (spec) {
+            $.post('/api/new/spec/', { name: obj.title, summary: obj.summary }, function (spec) {
                 obj.spec_versionptr = spec.versionptr;
-                regsnip(obj);
+                if (obj.code) {
+                    regsnip(obj);
+                }
+                else {
+                    window.location.href = '/' + spec.versionptr + '/';
+                }
             });
         }
     }));
-})
+    {% else %}
+    $('#loginlink').click(function() {
+        var path = window.location.pathname + window.location.search;
+        console.log(window.location);
+        window.location.href = '/openid/login/?next=' + escape(path);
+        return false;
+    });
+    {% endif %}
+});
 </script>
 {% endblock %}
 
 {% block content %}
- <div class="newsnippet">
-  <h1>New Snippet</h1>
-  <div name="editor" id="editor"></div>
- </div>
+<div name="newsnippet" id="newsnippet">
+ <h2>New Snippet</h2>
+ {% if not user.is_authenticated %}
+ <a href="#" name="loginlink" id="loginlink">Log in</a> to add a new snippet.
+ {% endif %}
+</div>
 {% endblock %}
