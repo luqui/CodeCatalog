@@ -489,8 +489,8 @@ def search(request):
         results_text = SearchQuerySet().all()
         results_alltext = SearchQuerySet().all()
         for word in words:
-            results_text = results_text.filter(text="*{0}*".format(word))
-            results_alltext = results_alltext.filter(alltext="*{0}*".format(word))
+            results_text = results_text.filter(text="{0}*".format(word))
+            results_alltext = results_alltext.filter(alltext="{0}*".format(word))
     else:
         results_text = []
         results_alltext = []
