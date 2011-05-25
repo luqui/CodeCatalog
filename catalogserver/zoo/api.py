@@ -5,6 +5,7 @@ from django.db.models import Q, Max
 from django.contrib.auth import authenticate
 import json
 import collections
+import ordereddict
 
 # Versions are organized into versionptrs, which essentially represents
 # a collection of versions of the same thing.  When we view a spec or a
@@ -523,7 +524,7 @@ def search(request):
     # is the most important, etc.
     max_results = 10
     i = 0
-    results = collections.OrderedDict()
+    results = ordereddict.OrderedDict()
     for r in [rn for rn in results_name] \
     + [rt for rt in results_textgram] \
     + [ra for ra in results_text] \
