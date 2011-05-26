@@ -20,6 +20,11 @@ CodeCatalog Search
  .searchbox input { height: 30px; font-size: large }
  .searchbox #q { width: 600px }
  
+ .top_result { 
+    font-size: 16pt;
+    background: #e3ddf3;
+ }
+ 
  .results_area { 
     display: block; 
     margin: auto;
@@ -113,6 +118,8 @@ $(function() {
     var top_result = null;
     
     var search_box = $('#q');
+    var search_button = $('#search');
+    search_button.attr('disabled', 'true');
     
     var do_search = function() {
         // do a search for the text
@@ -125,15 +132,23 @@ $(function() {
             // in the callback, populate the search_results div with the results
             var results_table = elt('table');
             top_result = null;
-            foreach(results, function(result) {
-                if (top_result == null) {
-                    top_result = result;
-                }
-                var result_row = elt('tr', {'name': result.versionptr, 'id': result.versionptr}, 
-                        elt('td', {}, elt('a', {'href': spec_to_address(result)}).text(result.name)), 
-                        elt('td').text(result.summary));
-                results_table.append(result_row);
-            });
+            if (results.length > 0) {
+                foreach(results, function(result) {
+                    var result_row = elt('tr', {'name': result.versionptr, 'id': result.versionptr}, 
+                            elt('td', {}, elt('a', {'href': spec_to_address(result)}).text(result.name)), 
+                            elt('td').text(result.summary));
+                    if (top_result == null) {
+                        top_result = result;
+                        result_row.addClass('top_result');
+                        search_button.removeAttr('disabled');
+                        console.log("foo");
+                    }
+                    results_table.append(result_row);
+                });
+            }
+            else {
+                search_button.attr('disabled', 'true');
+            }
             var results_div = elt('div', {'name': 'search_results', 'id': 'search_results'});
             $('#search_results').replaceWith(results_div);
             results_div.addClass('results_area');
@@ -165,7 +180,7 @@ $(function() {
 <div class="searchbox">
  <div class='center-aligned'>
   <input type='text' name='q' id='q' />
-  <button name='search' id='search'>Go</button>
+  <button name='search' id='search'>Top</button>
  </div>
 </div>
 
