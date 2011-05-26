@@ -19,6 +19,29 @@ CodeCatalog Search
  .searchbox .center-aligned { text-align: center }
  .searchbox input { height: 30px; font-size: large }
  .searchbox #q { width: 600px }
+ 
+ .results_area { 
+    display: block; 
+    margin: auto;
+    padding-left: 100px;
+    padding-right: 100px;
+ }
+
+.results_area table {
+    margin: auto;
+    border-style: hidden;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    border-width: 0px;
+ }
+
+.results_area td {
+    border-color: #e3ddf3;
+    border-width: 1px;
+    border-style: inset;
+    padding: 10px 16px;
+ }
+ 
 </style>
 
 <script>
@@ -113,6 +136,8 @@ $(function() {
             });
             var results_div = elt('div', {'name': 'search_results', 'id': 'search_results'});
             $('#search_results').replaceWith(results_div);
+            results_div.addClass('results_area');
+            
             results_div.append(results_table);
         });
     }
