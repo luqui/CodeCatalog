@@ -85,12 +85,12 @@ CodeCatalog Search
     background: #e3ddf3;
  }
  
- .results_area tr.focused .result_name {
+ .results_area tr.firstchild .result_name {
     font-size: 16pt;
     font-weight: bold;
  }
  
- .results_area tr.focused .result_summary {
+ .results_area tr.firstchild .result_summary {
     font-size: 14pt;
  }
  
@@ -194,7 +194,7 @@ $(function() {
                 });
             }
             
-            results_table.find('td:first-child').addClass('firstchild');
+            results_table.find(':first-child').addClass('firstchild');
             
             var focus_tr = function(tr) {
                 tr = $(tr);
