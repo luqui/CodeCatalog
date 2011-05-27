@@ -18,13 +18,25 @@ div.activity {
     font-weight: bold; 
 }
 </style>
+
+<script>
+
+$(function() {
+    var search_box = $('#q');
+    search_box.bind('search', function(query) {
+        $('#recent_activity').hide();
+    });
+});
+
+</script>
+
 {% endblock %}
 
 {% block content %}
 
 {{block.super}}
 
-<div class="activity">
+<div class="activity" name='recent_activity' id='recent_activity'>
 <h1>Recent Activity</h1>
 <table class="activity">
  <thead>

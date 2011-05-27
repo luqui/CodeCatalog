@@ -15,21 +15,33 @@ CodeCatalog Search
 {{ block.super }}
 
 <style>
- .searchbox { padding-top: 1cm }
+ .searchbox { 
+    margin-top: 20px;
+    margin-bottom: 20px;
+ }
  .searchbox .center-aligned { text-align: center }
  .searchbox input { height: 30px; font-size: large }
- .searchbox #q { width: 600px }
+ .searchbox #q { width: 800px }
  
- .top_result { 
+ .navigation_div {
+    text-align: center;
+    margin-top: 1cm;
+    margin-bottom:20px;
+ }
+ 
+ .navigation_div a {
+    color: blue;
+    font-size: 14pt;
+    font-family: sans-serif;
+ }
+ 
+ #q {
     font-size: 16pt;
-    background: #e3ddf3;
  }
  
  .results_area { 
     display: block; 
     margin: auto;
-    padding-left: 100px;
-    padding-right: 100px;
  }
 
 .results_area table {
@@ -38,13 +50,48 @@ CodeCatalog Search
     border-collapse: collapse;
     border-spacing: 0px;
     border-width: 0px;
+    /*border-color: #e3ddf3;*/
+    width: 800px;
  }
-
+ 
 .results_area td {
-    border-color: #e3ddf3;
+    /* border-color: #e3ddf3; */
     border-width: 1px;
     border-style: inset;
+    border: none;
+    border-bottom: 1px solid #e3ddf3;
     padding: 10px 16px;
+ }
+ 
+ .results_area td.firstchild {
+    width: 200px;
+    border-right: 4px solid #e3ddf3;
+ }
+ 
+ .result_name {
+    font-size: 14pt;
+ }
+ 
+ .result_summary {
+    font-size: 12pt;
+ }
+ 
+ .results_area tr.focused td {
+    border-color: #b0aac0;
+    border-bottom: none;
+ }
+ 
+ .results_area tr.focused {
+    background: #e3ddf3;
+ }
+ 
+ .results_area tr.focused .result_name {
+    font-size: 16pt;
+    font-weight: bold;
+ }
+ 
+ .results_area tr.focused .result_summary {
+    font-size: 14pt;
  }
  
 </style>
@@ -118,43 +165,56 @@ $(function() {
     var top_result = null;
     
     var search_box = $('#q');
-    var search_button = $('#search');
-    search_button.attr('disabled', 'true');
+    var search_results = $('#search_results');
     
     var do_search = function() {
         // do a search for the text
         var query = search_box.val();
         if (query.length < 3) {
-            return
-        }
-            
+            search_results.empty();
+            return;
+        } 
+        
         $.get('/api/search/', { q: query }, function(results) {
             // in the callback, populate the search_results div with the results
             var results_table = elt('table');
             top_result = null;
             if (results.length > 0) {
+                search_box.trigger('search',[query]);
                 foreach(results, function(result) {
-                    var result_row = elt('tr', {'name': result.versionptr, 'id': result.versionptr}, 
-                            elt('td', {}, elt('a', {'href': spec_to_address(result)}).text(result.name)), 
-                            elt('td').text(result.summary));
+                    var result_row = table_row(
+                            elt('a', {'href': spec_to_address(result), 'class': 'result_name'}).text(result.name), 
+                            elt('span', {'class': 'result_summary'}).text(result.summary));
                     if (top_result == null) {
                         top_result = result;
-                        result_row.addClass('top_result');
-                        search_button.removeAttr('disabled');
+                        result_row.addClass('focused');
                     }
+                    result_row.data('spec', result);
                     results_table.append(result_row);
                 });
             }
-            else {
-                search_button.attr('disabled', 'true');
-            }
-            var results_div = elt('div', {'name': 'search_results', 'id': 'search_results'});
-            $('#search_results').replaceWith(results_div);
-            results_div.addClass('results_area');
             
-            results_div.append(results_table);
+            results_table.find('td:first-child').addClass('firstchild');
+            
+            var focus_tr = function(tr) {
+                tr = $(tr);
+                results_table.find('tr').removeClass('focused');
+                tr.addClass('focused');
+                top_result = tr.data('spec');
+            };
+            
+            results_table.find('tr').each(function(_, tr) {
+                $(tr).mouseover(function() {
+                    focus_tr(tr);
+                });
+            });
+            results_table.mouseout(function() {
+                focus_tr(results_table.find('tr:first_child'));
+            });
+            search_results.empty();
+            search_results.append(results_table);
         });
-    }
+    };
     
     search_box.keypress(rate_limited_callback(300, do_search));
     
@@ -169,6 +229,8 @@ $(function() {
     
     on_enter(search_box, go_func);
     $('#search').click(go_func);
+    
+    search_box.focus();
 });
 
 </script>
@@ -176,15 +238,16 @@ $(function() {
 
 {% block content %}
 
-<div class="searchbox">
+<div class='navigation_div'><a href='/new'>Add Code</a></div>
+
+<div class='searchbox'>
  <div class='center-aligned'>
   <input type='text' name='q' id='q' />
-  <button name='search' id='search'>Top</button>
  </div>
 </div>
 
-<div><center><a href="/new" >Add Code</a></center></div>
-
-<div name='search_results' id='search_results'></div>
+<center>
+ <div name='search_results' id='search_results' class='results_area'></div>
+</center>
 
 {% endblock content %}
