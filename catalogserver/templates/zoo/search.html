@@ -216,7 +216,7 @@ $(function() {
         });
     };
     
-    search_box.keypress(rate_limited_callback(300, do_search));
+    search_box.keyup(rate_limited_callback(300, do_search));
     
     // Call do_search immediately in-case there was a reload of the page with text in the input box.
     do_search();
