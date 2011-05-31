@@ -176,6 +176,10 @@
     .spec_history {
         border-bottom: 1px solid black;
     }
+    
+    .copy_tag_warning {
+        color: red;
+    }
 
     /* Bugs box */
     .bugs { }
@@ -383,29 +387,24 @@
             'wrap': 'off'
         }).val(text);
         
-        var div = elt('div', {}, element, textarea);    
+        var warning = elt('div', {'class': 'copy_tag_warning'})
+            .text('Note: CodeCatalog wraps each snippet in tags so you can find them again and for updates through the project view.');
+        var div = elt('div', {}, element, textarea, warning);
+        warning.hide();
         textarea.hide();
-    
-        var notification_id = null;
+        
         
         div.click(function() {
+            warning.show();
             element.hide();
             textarea.show();
             textarea.focus();
             textarea.select();
-            if (notification_id) {
-                $.gritter.remove(notification_id, { 
-                    fade: false
-                });
-            }
-            notification_id = $.gritter.add({
-                title: 'What are those weird comments in the code?',
-                text: 'CodeCatalog wraps each snippet in tags so they can be tracked and updated when a new version is posted.'
-            });
         });
         textarea.blur(function() {
             element.show();
             textarea.hide();
+            warning.hide();
         });
         return div;
     };
