@@ -393,9 +393,10 @@
         warning.hide();
         textarea.hide();
         
-        
         div.click(function() {
-            warning.show();
+            if (!logged_in) {
+                warning.show();
+            }
             element.hide();
             textarea.show();
             textarea.focus();
