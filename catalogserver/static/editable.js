@@ -30,7 +30,8 @@ var editable = function(settings) {
     var makeLinkTag = function(proto) {
         var span = $('<div/>');
         var elt = proto.clone();
-        var editlink = $('<a href="#" class="dynamic_link dynamic_link_after_text">edit</a>');
+        var button_text = proto.text().length > 0 ? "edit" : "add " + proto.attr('name');
+        var editlink = $('<a href="#" class="dynamic_link dynamic_link_after_text">' + button_text + '</a>');
         span.append(elt).append(editlink);
 
         editlink.click(function() {

@@ -32,7 +32,11 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
     var markup = textarea.val();
     var converter = new Showdown.converter();
 
-    var editlink = elt('a', {'href':'#'}).text('edit');
+    var editlink = elt('a', {'href':'#'});
+    var set_edit_text = function() {
+        editlink.text(textarea.val().length > 0 ? "edit" : "add documentation");
+    };
+    set_edit_text();
     var editdiv = elt('span', {'class':'markdown_edit_div'}, editlink);
     var update = function() { div.html(converter.makeHtml(textarea.val())); };
 
@@ -42,6 +46,7 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
     
     editlink.click(function() {
         if (custom_on_click && !custom_on_click()) return;
+        editlink.hide();
         pretext = textarea.val();
         textarea.show();
 
@@ -49,6 +54,8 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
 
         var savebutton = $('<button>Save</button>');
         savebutton.click(function() {
+            set_edit_text();
+            editlink.show();
             savebutton.remove();
             cancelbutton.remove();
             edit_description.remove();
@@ -59,6 +66,7 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
 
         var cancelbutton = $('<button>Cancel</button>');
         cancelbutton.click(function() {
+            editlink.show();
             savebutton.remove();
             cancelbutton.remove();
             edit_description.remove();
