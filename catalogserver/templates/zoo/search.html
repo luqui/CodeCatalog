@@ -94,6 +94,12 @@ CodeCatalog Search
     font-size: 14pt;
  }
  
+ .no_results {
+    padding-top: 50px;
+    font-size: 16pt;
+    text-align: center;
+ }
+ 
 </style>
 
 <script>
@@ -192,25 +198,29 @@ $(function() {
                     result_row.data('spec', result);
                     results_table.append(result_row);
                 });
+                
+                results_table.find(':first-child').addClass('firstchild');
+                
+                var focus_tr = function(tr) {
+                    tr = $(tr);
+                    results_table.find('tr').removeClass('focused');
+                    tr.addClass('focused');
+                    top_result = tr.data('spec');
+                };
+                
+                results_table.find('tr').each(function(_, tr) {
+                    $(tr).mouseover(function() {
+                        focus_tr(tr);
+                    });
+                });
+                results_table.mouseout(function() {
+                    focus_tr(results_table.find('tr:first-child'));
+                });
+            }
+            else {
+                results_table = elt('div', {'class': 'no_results'}).text("no results");
             }
             
-            results_table.find(':first-child').addClass('firstchild');
-            
-            var focus_tr = function(tr) {
-                tr = $(tr);
-                results_table.find('tr').removeClass('focused');
-                tr.addClass('focused');
-                top_result = tr.data('spec');
-            };
-            
-            results_table.find('tr').each(function(_, tr) {
-                $(tr).mouseover(function() {
-                    focus_tr(tr);
-                });
-            });
-            results_table.mouseout(function() {
-                focus_tr(results_table.find('tr:first-child'));
-            });
             search_results.empty();
             search_results.append(results_table);
         });
