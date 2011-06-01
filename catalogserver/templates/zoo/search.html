@@ -172,6 +172,16 @@ $(function() {
     
     var search_box = $('#q');
     var search_results = $('#search_results');
+    var searching = false;
+    var enter_while_searching = false;
+    
+    var go_func = function() {
+        if (top_result != null) {
+            window.location.href = spec_to_address(top_result);
+            return true;
+        }
+        return false;
+    };
     
     var do_search = function() {
         // do a search for the text
@@ -179,7 +189,12 @@ $(function() {
         if (query.length < 3) {
             search_results.empty();
             return;
-        } 
+        }
+        
+        if (!searching) {
+            searching = true;
+            enter_while_searching = false;
+        }
         
         $.get('/api/search/', { q: query }, function(results) {
             // in the callback, populate the search_results div with the results
@@ -221,8 +236,14 @@ $(function() {
                 results_table = elt('div', {'class': 'no_results'}).text("no results");
             }
             
-            search_results.empty();
-            search_results.append(results_table);
+            searching = false;
+            if (enter_while_searching) {
+                go_func();
+            }
+            else { 
+                search_results.empty();
+                search_results.append(results_table);
+            }
         });
     };
     
@@ -231,13 +252,16 @@ $(function() {
     // Call do_search immediately in-case there was a reload of the page with text in the input box.
     do_search();
     
-    var go_func = function() {
-        if (top_result != null) {
-            window.location.href = spec_to_address(top_result);
+    on_enter(search_box, function() {
+        if (!go_func()) {
+            var was_searching = searching;
+            searching = true; // we will eventually get the keyup for the enter press!
+            enter_while_searching = true;
+            if (!was_searching) {
+                do_search();
+            }
         }
-    };
-    
-    on_enter(search_box, go_func);
+    });
     $('#search').click(go_func);
     
     search_box.focus();
