@@ -52,9 +52,6 @@ var editable = function(settings) {
         if (!empty) {
             editlink.addClass('dynamic_link_after_text');
         }
-        else {
-            div.addClass('empty_editable');
-        }
         div.append(editable).append(editlink);
 
         editlink.click(function() {

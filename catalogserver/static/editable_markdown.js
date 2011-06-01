@@ -39,13 +39,12 @@ var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_clic
     var set_edit_text = function() {
         if (textarea.val().length > 0) {
             editlink.text("edit");
-            editdiv.removeClass('empty_editable');
+            editdiv.removeClass('documentation_editable_empty');
             editdiv.addClass('documentation_editable');
         }
         else {
-            console.log('yo');
             editlink.text("add documentation");
-            editdiv.addClass('empty_editable');
+            editdiv.addClass('documentation_editable_empty');
             editdiv.removeClass('documentation_editable');
         }
             
