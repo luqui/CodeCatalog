@@ -2,6 +2,22 @@
 // Adds a little blue "edit" link next to every element with class .editable.
 // If it also has class .editarea, the edit box will be a textarea instead of a
 // text input.
+
+// CodeCatalog Snippet http://www.codecatalog.net/16/3/
+var elt = function(name, attrs) {
+    var r = $(document.createElement(name));
+    if (attrs) {
+        for (var i in attrs) {
+            r.attr(i, attrs[i]);
+        }
+    }
+    for (var i = 2; i < arguments.length; ++i) {
+        r.append(arguments[i]);
+    }
+    return r;
+};
+// End CodeCatalog Snippet
+
 var editable = function(settings) {
     var makeEditWidget = function(proto) {
         if (proto.hasClass('editarea')) {
@@ -28,24 +44,31 @@ var editable = function(settings) {
         return span;
     };
     var makeLinkTag = function(proto) {
-        var span = $('<div/>');
-        var elt = proto.clone();
-        var button_text = proto.text().length > 0 ? "edit" : "add " + proto.attr('name');
-        var editlink = $('<a href="#" class="dynamic_link dynamic_link_after_text">' + button_text + '</a>');
-        span.append(elt).append(editlink);
+        var div = elt('div');
+        var editable = proto.clone();
+        var empty = proto.text().length == 0;
+        var button_text = empty ? "add " + proto.attr('name') : "edit";
+        var editlink = elt('a', {'href':'#', 'class':'dynamic_link'}).text(button_text);
+        if (!empty) {
+            editlink.addClass('dynamic_link_after_text');
+        }
+        else {
+            div.addClass('empty_editable');
+        }
+        div.append(editable).append(editlink);
 
         editlink.click(function() {
             if (settings.custom_on_click && !settings.custom_on_click()) return;
-            span.replaceWith(makeEditBox(elt));
+            div.replaceWith(makeEditBox(editable));
             return false;
         });
-        return span;
+        return div;
     };
     var installEditButtons = function() {
       $('.editable').each(function(x,e) { 
         var je = $(e);
-        var elt = makeLinkTag(je);
-        je.replaceWith(elt);
+        var editable = makeLinkTag(je);
+        je.replaceWith(editable);
       });
     };
     return {

@@ -26,20 +26,32 @@ var edit_description_field = function()
 // End CodeCatalog Snippet
 
 var makeMarkdownArea = function(textarea, divclass, editcallback, custom_on_click){
-    var container = $('<div></div>');
+    var container = elt('div');
     container.addClass(divclass);
-    var div = $('<div></div>');
+    var div = elt('div');
     var markup = textarea.val();
     var converter = new Showdown.converter();
 
     var editlink = elt('a', {'href':'#'});
-    var set_edit_text = function() {
-        editlink.text(textarea.val().length > 0 ? "edit" : "add documentation");
-    };
-    set_edit_text();
-    var editdiv = elt('span', {'class':'markdown_edit_div'}, editlink);
+    var editdiv = elt('div', {'class':'markdown_edit_div'}, editlink);
     var update = function() { div.html(converter.makeHtml(textarea.val())); };
 
+    var set_edit_text = function() {
+        if (textarea.val().length > 0) {
+            editlink.text("edit");
+            editdiv.removeClass('empty_editable');
+            editdiv.addClass('documentation_editable');
+        }
+        else {
+            console.log('yo');
+            editlink.text("add documentation");
+            editdiv.addClass('empty_editable');
+            editdiv.removeClass('documentation_editable');
+        }
+            
+    };
+    set_edit_text();
+    
     // TODO keydown instead to make it more responsive.  Make sure it isn't lagging
     // a character behind though!
     textarea.keyup(update);
