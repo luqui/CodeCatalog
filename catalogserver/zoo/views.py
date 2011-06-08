@@ -66,6 +66,8 @@ faq = template('zoo/faq.html')
 
 tools = template('zoo/tools.html')
 
+new_events = template('zoo/new_events.html')
+
 @login_required
 def profile(request):
     if request.method == 'POST':

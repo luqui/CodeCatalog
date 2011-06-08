@@ -1,0 +1,177 @@
+{% extends "zoo/frame.html" %}
+
+{% block header %}
+
+<script type="text/javascript" src="/static/code_editor.js"></script>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+<style>
+    .new_events_title {
+        display: block;
+        text-align: center;
+        font-size: 24pt;
+        font-weight: bold;
+        border-bottom: 10px solid #e3ddf3;
+    }
+
+    .events_table { 
+        display: block; 
+        margin: auto;
+     }
+ 
+    .events_table table {
+        margin: auto;
+        border-style: hidden;
+        border-collapse: collapse;
+        border-spacing: 0px;
+        border-width: 0px;
+        width: 800px;
+    }
+ 
+    .events_table td {
+        border-width: 1px;
+        border-style: inset;
+        border: none;
+        border-bottom: 1px solid #e3ddf3;
+        padding: 10px 16px;
+    }
+    
+    .events_table td.firstchild {
+        width: 200px;
+        border-right: 4px solid #e3ddf3;
+    }
+    
+    .new_version {
+        color: darkgreen;
+    }
+    
+    .bug_report {
+        color: darkred;
+    }
+    
+    .bug_activity {
+        color: darkorange;
+    }
+    
+    .no_events {
+        font-size: 20pt;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+  <script>
+  
+    // CodeCatalog Snippet http://www.codecatalog.net/16/3/
+    var elt = function(name, attrs) {
+        var r = $(document.createElement(name));
+        if (attrs) {
+            for (var i in attrs) {
+                r.attr(i, attrs[i]);
+            }
+        }
+        for (var i = 2; i < arguments.length; ++i) {
+            r.append(arguments[i]);
+        }
+        return r;
+    };
+    // End CodeCatalog Snippet
+    
+    // CodeCatalog Snippet http://www.codecatalog.net/254/7/
+    var table_row = function() {
+        var tr = elt('tr');
+        foreach(arguments, function(arg) {
+            tr.append(elt('td', {}, arg));
+        });
+        return tr;
+    };
+    // End CodeCatalog Snippet
+    
+    var test_new_events = function(f) {
+        var stuff = { 'forEach': function(g) {
+            g({'name':'Test1', 'versionptr':1, 'type':'new_version', 'version':'1', 'versionptr_type':'Snippet'});
+            g({'name':'Test2', 'versionptr':2, 'type':'bug', 'version':'1', 'bug_title':'Insert Title Here', 'versionptr_type':'Snippet'});
+            g({'name':'Test3', 'versionptr':3, 'type':'bug', 'version':'1', 'bug_title':'Buggggestion', 'versionptr_type':'Snippet'});
+            g({'name':'Test4', 'versionptr':4, 'type':'new_version', 'version':'1', 'versionptr_type':'Snippet'});
+        }};
+        f(stuff);
+    }
+    
+    //$.get('/api/user/events/new/',
+    
+    $(function() {
+{% if user.is_authenticated %}
+        $.get('/api/user/events/check/', function (hasEvents) {
+            var new_events = $('#new_events');
+            /*
+            if (!hasEvents)  {
+                new_events.append(elt('div').text("-").addClass("no_events"));
+                return;
+            }
+            */
+            
+            var events_table = elt('table');
+            new_events.append(events_table);
+            
+            var adder = function(e_name, e) {
+                events_table.append(table_row(e_name, e));
+            };
+            
+            test_new_events( function (events) {
+                events.forEach(function(e) {
+                    var link = elt('a', { href: '#' }).text(e.name);
+                    var mklink = function(tvptr) {
+                        link.click(function() {
+                            $.post('/api/user/events/mark_viewed/',
+                                { versionptr: e.versionptr },
+                                function () { window.location.href = '/' + tvptr + '/' });
+                            return false;
+                        });
+                        return link;
+                    };
+                    if (e.type == 'new_version') {
+                        if (e.versionptr_type == 'Spec' || e.versionptr_type == 'Snippet') {
+                            adder(mklink(e.versionptr), elt('p').text('new version').addClass('new_version'));
+                        }
+                        else if (e.versionptr_type == 'BugReport') {
+                            adder(link, elt('p').text('bug activity').addClass('bug_activity'));
+                            $.get('/api/bug/' + e.version + '/', function(r) {
+                                mklink(r.target_versionptr);
+                            });
+                        }
+                    }
+                    else if (e.type == 'bug') {
+                        adder(mklink(e.versionptr), elt('p').text('bug report: ' + e.bug_title).addClass('bug_report'));
+                    }
+                    else if (e.type == 'vote' && e.value > 0) {
+                        adder(mklink(e.versionptr), elt('p').text('upvote'));
+                    }
+                    else if (e.type == 'vote' && e.value < 0) {
+                        adder(mklink(e.versionptr), elt('p').text('downvote'));
+                    }
+                });
+                
+                events_table.find(':first-child').addClass('firstchild');
+            });
+        });
+            
+{% endif %}
+        
+        $('#events').hide();
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+<div>
+ <div class="new_events_title">New Events</div>
+ {% if not user.is_authenticated %}
+ <a href="#" name="loginlink" id="loginlink">Log in</a> to add a new snippet.
+ {% endif %}
+ {% if user.is_authenticated %}
+ <div name="new_events" id="new_events", class="events_table">
+ </div>
+ {% endif %}
+</div>
+{% endblock %}

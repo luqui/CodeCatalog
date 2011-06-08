@@ -11,20 +11,64 @@
   {% endblock %}
 
   <style>
+   
    body { text-align: center }
-   .site { width: 900px; margin: 0 auto; text-align: left }
-   .centered { width: 480px; margin: 0 auto; text-align: left }
+   
+   .site { 
+       width: 900px; 
+       margin: 0 auto; 
+       text-align: left 
+   }
+   
+   .centered { 
+       width: 480px; 
+       margin: 0 auto; 
+       text-align: left 
+   }
+   
    .iecentered { text-align: center }
-   a.new_events { background: #c00; color: white }
+   
+   a.new_events { 
+        background: #c00; 
+        color: white;
+        text-align: center;
+   }
+   
    a { text-decoration: none }
+   
    a:hover { text-decoration: underline }
-   .events_table { background: silver }
-   .events_table td { border: 1px solid black }
-   .userpanel { background: #c7bce8 }
+   
+   .userpanel { 
+       background: #c7bce8;
+       height: 3eX;
+   }
+   
    img { border: none }
+   
    .deps { margin-left: 2cm }
+   
    .deps input { width: 700px }
+   
    .edit_description { width: 700px }
+   
+   .login_span {
+       display: inline-block;
+       width: 297px;
+       text-align: left;
+   }
+   
+   .events_span {
+       display: inline-block;
+       width: 297px;
+       text-align: center;
+   }
+   
+   .faq_span {
+       display: inline-block;
+       width: 297px;
+       text-align: right;
+   }
+  
   </style>
 
   <script>
@@ -42,72 +86,12 @@
         return r;
     };
     // End CodeCatalog Snippet
-
-    // CodeCatalog Snippet http://www.codecatalog.net/87/1/
-    var dropdown = function(clicker, make_elements) {
-        var div = elt('div', {}, clicker);
-        var onclick = function() {
-            var list = elt('table');
-            div.append(list);
-            clicker.unbind('click');
-            clicker.click(function() {
-                clicker.unbind('click');
-                list.remove();
-                clicker.click(onclick);
-                return false;
-            });
-    
-            make_elements(function(e) {
-                list.append(elt('tr', {}, elt('td', {}, e)));
-            });
-        };
-        clicker.click(onclick);
-        return div;
-    };
-    // End CodeCatalog Snippet
-
+        
     $(function() {
 {% if user.is_authenticated %}
         $.get('/api/user/events/check/', function (hasEvents) {
-            if (!hasEvents) return;
-            $('#events').append(
-                dropdown(elt('a', { href:'#' }).addClass('new_events').text("New Events"), function(adder) {
-                    $.get('/api/user/events/new/', function (events) {
-                        events.forEach(function(e) {
-                            var link = elt('a', { href: '#' }).text(e.name);
-                            var mklink = function(tvptr) {
-                                link.click(function() {
-                                    $.post('/api/user/events/mark_viewed/',
-                                        { versionptr: e.versionptr },
-                                        function () { window.location.href = '/' + tvptr + '/' });
-                                    return false;
-                                });
-                                return link;
-                            };
-                            if (e.type == 'new_version') {
-                                if (e.versionptr_type == 'Spec' || e.versionptr_type == 'Snippet') {
-                                    adder(elt('p').text('New version of ').append(mklink(e.versionptr)));
-                                }
-                                else if (e.versionptr_type == 'BugReport') {
-                                    adder(elt('p').text('Bug activity on ').append(link));
-                                    $.get('/api/bug/' + e.version + '/', function(r) {
-                                        mklink(r.target_versionptr);
-                                    });
-                                }
-                            }
-                            else if (e.type == 'bug') {
-                                adder(elt('p').text('Bug report: "' + e.bug_title + '" on ').append(mklink(e.versionptr)));
-                            }
-                            else if (e.type == 'vote' && e.value > 0) {
-                                adder(elt('p').text('Upvote on ').append(mklink(e.versionptr)));
-                            }
-                            else if (e.type == 'vote' && e.value < 0) {
-                                adder(elt('p').text('Downvote on ').append(mklink(e.versionptr)));
-                            }
-                        });
-                    });
-                }).addClass('events_table')
-            );
+            //if (!hasEvents) return;
+            $('#events').append(elt('a', { href:'/new_events'}).addClass('new_events').text("New Events"));
         });
 {% endif %}
 
@@ -139,25 +123,17 @@
  <body>
   <div class="site">
    <div class="userpanel">
-    <table width="100%">
-     <tr>
-      <td>
+      <span class="login_span">
        {% if user.is_authenticated %}
         <b><a href="/profile/">{{user.username}}</a></b> (<a href="/logout/" name="loginoutbutton" id="loginoutbutton">logout</a>)
        {% else %}
         <a href="/openid/login/" name="loginoutbutton" id="loginoutbutton">login</a>
        {% endif %}
-      </td> 
-      <td><a href="/faq/">FAQ</a></td>
-      <td>
-       {% if user.is_authenticated %}
-        <div id="events"></div>
+      </span>
+      {% if user.is_authenticated %}
+      <span name="events" id="events" class="events_span"></span>
        {% endif %}
-      </td>
-      <td style="text-align: right">
-       <a href="/search/">New / Search</a>
-     </tr>
-    </table>
+      <span class="faq_span"><a href="/faq/">FAQ</a></span>
    </div>
    <div class="iecentered">
     <div class="centered">
