@@ -98,18 +98,14 @@
         f(stuff);
     }
     
-    //$.get('/api/user/events/new/',
-    
     $(function() {
 {% if user.is_authenticated %}
         $.get('/api/user/events/check/', function (hasEvents) {
-            var new_events = $('#new_events');
-            /*
+            var new_events = $('#events_table');
             if (!hasEvents)  {
                 new_events.append(elt('div').text("-").addClass("no_events"));
                 return;
             }
-            */
             
             var events_table = elt('table');
             new_events.append(events_table);
@@ -118,7 +114,7 @@
                 events_table.append(table_row(e_name, e));
             };
             
-            test_new_events( function (events) {
+            $.get('/api/user/events/new/', function (events) {
                 events.forEach(function(e) {
                     var link = elt('a', { href: '#' }).text(e.name);
                     var mklink = function(tvptr) {
@@ -170,7 +166,7 @@
  <a href="#" name="loginlink" id="loginlink">Log in</a> to add a new snippet.
  {% endif %}
  {% if user.is_authenticated %}
- <div name="new_events" id="new_events", class="events_table">
+ <div name="events_table" id="events_table", class="events_table">
  </div>
  {% endif %}
 </div>

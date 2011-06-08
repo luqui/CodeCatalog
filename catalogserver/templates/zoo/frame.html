@@ -39,8 +39,14 @@
    a:hover { text-decoration: underline }
    
    .userpanel { 
+       display: table;
        background: #c7bce8;
        height: 3eX;
+       white-space-collapse: collapse;
+   }
+   
+   .userpanel_row {
+       display: table-row;
    }
    
    img { border: none }
@@ -52,20 +58,20 @@
    .edit_description { width: 700px }
    
    .login_span {
-       display: inline-block;
-       width: 297px;
+       display: table-cell;
+       width: 300px;
        text-align: left;
    }
    
    .events_span {
-       display: inline-block;
-       width: 297px;
+       display: table-cell;
+       width: 300px;
        text-align: center;
    }
    
    .faq_span {
-       display: inline-block;
-       width: 297px;
+       display: table-cell;
+       width: 300px;
        text-align: right;
    }
   
@@ -90,7 +96,7 @@
     $(function() {
 {% if user.is_authenticated %}
         $.get('/api/user/events/check/', function (hasEvents) {
-            //if (!hasEvents) return;
+            if (!hasEvents) return;
             $('#events').append(elt('a', { href:'/new_events'}).addClass('new_events').text("New Events"));
         });
 {% endif %}
@@ -123,6 +129,7 @@
  <body>
   <div class="site">
    <div class="userpanel">
+    <div class="userpanel_row">
       <span class="login_span">
        {% if user.is_authenticated %}
         <b><a href="/profile/">{{user.username}}</a></b> (<a href="/logout/" name="loginoutbutton" id="loginoutbutton">logout</a>)
@@ -130,10 +137,9 @@
         <a href="/openid/login/" name="loginoutbutton" id="loginoutbutton">login</a>
        {% endif %}
       </span>
-      {% if user.is_authenticated %}
-      <span name="events" id="events" class="events_span"></span>
-       {% endif %}
+      <span class="events_span"><span name="events" id="events"></span></span>
       <span class="faq_span"><a href="/faq/">FAQ</a></span>
+    </div>
    </div>
    <div class="iecentered">
     <div class="centered">
