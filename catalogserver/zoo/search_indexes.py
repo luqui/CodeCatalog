@@ -11,7 +11,7 @@ class SpecIndex(RealTimeSearchIndex):
     text = CharField(use_template=True)
     alltext = CharField(use_template=True)
 
-    def get_queryset(self):
+    def index_queryset(self):
         return VersionPtr.objects.filter(
             type=VersionPtr.PTRTYPE_TO_ID['Spec'],
             version__active=True,
