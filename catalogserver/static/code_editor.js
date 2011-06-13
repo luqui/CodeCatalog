@@ -329,9 +329,6 @@ var code_editor_with_title = function(proto, submit_callback) {
         label_table({
             'Title': title_input,
             'Summary': summary_input}),
-        button("Submit (spec only)", function() {
-        	submit_callback({'title': title_input.val(), 'summary': summary_input.val()});
-        }),
         code_editor(proto, function(snip) {
             snip.title = title_input.val() || "unnamed";
             snip.summary = summary_input.val();
