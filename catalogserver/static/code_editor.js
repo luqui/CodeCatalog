@@ -69,7 +69,7 @@ var delegate_method = function(obj, method) {
 var edit_description_field = function()
 {
     var edit_comment_input = elt('input', { 'type': 'text', 'class': 'edit_description'});
-    var edit_description = horizontal(elt('span').text("Edit summary"), edit_comment_input);
+    var edit_description = horizontal(elt('span').text("Comment"), edit_comment_input);
     edit_description.val = delegate_method(edit_comment_input, 'val');
     return edit_description;
 };
