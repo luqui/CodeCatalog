@@ -321,8 +321,8 @@ var code_editor = function(proto, submit_callback) {
 };
 
 var code_editor_with_title = function(proto, submit_callback) {
-    var title_input = elt('input', { type:'text' });
-    var summary_input = elt('input', { type:'text' });
+    var title_input = elt('input', { type:'text', 'class':'title_input' });
+    var summary_input = elt('input', { type:'text', 'class':'summary_input'});
     title_input.val(proto.title || "");
     summary_input.val(proto.summary || "");
     return elt('div', {},
