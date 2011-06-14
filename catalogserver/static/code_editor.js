@@ -328,7 +328,7 @@ var code_editor_with_title = function(proto, submit_callback) {
     return elt('div', {},
         label_table({
             'Title': title_input,
-            'Summary': summary_input}),
+            'Summary': summary_input}).addClass('title_summary_table'),
         code_editor(proto, function(snip) {
             snip.title = title_input.val() || "unnamed";
             snip.summary = summary_input.val();
