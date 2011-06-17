@@ -188,6 +188,65 @@
     .documentation_editable {
         text-align: left;
     }
+    
+    .results_area { 
+    display: block; 
+    margin: auto;
+ }
+
+.results_area table {
+    margin: auto;
+    border-style: hidden;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    border-width: 0px;
+    width: 800px;
+ }
+ 
+.results_area td {
+    border-width: 1px;
+    border-style: inset;
+    border: none;
+    border-bottom: 1px solid #e3ddf3;
+    padding: 10px 16px;
+ }
+ 
+ .results_area td.firstchild {
+    width: 200px;
+    border-right: 4px solid #e3ddf3;
+ }
+ 
+ .result_name {
+    font-size: 12pt;
+ }
+ 
+ .result_summary {
+    font-size: 10pt;
+ }
+ 
+ .results_area tr.focused td {
+    border-color: #b0aac0;
+    border-bottom: 1px solid #e3ddf3;
+ }
+ 
+ .results_area tr.focused {
+    background: #e3ddf3;
+ }
+ 
+ .results_area tr.firstchild .result_name {
+    font-size: 14pt;
+    font-weight: bold;
+ }
+ 
+ .results_area tr.firstchild .result_summary {
+    font-size: 12pt;
+ }
+ 
+ .no_results {
+    padding-top: 20px;
+    font-size: 14pt;
+    text-align: center;
+ }
 
     /* Bugs box */
     .bugs { }

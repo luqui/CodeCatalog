@@ -142,64 +142,115 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://www.codecatalog.net/303/2/
-var make_auto_complete = function(options) {
-    var generate_options = options['generate_options'];
-    var format = options['format'] || function(x) { return x };
-    var select = options['select'] || function() { };
-    var stylize = options['stylize'] || function(uimenu) { uimenu.width(element.width()); };
-	
-    var choice_to_val = {};
-    var span = elt('span');
-    var element = elt('input').autocomplete({
-    	'source': function(request, response_func) {
-            if (request) {
-            	generate_options(request.term, function(results) {
-                    var results_formatted = [];
-                    foreach(results, function(result) {
-                        var choice = format(result);
-                        results_formatted.push(choice);
-                        choice_to_val[choice] = result;
-                    });
-                    response_func(results_formatted);
-                });
-            }
-        },
-        'select': function(event, ui) {
-            var choice = ui.item.value;
-            if (choice in choice_to_val) {
-                select(choice_to_val[choice]);
-            }
-        },
-        'appendTo': span,
-        'open': function() {
-        	stylize(span.find('.ui-menu'));
-        }});
-    return element.add(span);
+//CodeCatalog Snippet http://www.codecatalog.net/309/1/
+var on_enter = function(element, callback) {
+    return element.keypress(function(e){
+        if(e.which == 13) {
+            callback();
+        }
+    });
 };
 // End CodeCatalog Snippet
 
-var spec_to_search_result = function(spec) {
-    var result = spec.name;
-    if (spec.summary) {
-        result += " - " + spec.summary;
-    }
-    return result;
+var spec_to_address = function(spec) {
+    return '/' + spec.versionptr + '/'
 };
 
-var catalog_search_with_autocomplete = function(select, stylize) {
-    return make_auto_complete({
-    	'generate_options': function(term, response) {
-    	    if (term.length > 2) {
-    	        $.get('/api/search/', { q: term }, response);
-    	    }
-    	    else {
-    	        response([]);
-    	    }
-        },
-        'format': spec_to_search_result,
-        'select': select,
-        'stylize': stylize});
+var search_box = function(e_search_input, e_search_results, go_func) {
+    var top_result = null;
+    var searching = false;
+    var enter_while_searching = false;
+    var next_search_id = 0;
+    var last_search_id = 0;
+    
+    var do_search = function() {
+        // do a search for the text
+        var query = e_search_input.val();
+        if (query.length < 3) {
+            e_search_results.empty();
+            return;
+        }
+        
+        if (!searching) {
+            searching = true;
+            enter_while_searching = false;
+        }
+        
+        var search_id = next_search_id = next_search_id + 1;
+        
+        $.get('/api/search/', { q: query }, function(results) {
+            
+            if (last_search_id > search_id) {
+                return;
+            }
+            last_search_id = search_id;
+            
+            var results_table = elt('table');
+            top_result = null;
+            if (results.length > 0) {
+                e_search_input.trigger('search',[query]);
+                foreach(results, function(result) {
+                    var result_row = table_row(
+                            elt('a', {'href': spec_to_address(result), 'class': 'result_name'}).text(result.name), 
+                            elt('span', {'class': 'result_summary'}).text(result.summary));
+                    if (top_result == null) {
+                        top_result = result;
+                        result_row.addClass('focused');
+                    }
+                    result_row.data('spec', result);
+                    results_table.append(result_row);
+                });
+                
+                results_table.find(':first-child').addClass('firstchild');
+                
+                var focus_tr = function(tr) {
+                    tr = $(tr);
+                    results_table.find('tr').removeClass('focused');
+                    tr.addClass('focused');
+                    top_result = tr.data('spec');
+                };
+                
+                results_table.find('tr').each(function(_, tr) {
+                    $(tr).mouseover(function() {
+                        focus_tr(tr);
+                    });
+                });
+                results_table.mouseout(function() {
+                    focus_tr(results_table.find('tr:first-child'));
+                });
+            }
+            else {
+                results_table = elt('div', {'class': 'no_results'}).text("no results");
+            }
+            
+            searching = false;
+            if (enter_while_searching) {
+                go_func(top_result);
+            }
+            else { 
+                e_search_results.empty();
+                e_search_results.append(results_table);
+            }
+        });
+    };
+    
+    e_search_input.keyup(rate_limited_callback(300, do_search));
+    
+    // Call do_search immediately in-case there was a reload of the page with text in the input box.
+    do_search();
+    
+    on_enter(e_search_input, function() {
+        if (!go_func(top_result)) {
+            var was_searching = searching;
+            searching = true; // we will eventually get the keyup for the enter press!
+            enter_while_searching = true;
+            if (!was_searching) {
+                do_search();
+            }
+        }
+    });
+    
+    e_search_input.focus();
 };
 
 var embedded_search = function() {
@@ -207,21 +258,26 @@ var embedded_search = function() {
     var choice_to_versionptr = {};
     var current_choice = null;
     
+    var search_input = elt('input');
+    var search_results = elt('div').addClass('results_area');
+    
     var select = function(choice) {
         current_choice = choice.versionptr;
-    	inp.attr('disabled', 'disabled');
+        search_input.attr('disabled', 'disabled');
     };
     
-    var inp = catalog_search_with_autocomplete(select, null);
+    //var inp = catalog_search_with_autocomplete(select, null);
+    search_box(search_input, search_results, select);
     
-    span.append(inp);
+    span.append(search_input);
+    span.append(search_results);
 
     span.val = function(versionptr) {
         if (versionptr) {
             current_choice = versionptr;
-            inp.attr('disabled', 'disabled');
+            search_input.attr('disabled', 'disabled');
             $.get('/api/specs/' + versionptr + '/active/', function(r) {
-                inp.val(r.name + " - " + r.summary);
+                search_input.val(r.name + " - " + r.summary);
             });
             return span;
         }
@@ -231,7 +287,7 @@ var embedded_search = function() {
     };
     
     span.focus = function() {
-        inp.focus();
+        search_input.focus();
     };
     
     return span;
