@@ -142,16 +142,6 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://www.codecatalog.net/309/1/
-var on_enter = function(element, callback) {
-    return element.keypress(function(e){
-        if(e.which == 13) {
-            callback();
-        }
-    });
-};
-// End CodeCatalog Snippet
-
 var spec_to_address = function(spec) {
     return '/' + spec.versionptr + '/'
 };

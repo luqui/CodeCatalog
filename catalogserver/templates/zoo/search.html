@@ -112,16 +112,6 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/309/1/
-var on_enter = function(element, callback) {
-    return element.keypress(function(e){
-        if(e.which == 13) {
-            callback();
-        }
-    });
-};
-// End CodeCatalog Snippet
-
 // CodeCatalog Snippet http://www.codecatalog.net/175/1/
 var rate_limited_callback = function(rate, cb) {
     var timeout = null;
@@ -240,11 +230,12 @@ var search_box = function(e_search_input, e_search_results, go_func) {
                 
                 results_table.find('tr').each(function(_, tr) {
                     var tr_element = $(tr);
+                    
+                    results_listing.push(tr_element);
+                    
                     tr_element.mouseover(function() {
                         focus_tr(tr_element);
                     });
-                    
-                    results_listing.push(tr_element);
                     
                     if (top_result == null) {
                         focus_tr(tr_element); // Sets top_result to result_row, among other things.
