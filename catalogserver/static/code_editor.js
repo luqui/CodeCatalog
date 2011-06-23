@@ -278,8 +278,18 @@ var editable_list = function(widget_factory) {
 
 var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');
-    var textarea = $('<textarea rows="15" style="width:100%"></textarea>');
+    var textarea = CodeMirror(div[0], { 
+        theme: 'neat', 
+        indentUnit: 4,
+        mode: 'javascript',
+        tabMode: 'indent'});
     var languages = language_selector();
+    
+    languages.find('select').change(function() {
+        console.log("Language changed to " + languages.val());
+        textarea.setOption('mode', languages.val());
+    });
+    
     if (proto.language) { languages.val(proto.language); }
 
     var deps_table = editable_list(embedded_search);
@@ -299,7 +309,7 @@ var code_editor = function(proto, submit_callback) {
         deps.sort();
     	
         var sub = $.extend({}, proto_opts, {
-            code: textarea.val(),
+            code: textarea.getValue(),
             dependencies: deps.join(','),
             language: languages.find('option:selected').val(),
             comment: edit_description.val()});
@@ -311,12 +321,12 @@ var code_editor = function(proto, submit_callback) {
         proto_opts.spec_versionptr = proto.spec_versionptr;
         proto_opts.versionptr = proto.versionptr;
 
-        deps_table.val(proto.dependencies);
-        languages.val(proto.language);
-        textarea.val(proto.code);
+        if (proto.dependencies) deps_table.val(proto.dependencies);
+        if (proto.language)     languages.val(proto.language);
+        if (proto.code)         textarea.setValue(proto.code);
     }
     
-    div.append(textarea, languages, deps_div, edit_description, license, submit_button);
+    div.append(languages, deps_div, edit_description, license, submit_button);
     return div;
 };
 
