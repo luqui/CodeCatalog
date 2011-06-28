@@ -408,23 +408,26 @@ var download_script = function(url, callback) {
     var script = document.createElement('script');
     script.type = 'text/javascript';
     
+    // IE Support
     var called = false;
-    var ready = function() {
-        return script.readyState == 'loaded' || script.readyState == 'complete';
+    var guarded_callback = function() {
+        if (!called) {
+            called = true;
+            if (callback) callback();
+        }
     };
-    if (ready()) {
-        callback();
-    }
-    else {
-        script.onreadystatechange = function () {
-            if (ready() && callback && !called) {
-                called = true;
-                callback();
-            }
-        };
-    }
-    $(script).load(callback);
+
+    script.onreadystatechange = function () {
+        if (script.readyState == 'loaded' || script.readyState == 'complete') {
+            guarded_callback();
+        }
+    };
+    
+    // Gecko/V8 support
+    $(script).load(guarded_callback);
+
     script.src = url;
+    
     head.appendChild(script);
 };
 // End CodeCatalog Snippet
