@@ -475,7 +475,7 @@ var code_editor = function(proto, submit_callback) {
     };
     
     var languages = language_selector();
-    languages.val('javascript');
+    languages.val(proto.language || 'javascript');
     load_language(languages.val());
     
     languages.find('select').change(function() {
