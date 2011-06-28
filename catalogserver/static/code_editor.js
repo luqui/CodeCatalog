@@ -409,12 +409,20 @@ var download_script = function(url, callback) {
     script.type = 'text/javascript';
     
     var called = false;
-    script.onreadystatechange = function () {
-        if ((this.readyState == 'loaded' || this.readyState == 'completed') && callback && !called) {
-            called = true;
-            callback();
-        }
+    var ready = function() {
+        return script.readyState == 'loaded' || script.readyState == 'complete';
     };
+    if (ready()) {
+        callback();
+    }
+    else {
+        script.onreadystatechange = function () {
+            if (ready() && callback && !called) {
+                called = true;
+                callback();
+            }
+        };
+    }
     $(script).load(callback);
     script.src = url;
     head.appendChild(script);
@@ -427,29 +435,11 @@ var download_stylesheet = function(url) {
 };
 // End CodeCatalog Snippet
 
-{
-    var loaded = false;
-    var code_editor_with_deps = function(proto, submit_callback, ret) {
-        if (!loaded) {
-            download_script("/static/codemirror/codemirror.js", function() {
-                ret(code_editor(proto, submit_callback));
-            });
-            download_stylesheet('/static/codemirror/codemirror.css');
-            download_stylesheet('/static/codemirror/theme/neat.css');
-        }
-        else {
-            ret(code_editor(proto, submit_callback));
-        }
-    };
-}
-
 var load_code_editor_deps = (function() {
     var loaded = false;
     return function(cb) {
         if (!loaded) {
             loaded = true;
-            download_stylesheet('/static/codemirror/codemirror.css');
-            download_stylesheet('/static/codemirror/theme/neat.css');
             download_script("/static/codemirror/codemirror.js", function() {
                 cb();
             });
@@ -462,13 +452,14 @@ var load_code_editor_deps = (function() {
 
 var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');
+
     var textarea = CodeMirror(div[0], { 
         theme: 'neat', 
         indentUnit: 4,
         mode: 'text/plain',
         tabMode: 'indent'});
     
-    var load_language = function(language) { 
+    var load_language = function(language) {
         if (language in language_to_codemirror_mode) {
             var mode_info = language_to_codemirror_mode[language];
             download_script(mode_info.url, function() {
