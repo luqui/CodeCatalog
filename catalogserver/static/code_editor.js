@@ -389,13 +389,50 @@ var download_script = function(url, callback) {
     var script = document.createElement('script');
     script.type = 'text/javascript';
     script.onreadystatechange = function () {
-        if (this.readyState == 'complete') callback();
+        if (this.readyState == 'complete' && callback) callback();
     };
     script.onload = callback;
     script.src = url;
     head.appendChild(script);
 };
 // End CodeCatalog Snippet
+
+var download_stylesheet = function(url) {
+    $('head').append(elt('link', {rel: 'stylesheet', href: url}));
+};
+
+{
+    var loaded = false;
+    var code_editor_with_deps = function(proto, submit_callback, ret) {
+        if (!loaded) {
+            download_script("/static/codemirror/codemirror.js", function() {
+                ret(code_editor(proto, submit_callback));
+            });
+            download_stylesheet('/static/codemirror/codemirror.css');
+            download_stylesheet('/static/codemirror/theme/neat.css');
+        }
+        else {
+            ret(code_editor(proto, submit_callback));
+        }
+    };
+}
+
+var load_code_editor_deps = (function() {
+    var loaded = false;
+    return function(cb) {
+        if (!loaded) {
+            loaded = true;
+            download_stylesheet('/static/codemirror/codemirror.css');
+            download_stylesheet('/static/codemirror/theme/neat.css');
+            download_script("/static/codemirror/codemirror.js", function() {
+                cb();
+            });
+        }
+        else {
+            cb();
+        } 
+    }
+})();
 
 var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');

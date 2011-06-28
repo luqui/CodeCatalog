@@ -6,10 +6,6 @@
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
-<script src="/static/codemirror/codemirror.js"></script>
-<link rel="stylesheet" href="/static/codemirror/codemirror.css">
-<link rel="stylesheet" href="/static/codemirror/theme/neat.css">
-
 <style>
  .searchresults table {
     width: 100%;
@@ -49,7 +45,8 @@
 <script>
 $(function() {
     {% if user.is_authenticated %}
-    $('#newsnippet').append(code_editor_with_title({ title: "{{query}}" }, function(obj) {
+   
+    var submit_callback = function(obj) {
         var regsnip = function (snip) {
             $.post('/api/new/snippet/', snip, function (reply) {
                 window.location.href = '/' + reply.versionptr + '/';
@@ -69,7 +66,12 @@ $(function() {
                 }
             });
         }
-    }));
+    };
+    
+    load_code_editor_deps(function() {
+        $('#newsnippet').append(code_editor_with_title({ title: "{{query}}" }, submit_callback));
+    });
+    
     {% else %}
     $('#loginlink').click(function() {
         var path = window.location.pathname + window.location.search;

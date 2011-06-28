@@ -922,9 +922,11 @@ var language_to_line_comment_map = {
         var edit = function() {
             if (!try_login()) return;
             editlink.remove();
-            version_display.replaceWith(code_editor(snip, function(newsnip) {
-                $.post('/api/new/snippet/', newsnip, reload);
-            }));
+            load_code_editor_deps(function() {
+                version_display.replaceWith(code_editor(snip, function(newsnip) {
+                    $.post('/api/new/snippet/', newsnip, reload);
+                }));
+            });
         };
 
         var version_display = display_snip_version(snip);
@@ -1100,11 +1102,12 @@ var language_to_line_comment_map = {
         });
 
         $('#addsnippet').click(function() {
-            var proto = {
-                spec_versionptr: {{spec.versionptr}}};
-            $('#addsnippet').replaceWith(code_editor(proto, function(newsnip) {
-                $.post('/api/new/snippet/', newsnip, reload);
-            }));
+            var proto = { spec_versionptr: {{spec.versionptr}} };
+            load_code_editor_deps(function() {
+                $('#addsnippet').replaceWith(code_editor(proto, function(newsnip) {
+                    $.post('/api/new/snippet/', newsnip, reload);
+                }));
+            });
         });
 
         var spec_status = $('#spec_status');
