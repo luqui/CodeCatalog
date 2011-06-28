@@ -144,11 +144,32 @@ var foreach = function(array, body) {
 };
 // End CodeCatalog Snippet
 
+//CodeCatalog Snippet http://www.codecatalog.net/254/7/
+var table_row = function() {
+    var tr = elt('tr');
+    foreach(arguments, function(arg) {
+        tr.append(elt('td', {}, arg));
+    });
+    return tr;
+};
+// End CodeCatalog Snippet
+
 var spec_to_address = function(spec) {
     return '/' + spec.versionptr + '/'
 };
 
-var search_box = function(e_search_input, e_search_results, go_func) {
+var search_box = function(options) {
+    var e_search_input = options.search_input;
+    var e_search_results = options.search_results;
+    var go_func = options.go_func;
+    
+    var style_result_title_func = options.style_result_title_func || function(result) {
+        return elt('a', {'href': spec_to_address(result), 'class': 'result_name'}).text(result.name);
+    };
+    var style_result_summary_func = options.style_result_summary_func || function(result) {
+        return elt('span', {'class': 'result_summary'}).text(result.summary);
+    };
+    
     var top_result = null;
     var top_result_tr = null;
     var results_listing = [];
@@ -160,24 +181,11 @@ var search_box = function(e_search_input, e_search_results, go_func) {
     var results_table = null;
     
     var focus_tr = function(tr) {
-        var old_index = results_listing.indexOf(tr);
         tr = $(tr);
-        if (old_index >= 0) {
-            results_listing[old_index] = tr;
-        }
         results_table.find('tr').removeClass('focused');
         tr.addClass('focused');
         top_result = tr.data('spec');
         top_result_tr = tr;
-        
-        /*
-        $.get('/api/specs/' + top_result.versionptr + '/active/', function(r) {
-            console.log("FOCUSED: ");
-            console.log(r.name + " - " + r.summary);
-        });*/
-        
-        //console.log("Updated?");
-        //console.log(results_listing.indexOf(tr));
     };
     
     var do_search = function() {
@@ -211,8 +219,9 @@ var search_box = function(e_search_input, e_search_results, go_func) {
                 
                 foreach(results, function(result) {
                     var result_row = table_row(
-                            elt('a', {'href': spec_to_address(result), 'class': 'result_name'}).text(result.name), 
-                            elt('span', {'class': 'result_summary'}).text(result.summary));
+                        style_result_title_func(result),
+                        style_result_summary_func(result)
+                    );
                     
                     result_row.data('spec', result);
                     results_table.append(result_row);
@@ -221,9 +230,13 @@ var search_box = function(e_search_input, e_search_results, go_func) {
                 results_table.find(':first-child').addClass('firstchild');
                 
                 results_table.find('tr').each(function(_, tr) {
-                    var tr_element = $(tr);
+                    var tr_element = $(tr).data('result_index', results_listing.length);
                     tr_element.mouseover(function() {
                         focus_tr(tr_element);
+                    });
+                    tr_element.click(function() {
+                        focus_tr(tr_element);
+                        go_func(top_result);
                     });
                     
                     results_listing.push(tr_element);
@@ -255,18 +268,16 @@ var search_box = function(e_search_input, e_search_results, go_func) {
     
     var on_search_edit = function(e){
         if (e.keyCode == 38 /* UP */) {
-            var index = results_listing.indexOf(top_result_tr);
-            if (index > 0) {
-                var prev = results_listing[index - 1];
-                focus_tr(prev);
-            }
+            var index = top_result_tr.data('result_index');
+            var prev_index = (index + results_listing.length - 1) % results_listing.length;
+            var prev = results_listing[prev_index];
+            focus_tr(prev);
         }
         else if (e.keyCode == 40 /* DOWN */) {
-            var index = results_listing.indexOf(top_result_tr);
-            if (index >= 0 && index < results_listing.length - 1) {
-                var next = results_listing[index + 1];
-                focus_tr(next);
-            }
+            var index = top_result_tr.data('result_index');
+            var next_index = (index + 1) % results_listing.length;
+            var next = results_listing[next_index];
+            focus_tr(next);
         }
         else if (e.keyCode == 13 /* ENTER */) {
             if (!go_func(top_result)) {
@@ -304,8 +315,16 @@ var embedded_search = function() {
         return true;
     };
     
-    //var inp = catalog_search_with_autocomplete(select, null);
-    search_box(search_input, search_results, select);
+    var style_result_title_func = function(result) {
+        return elt('a', {'href': spec_to_address(result), 'class': 'result_name', 'target': '_blank'}).text(result.name);
+    };
+    
+    search_box({
+        'search_input': search_input, 
+        'search_results': search_results, 
+        'go_func': select,
+        'style_result_title_func': style_result_title_func
+    });
     
     span.append(search_input);
     span.append(search_results);
