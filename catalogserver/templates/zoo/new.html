@@ -6,6 +6,10 @@
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
+<script src="/static/codemirror/codemirror.js"></script>
+<link rel="stylesheet" href="/static/codemirror/codemirror.css">
+<link rel="stylesheet" href="/static/codemirror/theme/neat.css">
+
 <style>
  .searchresults table {
     width: 100%;
@@ -14,6 +18,11 @@
  .searchresults thead {
     font-weight: bold;
  }
+ 
+ .CodeMirror {
+    border: 2px inset #f0f0f0;
+ }
+ 
  #newsnippet {
     margin-top: 1cm;
     border: 2px solid #e3ddf3;

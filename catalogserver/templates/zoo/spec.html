@@ -18,9 +18,6 @@
   <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="/static/jquery.gritter.css" />
-  <script type="text/javascript" src="/static/jquery.gritter.js"></script>
-
   <style>
     h2 {
         font-size: 14pt;
@@ -265,17 +262,20 @@
     var reload = function() { document.location.reload(); };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/30/9/
-    var language_to_line_comment_map = {
-        python: '#',
-        javascript: '//',
-        haskell: '--',
-        c: '//',
-        csharp: '//',
-        java: '//', 
-        ruby: '#'
-    };
-    // End CodeCatalog Snippet
+    // CodeCatalog Snippet http://www.codecatalog.net/30/11/
+var language_to_line_comment_map = {
+    python: '#',
+    javascript: '//',
+    haskell: '--',
+    c: '//',
+    cpp: '//',
+    csharp: '//',
+    java: '//', 
+    ruby: '#',
+    php: '//'
+};
+// End CodeCatalog Snippet
+
 
     // CodeCatalog Snippet http://www.codecatalog.net/16/3/
     var elt = function(name, attrs) {

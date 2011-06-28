@@ -23,15 +23,17 @@ var realtime_input = function(rate, cb) {
 };
 // End CodeCatalog Snippet
 
-// CodeCatalog Snippet http://www.codecatalog.net/30/9/
+//CodeCatalog Snippet http://www.codecatalog.net/30/11/
 var language_to_line_comment_map = {
     python: '#',
     javascript: '//',
     haskell: '--',
     c: '//',
+    cpp: '//',
     csharp: '//',
     java: '//', 
-    ruby: '#'
+    ruby: '#',
+    php: '//'
 };
 // End CodeCatalog Snippet
 
@@ -369,10 +371,60 @@ var editable_list = function(widget_factory) {
     return div;
 };
 
+//CodeCatalog Snippet http://www.codecatalog.net/399/1/
+var language_to_codemirror_mode = {
+    "python": { url: 'http://codemirror.net/mode/python/python.js', mime: 'text/x-python' },
+    "javascript": { url: 'http://codemirror.net/mode/javascript/javascript.js', mime: 'text/javascript' },
+    "haskell": { url: 'http://codemirror.net/mode/haskell/haskell.js', mime: 'text/x-haskell' },
+    "c": { url: 'http://codemirror.net/mode/clike/clike.js', mime: 'text/x-csrc' },
+    "cpp": { url: 'http://codemirror.net/mode/clike/clike.js', mime: 'text/x-c++src' }, 
+    "csharp": { url: 'http://codecatalog.net/static/codemirror/mode/clike/clike.js', mime: 'text/x-csharp' },
+    "java": { url: 'http://codemirror.net/mode/clike/clike.js', mime: 'text/x-java' }
+};
+// End CodeCatalog Snippet
+
+//CodeCatalog Snippet http://www.codecatalog.net/401/3/
+var download_script = function(url, callback) {
+    var head = document.getElementsByTagName('head')[0];
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.onreadystatechange = function () {
+        if (this.readyState == 'complete') callback();
+    };
+    script.onload = callback;
+    script.src = url;
+    head.appendChild(script);
+};
+// End CodeCatalog Snippet
+
 var code_editor = function(proto, submit_callback) {
     var div = $('<div></div>');
-    var textarea = $('<textarea rows="15" style="width:100%"></textarea>');
+    var textarea = CodeMirror(div[0], { 
+        theme: 'neat', 
+        indentUnit: 4,
+        mode: 'text/plain',
+        tabMode: 'indent'});
+    
+    var load_language = function(language) { 
+        if (language in language_to_codemirror_mode) {
+            var mode_info = language_to_codemirror_mode[language];
+            download_script(mode_info.url, function() {
+                textarea.setOption('mode', mode_info.mime);
+            });
+        }
+        else {
+            textarea.setOption('mode', 'text/plain');
+        }
+    };
+    
     var languages = language_selector();
+    languages.val('javascript');
+    load_language(languages.val());
+    
+    languages.find('select').change(function() {
+        load_language(languages.val());
+    });
+    
     if (proto.language) { languages.val(proto.language); }
 
     var deps_table = editable_list(embedded_search);
@@ -392,7 +444,7 @@ var code_editor = function(proto, submit_callback) {
         deps.sort();
     	
         var sub = $.extend({}, proto_opts, {
-            code: textarea.val(),
+            code: textarea.getValue(),
             dependencies: deps.join(','),
             language: languages.find('option:selected').val(),
             comment: edit_description.val()});
@@ -404,12 +456,12 @@ var code_editor = function(proto, submit_callback) {
         proto_opts.spec_versionptr = proto.spec_versionptr;
         proto_opts.versionptr = proto.versionptr;
 
-        deps_table.val(proto.dependencies);
-        languages.val(proto.language);
-        textarea.val(proto.code);
+        if (proto.dependencies) deps_table.val(proto.dependencies);
+        if (proto.language)     languages.val(proto.language);
+        if (proto.code)         textarea.setValue(proto.code);
     }
     
-    div.append(textarea, languages, deps_div, edit_description, license, submit_button);
+    div.append(languages, deps_div, edit_description, license, submit_button);
     return div;
 };
 
