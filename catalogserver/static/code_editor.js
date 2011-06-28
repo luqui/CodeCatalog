@@ -402,23 +402,30 @@ var language_to_codemirror_mode = {
 };
 // End CodeCatalog Snippet
 
-//CodeCatalog Snippet http://www.codecatalog.net/401/3/
+//CodeCatalog Snippet http://www.codecatalog.net/401/4/
 var download_script = function(url, callback) {
     var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
     script.type = 'text/javascript';
+    
+    var called = false;
     script.onreadystatechange = function () {
-        if (this.readyState == 'complete' && callback) callback();
+        if ((this.readyState == 'loaded' || this.readyState == 'completed') && callback && !called) {
+            called = true;
+            callback();
+        }
     };
-    script.onload = callback;
+    $(script).load(callback);
     script.src = url;
     head.appendChild(script);
 };
 // End CodeCatalog Snippet
 
+//CodeCatalog Snippet http://www.codecatalog.net/403/2/
 var download_stylesheet = function(url) {
     $('head').append(elt('link', {rel: 'stylesheet', href: url}));
 };
+// End CodeCatalog Snippet
 
 {
     var loaded = false;
