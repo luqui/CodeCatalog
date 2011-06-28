@@ -272,12 +272,14 @@ var search_box = function(options) {
             var prev_index = (index + results_listing.length - 1) % results_listing.length;
             var prev = results_listing[prev_index];
             focus_tr(prev);
+            return false;
         }
         else if (e.keyCode == 40 /* DOWN */) {
             var index = top_result_tr.data('result_index');
             var next_index = (index + 1) % results_listing.length;
             var next = results_listing[next_index];
             focus_tr(next);
+            return false;
         }
         else if (e.keyCode == 13 /* ENTER */) {
             if (!go_func(top_result)) {
@@ -288,6 +290,7 @@ var search_box = function(options) {
                     do_search();
                 }
             }
+            return false;
         }
         else
         {
