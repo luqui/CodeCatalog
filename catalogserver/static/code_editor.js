@@ -309,7 +309,8 @@ var embedded_search = function() {
     var choice_to_versionptr = {};
     var current_choice = null;
     
-    var search_input = elt('input');
+    var random_q = "q" + Math.floor(Math.random() * 3000000)
+    var search_input = elt('input', {'id': random_q, 'name': random_q});
     var search_results = elt('div').addClass('dep_results_area');
     
     var select = function(choice) {

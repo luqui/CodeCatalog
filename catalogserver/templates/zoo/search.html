@@ -20,8 +20,7 @@ CodeCatalog Search
     margin-bottom: 20px;
  }
  .searchbox .center-aligned { text-align: center }
- .searchbox input { height: 30px; font-size: large }
- .searchbox #q { width: 800px }
+ .searchbox .search_input { height: 30px; width: 800px; font-size: 16pt; }
  
  .navigation_div {
     text-align: center;
@@ -33,10 +32,6 @@ CodeCatalog Search
     color: blue;
     font-size: 14pt;
     font-family: sans-serif;
- }
- 
- #q {
-    font-size: 16pt;
  }
  
  .results_area { 
@@ -110,6 +105,11 @@ var spec_to_address = function(spec) {
 
 $(function() {
     var search_input = $('#q');
+    var random_q = "q" + Math.floor(Math.random() * 3000000)
+    search_input.attr('id', "q" + random_q)
+    search_input.attr('name', "q" + random_q)
+    search_input.addClass('search_input')
+    
     var search_results = $('#search_results');
     
     var go_func = function(choice) {
