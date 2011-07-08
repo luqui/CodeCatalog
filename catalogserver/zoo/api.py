@@ -4,6 +4,7 @@ from haystack.query import SearchQuerySet
 from django.db.models import Q, Max
 from django.contrib.auth import authenticate
 import json
+import search_indexes
 
 try:
     from collections import OrderedDict
@@ -308,7 +309,7 @@ def specs_all(request, versionptr):
     
 def specs_snippets(request, versionptr):
     """GET /api/specs/<ptr>/snippets/ : Get all snippets associated with the spec versionptr <ptr>."""
-    objs = Snippet.objects.filter(spec_versionptr = versionptr)
+    objs = Snippet.objects.filter(spec_versionptr=versionptr)
     return map(dump_snippet, objs)
 
 def specs_snippets_active(request, versionptr):
@@ -473,7 +474,8 @@ def search(request):
     user_query = request.GET['q']
     
     # Clean user-provided data.
-    clean_query = SearchQuerySet().query.clean(user_query)
+    index_query = search_indexes.clean_string(user_query)
+    clean_query = SearchQuerySet().query.clean(index_query)
     
     # First, try an edge-gram autocomplete on the spec name.
     results_name = SearchQuerySet().autocomplete(name=clean_query)
@@ -533,15 +535,15 @@ def search(request):
     + [ra for ra in results_text] \
     + [rs for rs in results_alltext]:
         if not r.object in results:
-            results[r.object] = r
+            results[r.object] = Spec.objects.get(version__versionptr=r.versionptrid, version__active=True)
             i += 1
             if i > max_results:
                 break
     
-    return [ { 'name': r.name,
-               'summary': r.summary,
-               'versionptr': r.versionptrid } 
-                        for r in results.values() ]
+    return [ { 'name': spec.name,
+               'summary': spec.summary,
+               'versionptr': spec.version.versionptr.id } 
+                        for spec in results.values() ]
 
 @login_required
 def user_update(request):

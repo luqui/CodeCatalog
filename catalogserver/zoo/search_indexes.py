@@ -2,6 +2,12 @@ from haystack.indexes import *
 from haystack import site
 from zoo.models import Spec, VersionPtr
 
+def clean_string(s):
+    """
+    Prepare a string to be indexed for searching.
+    """
+    return s.replace("-", " ").replace("_", " ")
+
 class SpecIndex(RealTimeSearchIndex):
     name = CharField()
     summary = CharField()
@@ -24,19 +30,19 @@ class SpecIndex(RealTimeSearchIndex):
             if active and obj.active_spec().status != Spec.STATUS_TO_ID['Open']:
                 self.remove_object(obj)
                 return False
-        return specptr        
+        return specptr
 
     def prepare_name(self, obj):
         active = obj.active_spec()
-        return active and active.name
+        return active and clean_string(active.name)
 
     def prepare_summary(self, obj):
         active = obj.active_spec()
-        return active and active.summary
+        return active and clean_string(active.summary)
     
     def prepare_spec(self, obj):
         active = obj.active_spec()
-        return active and active.spec
+        return active and clean_string(active.spec)
 
     def prepare_versionptrid(self, obj):
         return obj.id
