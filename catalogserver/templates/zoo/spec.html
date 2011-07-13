@@ -763,7 +763,7 @@ var language_to_line_comment_map = {
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/294/2/
+    // CodeCatalog Snippet http://www.codecatalog.net/294/4/
     var time_to_string = function(t) {
         var currentTime = new Date();
         var delta = currentTime.getTime() - t.getTime();
@@ -771,37 +771,47 @@ var language_to_line_comment_map = {
         var mpm = 2628000000;
         var years = Math.floor(delta / mpy);
         var months = Math.floor((delta % mpy) / mpm);
+        var essify = function(num, desc) {
+            s = num + " " + desc;
+            if (num == 0 || num > 1) {
+                s += "s";
+            }
+            return s;
+        }
         if (years > 0)
         {
-            var s = years + " years ";
+            var s = essify(years, "year");
             if (months > 0)
             {
-                s += months + " months ago";
+                s += essify(months, "month");
             }
+            
+            s += " ago";
             return s;
         }
         
         if (months > 0)
         {
-            return months + " months ago";
+            return essify(months, "month") + " ago";
         }
         
         var days = Math.floor(delta / 86400000);
         if (days > 0)
         {
-            return days + " days ago";
+            return essify(days, "day") + " ago";
         }
         
         var hours = Math.floor(delta / 3600000);
         if (hours > 0)
         {
-            return hours + " hours ago";
+            return essify(hours, "hour") + " ago";
         }
         
         var minutes = Math.floor(delta / 60000);
-        return minutes + " minutes ago";
+        return essify(minutes, "minute") + " ago";
     }
     // End CodeCatalog Snippet
+
 
     var history_annotation = function(username, timestamp) {
         var time = new Date(timestamp);
