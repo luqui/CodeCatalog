@@ -28,6 +28,16 @@ var editable = function(settings) {
         }
     };
 
+    // CodeCatalog Snippet http://www.codecatalog.net/309/1/
+    var on_enter = function(element, callback) {
+        return element.keypress(function(e){
+            if(e.which == 13) {
+                callback();
+            }
+        });
+    };
+    // End CodeCatalog Snippet
+    
     var makeEditBox = function(proto) {
         var span = $('<div/>');
         var editbox = makeEditWidget(proto);
@@ -35,12 +45,16 @@ var editable = function(settings) {
         var button  = $('<input type="button" value="OK" />');
         span.append(editbox).append(button);
 
-        button.click(function() {
+        submit = function() {
             proto.text(editbox.val());
             var newelt = makeLinkTag(proto);
             span.replaceWith(newelt);
             settings.onedit(newelt)
-        });
+        };
+        
+        button.click(submit);
+        on_enter(editbox, submit);
+        
         return span;
     };
     var makeLinkTag = function(proto) {
