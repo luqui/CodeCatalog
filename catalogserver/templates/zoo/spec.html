@@ -763,17 +763,49 @@ var language_to_line_comment_map = {
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/294/1/
-    var timestamp_to_string = function(timestamp) {
-       var date_time = timestamp.split('T');
-       var date = date_time[0];
-       var time = date_time[1].split('.')[0];
-       return time + ", " + date;
-    };
+    // CodeCatalog Snippet http://www.codecatalog.net/294/2/
+    var time_to_string = function(t) {
+        var currentTime = new Date();
+        var delta = currentTime.getTime() - t.getTime();
+        var mpy = 31536000000;
+        var mpm = 2628000000;
+        var years = Math.floor(delta / mpy);
+        var months = Math.floor((delta % mpy) / mpm);
+        if (years > 0)
+        {
+            var s = years + " years ";
+            if (months > 0)
+            {
+                s += months + " months ago";
+            }
+            return s;
+        }
+        
+        if (months > 0)
+        {
+            return months + " months ago";
+        }
+        
+        var days = Math.floor(delta / 86400000);
+        if (days > 0)
+        {
+            return days + " days ago";
+        }
+        
+        var hours = Math.floor(delta / 3600000);
+        if (hours > 0)
+        {
+            return hours + " hours ago";
+        }
+        
+        var minutes = Math.floor(delta / 60000);
+        return minutes + " minutes ago";
+    }
     // End CodeCatalog Snippet
 
     var history_annotation = function(username, timestamp) {
-        return " -- by " + username + " at " + timestamp_to_string(timestamp);
+        var time = new Date(timestamp);
+        return " -- by " + username + " " + time_to_string(time);
     };
     
     var render_diff = function(dmp, text_a, text_b, language) {
