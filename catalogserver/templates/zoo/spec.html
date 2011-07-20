@@ -806,7 +806,7 @@ var language_to_line_comment_map = {
             return essify(hours, "hour") + " ago";
         }
         
-        var minutes = Math.max(0, Math.floor(delta / 60000));
+        var minutes = Math.floor(delta / 60000);
         return essify(minutes, "minute") + " ago";
         
     }
