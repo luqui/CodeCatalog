@@ -1,7 +1,7 @@
 # CodeCatalog Snippet http://www.codecatalog.net/423/1/
 import time
 # End CodeCatalog Snippet
-# CodeCatalog Snippet http://www.codecatalog.net/419/1/
+# CodeCatalog Snippet http://www.codecatalog.net/419/2/
 from datetime import datetime
 # End CodeCatalog Snippet
 from django.shortcuts import get_object_or_404
