@@ -1,5 +1,10 @@
+# CodeCatalog Snippet http://www.codecatalog.net/423/1/
+import time
+# End CodeCatalog Snippet
+# CodeCatalog Snippet http://www.codecatalog.net/419/1/
+import datetime
+# End CodeCatalog Snippet
 from zoo.models import *
-from datetime import datetime
 from haystack.query import SearchQuerySet
 from django.db.models import Q, Max
 from django.contrib.auth import authenticate
@@ -90,6 +95,14 @@ def get_versionptr_name(versionptr):
         return latest_version(BugReport, versionptr).title
     return "???"
 
+# CodeCatalog Snippet http://www.codecatalog.net/421/3/
+def datetime_to_ticks(dt):
+    """
+    Return the given datetime object as ms since the epoch.
+    """
+    return time.mktime(dt.timetuple()) * 1000
+# End CodeCatalog Snippet
+
 def get_events_date_range(versionptr, startdate, enddate):
     versionptr_type = VersionPtr.ID_TO_PTRTYPE[versionptr.type]
     
@@ -101,7 +114,7 @@ def get_events_date_range(versionptr, startdate, enddate):
             'versionptr': versionptr.id,
             'versionptr_type': versionptr_type,
             'version': v.id,
-            'timestamp': v.timestamp.isoformat(),
+            'timestamp': datetime_to_ticks(v.timestamp),
             'name': name,
         })
     for bug in BugReport.objects.filter(target_versionptr=versionptr, version__timestamp__gt=startdate, version__timestamp__lt=enddate):
@@ -109,7 +122,7 @@ def get_events_date_range(versionptr, startdate, enddate):
             'type': 'bug',
             'versionptr': versionptr.id,
             'versionptr_type': versionptr_type,
-            'timestamp': bug.version.timestamp.isoformat(),
+            'timestamp': datetime_to_ticks(bug.version.timestamp),
             'bug_version': bug.version.id,
             'bug_versionptr': bug.version.versionptr.id,
             'name': name,
@@ -127,7 +140,7 @@ def dump_spec(spec):
         'name': spec.name,
         'summary': spec.summary,
         'spec': spec.spec,
-        'timestamp': spec.version.timestamp.isoformat(),
+        'timestamp': datetime_to_ticks(spec.version.timestamp),
         'comment': spec.version.comment,
         'user': spec.version.user and spec.version.user.username,
         'status': Spec.ID_TO_STATUS[spec.status],
@@ -144,7 +157,7 @@ def dump_snippet(snippet):
         'spec_versionptr': snippet.spec_versionptr.id,
         'language': snippet.language,
         'code': snippet.code,
-        'timestamp': snippet.version.timestamp.isoformat(),
+        'timestamp': datetime_to_ticks(snippet.version.timestamp),
         'comment': snippet.version.comment,
         'user': snippet.version.user and snippet.version.user.username,
     }
@@ -158,7 +171,7 @@ def dump_bug(bug):
         'target_versionptr': bug.target_versionptr.id,
         'title': bug.title,
         'status': BugReport.ID_TO_STATUS[bug.status],
-        'timestamp': bug.version.timestamp.isoformat(),
+        'timestamp': datetime_to_ticks(bug.version.timestamp),
         'comment': bug.version.comment,
         'user': bug.version.user and bug.version.user.username,
     }
