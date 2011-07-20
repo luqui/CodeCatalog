@@ -2,7 +2,7 @@
 import time
 # End CodeCatalog Snippet
 # CodeCatalog Snippet http://www.codecatalog.net/419/1/
-import datetime
+from datetime import datetime
 # End CodeCatalog Snippet
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404

@@ -2,8 +2,9 @@
 import time
 # End CodeCatalog Snippet
 # CodeCatalog Snippet http://www.codecatalog.net/419/1/
-import datetime
+from datetime import datetime
 # End CodeCatalog Snippet
+
 from zoo.models import *
 from haystack.query import SearchQuerySet
 from django.db.models import Q, Max
