@@ -1,6 +1,7 @@
+import time
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from datetime import datetime
 from zoo.models import *
 from django.contrib.auth.decorators import login_required
 from zoo import api
@@ -10,6 +11,7 @@ def render(request, template, dictionary={}, context_instance=None, mimetype="te
     from django.template import RequestContext
     if context_instance == None:
         context_instance = RequestContext(request)
+    dictionary['currentTime'] = time.time() * 1000 # time returns seconds instead of ms for some reason.
     return render_to_response(template, dictionary, context_instance=context_instance, mimetype=mimetype)
 
 def latest(request, versionptr):

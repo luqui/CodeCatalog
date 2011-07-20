@@ -763,10 +763,9 @@ var language_to_line_comment_map = {
     };
     // End CodeCatalog Snippet
     
-    // CodeCatalog Snippet http://www.codecatalog.net/294/4/
-    var time_to_string = function(t) {
-        var currentTime = new Date();
-        var delta = currentTime.getTime() - t.getTime();
+    // CodeCatalog Snippet http://www.codecatalog.net/294/5/
+    var time_to_string = function(currentTime, displayTime) {
+        var delta = currentTime.getTime() - displayTime.getTime();
         var mpy = 31536000000;
         var mpm = 2628000000;
         var years = Math.floor(delta / mpy);
@@ -815,8 +814,9 @@ var language_to_line_comment_map = {
 
 
     var history_annotation = function(username, timestamp) {
+        var currentTime = new Date({{currentTime}});
         var time = new Date(timestamp);
-        return " -- by " + username + " " + time_to_string(time);
+        return " -- by " + username + " " + time_to_string(currentTime, time);
     };
     
     var render_diff = function(dmp, text_a, text_b, language) {
