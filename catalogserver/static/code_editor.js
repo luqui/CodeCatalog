@@ -499,9 +499,11 @@ var code_editor = function(proto, submit_callback) {
     var license = $('<p>By clicking the <i>Submit</i> button, you irrevocably agree to release your contribution under the '
                   + 'terms of the <a href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a> '
                   + 'license.</p>');
-                  
+    
     var submit_button = button("Submit", function() {
-    	var deps = deps_table.val();
+        submit_button.attr('disabled', 'disabled');
+
+        var deps = deps_table.val();
         deps.sort();
     	
         var sub = $.extend({}, proto_opts, {

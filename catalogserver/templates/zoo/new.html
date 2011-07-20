@@ -50,8 +50,10 @@ $(function() {
     {% if user.is_authenticated %}
    
     var submit_callback = function(obj) {
+        $("body").css("cursor", "progress");
         var regsnip = function (snip) {
             $.post('/api/new/snippet/', snip, function (reply) {
+                $("body").css("cursor", "auto");
                 window.location.href = '/' + reply.versionptr + '/';
             });
         };
@@ -65,6 +67,7 @@ $(function() {
                     regsnip(obj);
                 }
                 else {
+                    $("body").css("cursor", "auto");
                     window.location.href = '/' + spec.versionptr + '/';
                 }
             });
