@@ -255,7 +255,37 @@
     .bugs .closed { color: #666 }
     .bugs table, .bugs input, .bugs textarea { width: 100% }
     .bugs textarea { height: 1in }
-    .bugs .details, .bugs .editor { border: 1px solid black; background: #feb }
+    .bugs .details, .bugs .editor { border: 4px solid #b0aac0; background: #e9e4ff  }
+    
+    .bug_spacer {
+        border-top: 2px dotted #b0aac0;
+    }
+    
+    .update_hide_spacer {
+        display: inline-block;
+        width: 10px;
+    }
+    
+    .bug_details_title_row {
+        display: block;
+        width: 100%;
+    }
+    
+    .bug_details_title {
+        font-size: 10pt;
+        padding: 10px;
+    }
+    
+    .bug_details_user {
+        color: #666666;
+        float: right;
+        padding-right: 50px;
+    }
+    .bug_details_comment {
+        color: #666666;
+        width: 500px;
+        padding-left: 40px;
+    }
   </style>
 
 {% block scripting %}
@@ -764,7 +794,7 @@ var language_to_line_comment_map = {
     // End CodeCatalog Snippet
     
     // CodeCatalog Snippet http://www.codecatalog.net/294/5/
-    var time_to_string = function(currentTime, displayTime) {
+    var timestamp_to_string = function(currentTime, displayTime) {
         var delta = currentTime.getTime() - displayTime.getTime();
         var mpy = 31536000000;
         var mpm = 2628000000;
@@ -815,7 +845,7 @@ var language_to_line_comment_map = {
     var history_annotation = function(username, timestamp) {
         var currentTime = new Date({{currentTime}});
         var time = new Date(timestamp);
-        return " -- by " + username + " " + time_to_string(currentTime, time);
+        return " -- by " + username + " " + timestamp_to_string(currentTime, time);
     };
     
     var render_diff = function(dmp, text_a, text_b, language) {
@@ -981,7 +1011,11 @@ var language_to_line_comment_map = {
     };
 
     var render_bug = function(bug) {
-        var details = elt('a', {href:'#'}).text("Details...");
+        var details = dynamic_link("Details...", function() {
+            details.replaceWith(render_bug_details(bug, function() { ret.replaceWith(render_bug(bug)) } ));
+            return false;
+        }).addClass('dynamic_link');
+        
         var cls = 
             bug.status == 'Open'     ? 'open' :
             bug.status == 'Resolved' ? 'resolved' :
@@ -991,15 +1025,11 @@ var language_to_line_comment_map = {
             elt('p').text(bug.title).append(
                 elt('b').text(" -- " + bug.status + ". "),
                 details));
-        details.click(function() {
-            ret.replaceWith(render_bug_details(bug));
-            return false;
-        });
         return ret; 
     };
 
-    var render_bug_details = function(bug) {
-        var div = elt('div').addClass("details");
+    var render_bug_details = function(bug, hide_func) {
+        var div = elt('div').addClass('details');
         orm_request({
             model: 'BugReport',
             query: {
@@ -1011,21 +1041,31 @@ var language_to_line_comment_map = {
         }, function(bugs) {
             for (var i in bugs) {
                 div.append(render_bug_version(bugs[i]));
+                div.append(elt('div').addClass('bug_spacer'));
             }
-            var link = button('Update', function() {
+            var link = dynamic_link('Update', function() {
                 var last = bugs[bugs.length-1];
                 link.replaceWith(bug_edit_box(last.target_versionptr, last, render_bug_version));
-            });
+            }).addClass('dynamic_link');
             div.append(link);
-            div.append(button('Hide', function() { div.replaceWith(render_bug(bug)) }));
+            div.append(elt('span', { 'class': 'update_hide_spacer' }));
+            div.append(dynamic_link('Hide', function() { hide_func() }).addClass('dynamic_link'));
         });
         return div;
     };
 
     var render_bug_version = function(bug) {
+        var cls = 
+            bug.status == 'Open'     ? 'open' :
+            bug.status == 'Resolved' ? 'resolved' :
+            bug.status == 'Closed'   ? 'closed'
+                                     : 'unknown';
+        
         return elt('div', {}, 
-            horizontal(elt('b').text(bug.title), elt('span').text(bug.user || 'Anonymous'), elt('span').text(bug.status)),
-            elt('p').text(bug.comment));
+            elt('tr', { 'class': 'bug_details_title_row'}, 
+                    elt('span', {'class':'bug_details_title ' + cls}, elt('b').text(bug.title + " -- " + bug.status)), 
+                    elt('span', {'class':'bug_details_user '}, elt('span').text(bug.user || 'Anonymous'))),
+            elt('p').text(bug.comment).addClass('bug_details_comment'));
     };
 
     var bug_edit_box = function(target, bug, cont) {
